@@ -1,0 +1,8 @@
+var File = Java.type("java.io.File");
+var previousAutoRunFlag = typeof ARCHI_NIST_SKIP_AUTORUN !== "undefined" ? ARCHI_NIST_SKIP_AUTORUN : false;
+
+ARCHI_NIST_SKIP_AUTORUN = true;
+load(new File(__DIR__ + "Generate_Detailed_NIST_800_53_View.ajs").getCanonicalPath());
+ARCHI_NIST_SKIP_AUTORUN = previousAutoRunFlag;
+
+ArchiNistViews.generateNist80053ObjectivesView();

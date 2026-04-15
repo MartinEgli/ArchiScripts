@@ -1,0 +1,83 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Test_Generate_Detailed_NIST_800_53_View";
+var previousAutoRunFlag = typeof ARCHI_NIST_SKIP_AUTORUN !== "undefined" ? ARCHI_NIST_SKIP_AUTORUN : false;
+var generationResult;
+var validationResult;
+var logger;
+var dialogs;
+var summaryLines = [];
+
+ARCHI_NIST_SKIP_AUTORUN = true;
+if (typeof ArchiNistViews !== "undefined") {
+    ArchiNistViews = null;
+}
+load(new File(__DIR__ + "Generate_Detailed_NIST_800_53_View.ajs").getCanonicalPath());
+ARCHI_NIST_SKIP_AUTORUN = previousAutoRunFlag;
+
+logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Test Detailed NIST 800-53 View"
+});
+
+function buildSummaryLines(generation, validation) {
+    var lines = [];
+
+    lines.push("Detailed NIST 800-53 view test completed.");
+    lines.push("");
+    lines.push("Generated view: " + generation.view.name);
+    lines.push("Families: " + generation.summary.families);
+    lines.push("Cluster groups: " + generation.summary.clusterGroups);
+    lines.push("Control objectives: " + generation.summary.objectives);
+    lines.push("Child elements: " + generation.summary.children);
+    lines.push("Junctions: " + generation.summary.junctions);
+    lines.push("Expected visuals: " + validation.expectedVisualCount);
+    lines.push("Actual visuals: " + validation.actualVisualCount);
+    lines.push("Expected minimum connections: " + validation.expectedMinConnectionCount);
+    lines.push("Actual connections: " + validation.actualConnectionCount);
+    lines.push("");
+
+    if (validation.isValid) {
+        lines.push("Validation status: PASS");
+    } else {
+        lines.push("Validation status: FAIL");
+        lines.push("Errors:");
+        validation.errors.forEach(function (error) {
+            lines.push("- " + error);
+        });
+    }
+
+    return lines;
+}
+
+logger.start("Detailed NIST 800-53 view test started.");
+
+generationResult = ArchiNistViews.generateDetailedNist80053View({
+    logger: logger,
+    dialogs: dialogs,
+    showDialogs: false,
+    selectFirstCandidate: true,
+    viewName: ArchiNistViews.buildUniqueViewName("Detailed NIST SP 800-53 Controls Test")
+});
+
+validationResult = ArchiNistViews.validateDetailedNist80053View(generationResult, logger);
+summaryLines = buildSummaryLines(generationResult, validationResult);
+
+if (validationResult.isValid) {
+    dialogs.showInfo(summaryLines.join("\n"), "Test Detailed NIST 800-53 View");
+    logger.finish("Detailed NIST 800-53 view test passed.", {
+        generated_view_name: generationResult.view.name
+    });
+} else {
+    dialogs.showWarning(summaryLines.join("\n"), "Test Detailed NIST 800-53 View");
+    logger.fail("Detailed NIST 800-53 view test failed.", null, {
+        generated_view_name: generationResult.view.name,
+        error_count: validationResult.errors.length
+    });
+    throw new Error("Detailed NIST 800-53 view validation failed.");
+}

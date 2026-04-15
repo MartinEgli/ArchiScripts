@@ -1,0 +1,2040 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/exchange/ViewExchange.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_Detailed_NIST_800_53_View";
+var generatorLogger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var generatorDialogs = ArchiDialogs.createDialogService(generatorLogger, {
+    title: "Detailed NIST 800-53 View"
+});
+
+var CONST = {
+    Folders: {
+        Root: "Standards",
+        Standard: "NIST SP 800-53 Rev. 5",
+        ViewsGenerated: "Generated",
+        ViewsBootstrap: "Bootstrap"
+    },
+    Layout: {
+        Columns: 2,
+        StandardX: 60,
+        StandardY: 60,
+        StandardPaddingX: 32,
+        StandardPaddingTop: 38,
+        StandardPaddingBottom: 32,
+        FamilyWidth: 400,
+        FamilyGapX: 28,
+        FamilyGapY: 28,
+        FamilyInnerX: 18,
+        FamilyInnerY: 46,
+        FamilyInnerRight: 18,
+        FamilyInnerBottom: 18,
+        FamilyMinHeight: 110,
+        ClusterPaddingTop: 12,
+        ClusterPaddingBottom: 12,
+        ObjectiveHeight: 62,
+        ChildHeight: 56,
+        ObjectiveGap: 14,
+        ChildGap: 12,
+        ClusterGap: 24,
+        ObjectiveIndent: 44,
+        ChildIndent: 44,
+        JunctionIndent: 12,
+        JunctionSize: 18,
+        EmptyNoteHeight: 54
+    },
+    Style: {
+        StandardFill: "#fff8b0",
+        FamilyFill: "#ffffff",
+        ClusterFill: "#f7f7f7",
+        ObjectiveFill: "#c8c3ff",
+        ChildFill: "#d8d4ff",
+        NoteFill: "#f4f4f4",
+        LineColor: "#5c5c5c",
+        FontColor: "#000000"
+    },
+    RelationshipPriority: {
+        "composition-relationship": 1,
+        "aggregation-relationship": 2,
+        "realization-relationship": 3,
+        "assignment-relationship": 4,
+        "serving-relationship": 5,
+        "association-relationship": 6,
+        "flow-relationship": 7,
+        "triggering-relationship": 8,
+        "access-relationship": 9
+    }
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function getTopLevelFolder(rootName) {
+    return $("folder." + rootName).first();
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
+    if (!objectToMove) {
+        return null;
+    }
+
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    targetFolder.add(objectToMove);
+    return targetFolder;
+}
+
+function getStandardPathSegments(extraSegments) {
+    var segments = [CONST.Folders.Root, CONST.Folders.Standard];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function moveConceptToStandardTree(concept, rootName, extraSegments) {
+    return moveObjectToFolder(rootName, getStandardPathSegments(extraSegments), concept);
+}
+
+function moveViewToStandardTree(viewObject, viewCategory) {
+    return moveObjectToFolder(
+        "Views",
+        getStandardPathSegments([viewCategory]),
+        viewObject
+    );
+}
+
+function moveRelationshipToStandardTreeWithSegments(relationship, extraSegments) {
+    return moveObjectToFolder(
+        "Relations",
+        getStandardPathSegments(extraSegments),
+        relationship
+    );
+}
+
+function moveRelationshipToStandardTree(relationship, familyCode, controlId) {
+    return moveRelationshipToStandardTreeWithSegments(relationship, [familyCode, controlId]);
+}
+
+function getConceptRootFolderName(concept) {
+    if (!concept) {
+        return "Other";
+    }
+
+    if (concept.type === "goal" || concept.type === "requirement") {
+        return "Motivation";
+    }
+
+    if (concept.type === "grouping" || concept.type === "junction") {
+        return "Other";
+    }
+
+    if (concept.type === "representation") {
+        return "Business";
+    }
+
+    return "Other";
+}
+
+function toArray(collection) {
+    var result = [];
+
+    collection.each(function (item) {
+        result.push(item);
+    });
+
+    return result;
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var counter = 2;
+
+    while ($("view").filter(function (view) {
+        return safeString(view.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + counter + ")";
+        counter++;
+    }
+
+    return candidate;
+}
+
+function styleVisual(visual, fillColor) {
+    if (fillColor) {
+        visual.fillColor = fillColor;
+    }
+
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function styleConnection(connection) {
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    if (!expression) {
+        return;
+    }
+
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        generatorLogger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "nist.view.label_expression.skipped");
+    }
+}
+
+function getBestLabelExpression(concept) {
+    if (!concept) {
+        return null;
+    }
+
+    if (concept.type === "grouping" && !isNullOrEmpty(concept.prop("Stereotype"))) {
+        return "«${property:Stereotype}» ${name}";
+    }
+
+    if (!isNullOrEmpty(concept.specialization)) {
+        return "«${specialization}»\n${name}";
+    }
+
+    if (!isNullOrEmpty(concept.prop("Stereotype"))) {
+        return "${property:Stereotype}\n${name}";
+    }
+
+    return null;
+}
+
+function isNullOrEmpty(value) {
+    return value === null || typeof value === "undefined" || String(value) === "";
+}
+
+function findConceptsByType(conceptType) {
+    return $("concept").filter(function (concept) {
+        return concept.type === conceptType;
+    });
+}
+
+function findConceptByTypeAndName(conceptType, name) {
+    return findConceptsByType(conceptType).filter(function (concept) {
+        return safeString(concept.name) === safeString(name);
+    }).first();
+}
+
+function findConceptByTypeAndProperty(conceptType, propertyName, propertyValue) {
+    return findConceptsByType(conceptType).filter(function (concept) {
+        return safeString(concept.prop(propertyName)) === safeString(propertyValue);
+    }).first();
+}
+
+function findObjectiveConcept(controlData) {
+    var objectiveName = beautifyDisplayText(controlData.objective_name);
+    var preferredType = safeString(controlData.objective_type || "goal");
+    var objective;
+
+    objective = findConceptsByType(preferredType).filter(function (concept) {
+        return safeString(concept.prop("ControlId")) === safeString(controlData.id);
+    }).first();
+
+    if (objective) {
+        return objective;
+    }
+
+    objective = $("concept").filter(function (concept) {
+        return concept.type.indexOf("relationship") === -1 &&
+            safeString(concept.prop("ControlId")) === safeString(controlData.id);
+    }).first();
+
+    if (objective) {
+        return objective;
+    }
+
+    objective = findConceptByTypeAndName(preferredType, objectiveName);
+
+    if (objective) {
+        return objective;
+    }
+
+    return $("concept").filter(function (concept) {
+        return concept.type.indexOf("relationship") === -1 &&
+            safeString(concept.name) === objectiveName &&
+            safeString(concept.prop("FamilyCode")) === safeString(controlData.family_code);
+    }).first();
+}
+
+function findChildConcept(controlData, childData) {
+    var childLabel = beautifyDisplayText(childData.label);
+    var controlId = safeString(controlData.id);
+    var controlItemId = safeString(childData.id);
+    var controlItemLetter = safeString(childData.letter);
+    var child;
+
+    child = findConceptByTypeAndProperty("requirement", "ControlItemId", controlItemId);
+
+    if (child) {
+        return child;
+    }
+
+    child = findConceptsByType("requirement").filter(function (concept) {
+        return safeString(concept.prop("ControlId")) === controlId &&
+            safeString(concept.prop("ControlItemLetter")) === controlItemLetter &&
+            !isNullOrEmpty(controlItemLetter);
+    }).first();
+
+    if (child) {
+        return child;
+    }
+
+    return findConceptsByType("requirement").filter(function (concept) {
+        return safeString(concept.name) === childLabel &&
+            safeString(concept.prop("ControlId")) === controlId;
+    }).first() || findConceptByTypeAndName("requirement", childLabel);
+}
+
+function findStandardCandidates() {
+    var result = [];
+
+    $("representation").filter(function (concept) {
+        var name = safeString(concept.name).toLowerCase();
+        var stereotype = safeString(concept.prop("Stereotype")).toLowerCase();
+        var sourceStandard = safeString(concept.prop("SourceStandard")).toLowerCase();
+
+        return (name === "nist special publication 800-53") ||
+            (stereotype.indexOf("standard") !== -1 && name.indexOf("nist") !== -1 && name.indexOf("800-53") !== -1) ||
+            (sourceStandard.indexOf("nist sp 800-53") !== -1);
+    }).each(function (concept) {
+        result.push(concept);
+    });
+
+    result.sort(function (left, right) {
+        return safeString(left.name).localeCompare(safeString(right.name));
+    });
+
+    return result;
+}
+
+function selectStandardConcept(candidates, options, dialogService) {
+    var optionNames;
+    var selectedName;
+    var i;
+
+    if (candidates.length === 0) {
+        return null;
+    }
+
+    if (candidates.length === 1) {
+        return candidates[0];
+    }
+
+    if (options && options.selectFirstCandidate === true) {
+        return candidates[0];
+    }
+
+    optionNames = candidates.map(function (concept) {
+        return safeString(concept.name);
+    });
+    selectedName = dialogService.selectFromList(
+        "Select the NIST standard element to use as the outer container.",
+        optionNames,
+        "Detailed NIST 800-53 View"
+    );
+
+    if (selectedName === null) {
+        return null;
+    }
+
+    for (i = 0; i < candidates.length; i++) {
+        if (safeString(candidates[i].name) === selectedName) {
+            return candidates[i];
+        }
+    }
+
+    return candidates[0];
+}
+
+function parseFamilyName(name) {
+    var match = /^([A-Z]{2}):\s+(.+)$/.exec(safeString(name));
+
+    if (!match) {
+        return null;
+    }
+
+    return {
+        code: match[1],
+        title: match[2]
+    };
+}
+
+function parseControlName(name) {
+    var match = /^([A-Z]{2})-(\d+)([A-Za-z0-9\-\(\)]*):\s*(.+)$/.exec(safeString(name));
+    var numberValue;
+
+    if (!match) {
+        return null;
+    }
+
+    numberValue = Number(match[2]);
+
+    return {
+        familyCode: match[1],
+        controlNumber: match[2],
+        controlNumberValue: isNaN(numberValue) ? 0 : numberValue,
+        suffix: match[3] || "",
+        baseId: match[1] + "-" + match[2],
+        fullId: match[1] + "-" + match[2] + (match[3] || ""),
+        title: match[4]
+    };
+}
+
+function findFamilyConcepts() {
+    var result = [];
+
+    $("grouping").each(function (concept) {
+        var parsed = parseFamilyName(concept.name);
+
+        if (!parsed) {
+            return;
+        }
+
+        result.push({
+            code: parsed.code,
+            title: parsed.title,
+            concept: concept
+        });
+    });
+
+    result.sort(function (left, right) {
+        return left.code.localeCompare(right.code);
+    });
+
+    return result;
+}
+
+function isPreferredObjective(concept) {
+    var stereotype = safeString(concept.prop("Stereotype")).toLowerCase();
+    var specialization = safeString(concept.specialization).toLowerCase();
+
+    return stereotype.indexOf("control objective") !== -1 ||
+        specialization.indexOf("control objective") !== -1 ||
+        concept.type === "goal";
+}
+
+function sortConceptsByName(left, right) {
+    return safeString(left.name).localeCompare(safeString(right.name));
+}
+
+function choosePrimaryObjective(objectives) {
+    var sortedObjectives = objectives.slice(0);
+
+    sortedObjectives.sort(function (left, right) {
+        var leftPreferred = isPreferredObjective(left) ? 0 : 1;
+        var rightPreferred = isPreferredObjective(right) ? 0 : 1;
+
+        if (leftPreferred !== rightPreferred) {
+            return leftPreferred - rightPreferred;
+        }
+
+        return sortConceptsByName(left, right);
+    });
+
+    return sortedObjectives[0] || null;
+}
+
+function pushUniqueConcept(target, concept, conceptIds) {
+    if (!concept || conceptIds[concept.id]) {
+        return;
+    }
+
+    conceptIds[concept.id] = true;
+    target.push(concept);
+}
+
+function collectChildrenFromRelationships(group) {
+    var relatedChildren = [];
+    var seen = {};
+    var objective = group.objective;
+
+    if (!objective) {
+        return relatedChildren;
+    }
+
+    $(objective).rels().each(function (relationship) {
+        var other = relationship.source.id === objective.id ? relationship.target : relationship.source;
+        var parsed = parseControlName(other.name);
+
+        if (!parsed) {
+            return;
+        }
+
+        if (parsed.baseId !== group.baseId || isNullOrEmpty(parsed.suffix)) {
+            return;
+        }
+
+        if (!seen[other.id]) {
+            seen[other.id] = true;
+            relatedChildren.push(other);
+        }
+    });
+
+    return relatedChildren;
+}
+
+function buildFamilyModels(familyConcepts) {
+    var familyMap = {};
+    var allConcepts = [];
+    var result = [];
+
+    familyConcepts.forEach(function (family) {
+        familyMap[family.code] = {
+            code: family.code,
+            title: family.title,
+            familyConcept: family.concept,
+            groups: []
+        };
+    });
+
+    $("concept").each(function (concept) {
+        if (concept.type.indexOf("relationship") === -1) {
+            allConcepts.push(concept);
+        }
+    });
+
+    allConcepts.forEach(function (concept) {
+        var parsed = parseControlName(concept.name);
+        var family;
+        var group;
+
+        if (!parsed) {
+            return;
+        }
+
+        family = familyMap[parsed.familyCode];
+
+        if (!family) {
+            return;
+        }
+
+        group = family.groups.filter(function (item) {
+            return item.baseId === parsed.baseId;
+        })[0];
+
+        if (!group) {
+            group = {
+                baseId: parsed.baseId,
+                familyCode: parsed.familyCode,
+                controlNumberValue: parsed.controlNumberValue,
+                objectiveCandidates: [],
+                childCandidates: [],
+                objective: null,
+                children: []
+            };
+            family.groups.push(group);
+        }
+
+        if (isNullOrEmpty(parsed.suffix)) {
+            group.objectiveCandidates.push(concept);
+        } else {
+            group.childCandidates.push(concept);
+        }
+    });
+
+    Object.keys(familyMap).sort().forEach(function (code) {
+        var family = familyMap[code];
+
+        family.groups.forEach(function (group) {
+            var childConceptIds = {};
+
+            group.objective = choosePrimaryObjective(group.objectiveCandidates);
+            group.childCandidates.sort(sortConceptsByName);
+            group.childCandidates.forEach(function (concept) {
+                pushUniqueConcept(group.children, concept, childConceptIds);
+            });
+            collectChildrenFromRelationships(group).sort(sortConceptsByName).forEach(function (concept) {
+                pushUniqueConcept(group.children, concept, childConceptIds);
+            });
+        });
+
+        family.groups.sort(function (left, right) {
+            if (left.controlNumberValue !== right.controlNumberValue) {
+                return left.controlNumberValue - right.controlNumberValue;
+            }
+
+            return left.baseId.localeCompare(right.baseId);
+        });
+
+        result.push(family);
+    });
+
+    return result;
+}
+
+function findRelationshipBetween(sourceConcept, targetConcept) {
+    var matches = [];
+
+    if (!sourceConcept || !targetConcept) {
+        return null;
+    }
+
+    $(sourceConcept).rels().each(function (relationship) {
+        var connectsForward = relationship.source.id === sourceConcept.id && relationship.target.id === targetConcept.id;
+        var connectsBackward = relationship.source.id === targetConcept.id && relationship.target.id === sourceConcept.id;
+
+        if (connectsForward || connectsBackward) {
+            matches.push(relationship);
+        }
+    });
+
+    matches.sort(function (left, right) {
+        var leftPriority = CONST.RelationshipPriority[left.type] || 100;
+        var rightPriority = CONST.RelationshipPriority[right.type] || 100;
+
+        if (leftPriority !== rightPriority) {
+            return leftPriority - rightPriority;
+        }
+
+        return safeString(left.name).localeCompare(safeString(right.name));
+    });
+
+    return matches[0] || null;
+}
+
+function estimateFamilyHeight(family, renderOptions) {
+    var height = CONST.Layout.FamilyInnerY + CONST.Layout.FamilyInnerBottom;
+
+    if (family.groups.length === 0) {
+        return Math.max(CONST.Layout.FamilyMinHeight, height + CONST.Layout.EmptyNoteHeight);
+    }
+
+    family.groups.forEach(function (group, groupIndex) {
+        height += calculateControlClusterHeight(group, renderOptions);
+
+        if (groupIndex < family.groups.length - 1) {
+            height += CONST.Layout.ClusterGap;
+        }
+    });
+
+    return Math.max(CONST.Layout.FamilyMinHeight, height);
+}
+
+function calculateFamilyPlacements(familyModels, renderOptions) {
+    var placements = [];
+    var currentY = CONST.Layout.StandardPaddingTop;
+    var rowIndex;
+    var columnIndex;
+    var familyIndex = 0;
+
+    while (familyIndex < familyModels.length) {
+        var rowHeight = 0;
+        var rowFamilies = [];
+
+        for (columnIndex = 0; columnIndex < CONST.Layout.Columns && familyIndex < familyModels.length; columnIndex++) {
+            var family = familyModels[familyIndex];
+            var familyHeight = estimateFamilyHeight(family, renderOptions);
+
+            rowFamilies.push({
+                family: family,
+                x: CONST.Layout.StandardPaddingX + (columnIndex * (CONST.Layout.FamilyWidth + CONST.Layout.FamilyGapX)),
+                y: currentY,
+                width: CONST.Layout.FamilyWidth,
+                height: familyHeight
+            });
+
+            rowHeight = Math.max(rowHeight, familyHeight);
+            familyIndex++;
+        }
+
+        for (rowIndex = 0; rowIndex < rowFamilies.length; rowIndex++) {
+            placements.push(rowFamilies[rowIndex]);
+        }
+
+        currentY += rowHeight + CONST.Layout.FamilyGapY;
+    }
+
+    return {
+        placements: placements,
+        standardWidth:
+            (CONST.Layout.StandardPaddingX * 2) +
+            (CONST.Layout.Columns * CONST.Layout.FamilyWidth) +
+            ((CONST.Layout.Columns - 1) * CONST.Layout.FamilyGapX),
+        standardHeight:
+            currentY -
+            CONST.Layout.FamilyGapY +
+            CONST.Layout.StandardPaddingBottom
+    };
+}
+
+function addNote(container, text, x, y, width, height) {
+    var note = container.createObject("note", x, y, width, height);
+
+    note.text = text;
+    styleVisual(note, CONST.Style.NoteFill);
+    return note;
+}
+
+function addConceptVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+
+    styleVisual(visual, fillColor);
+    tryApplyLabelExpression(visual, getBestLabelExpression(concept));
+    return visual;
+}
+
+function getClusterGroupingName(group) {
+    if (group && group.objective && !isNullOrEmpty(group.objective.name)) {
+        return safeString(group.objective.name);
+    }
+
+    return safeString(group.baseId);
+}
+
+function findGroupingConceptForControl(group) {
+    var groupingName = getClusterGroupingName(group);
+    var legacyGroupingName = group.baseId + " Cluster";
+
+    return $("grouping").filter(function (concept) {
+        var conceptName = safeString(concept.name);
+        var controlMarker = safeString(concept.prop("Control"));
+
+        return controlMarker === safeString(group.baseId) ||
+            (conceptName === groupingName && safeString(concept.prop("FamilyCode")) === safeString(group.familyCode)) ||
+            (conceptName === legacyGroupingName && safeString(concept.prop("FamilyCode")) === safeString(group.familyCode));
+    }).first();
+}
+
+function ensureClusterGroupingConcept(group) {
+    var groupingName = getClusterGroupingName(group);
+    var groupingConcept = findGroupingConceptForControl(group);
+
+    if (groupingConcept) {
+        groupingConcept.name = groupingName;
+        groupingConcept.documentation = "Display control group for " + groupingName + ".";
+        groupingConcept.prop("Stereotype", "Control");
+        groupingConcept.prop("Control", group.baseId);
+        groupingConcept.prop("FamilyCode", group.familyCode);
+        groupingConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+        return groupingConcept;
+    }
+
+    groupingConcept = model.createElement("grouping", groupingName);
+    groupingConcept.documentation = "Display control group for " + groupingName + ".";
+    groupingConcept.prop("Stereotype", "Control");
+    groupingConcept.prop("Control", group.baseId);
+    groupingConcept.prop("FamilyCode", group.familyCode);
+    groupingConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+    moveConceptToStandardTree(
+        groupingConcept,
+        "Other",
+        [group.familyCode, group.baseId]
+    );
+    return groupingConcept;
+}
+
+function addClusterGroup(container, group, x, y, width, height) {
+    var groupingConcept = ensureClusterGroupingConcept(group);
+    var groupVisual = container.add(groupingConcept, x, y, width, height);
+
+    styleVisual(groupVisual, CONST.Style.ClusterFill);
+    tryApplyLabelExpression(groupVisual, getBestLabelExpression(groupingConcept));
+    return groupVisual;
+}
+
+function normalizeRenderOptions(options) {
+    var renderOptions = options || {};
+    var includeChildren = renderOptions.includeChildren !== false;
+
+    return {
+        includeChildren: includeChildren,
+        includeJunctions: includeChildren && renderOptions.includeJunctions !== false
+    };
+}
+
+function calculateControlClusterContentHeight(group, renderOptions) {
+    var activeRenderOptions = normalizeRenderOptions(renderOptions);
+    var clusterHeight = 0;
+
+    if (group.objective) {
+        clusterHeight += CONST.Layout.ObjectiveHeight;
+    } else {
+        clusterHeight += CONST.Layout.EmptyNoteHeight;
+    }
+
+    if (activeRenderOptions.includeChildren && group.children.length > 0) {
+        clusterHeight += CONST.Layout.ObjectiveGap;
+        clusterHeight += (group.children.length * CONST.Layout.ChildHeight) +
+            ((group.children.length - 1) * CONST.Layout.ChildGap);
+    }
+
+    return clusterHeight;
+}
+
+function calculateControlClusterHeight(group, renderOptions) {
+    return CONST.Layout.ClusterPaddingTop +
+        calculateControlClusterContentHeight(group, renderOptions) +
+        CONST.Layout.ClusterPaddingBottom;
+}
+
+function ensurePreferredRelationship(preferredType, fallbackType, sourceConcept, targetConcept, relationshipName, activeLogger) {
+    var relationship = findRelationship(sourceConcept, targetConcept, preferredType);
+
+    if (relationship) {
+        return relationship;
+    }
+
+    try {
+        return model.createRelationship(
+            preferredType,
+            relationshipName || "",
+            sourceConcept,
+            targetConcept
+        );
+    } catch (error) {
+        if (activeLogger) {
+            activeLogger.debug("Preferred relationship type is not valid. Falling back.", {
+                preferred_type: preferredType,
+                fallback_type: fallbackType,
+                source_name: safeString(sourceConcept.name),
+                target_name: safeString(targetConcept.name),
+                error: String(error)
+            }, "nist.view.relationship.fallback");
+        }
+    }
+
+    return ensureRelationship(
+        fallbackType,
+        sourceConcept,
+        targetConcept,
+        relationshipName || ""
+    );
+}
+
+function ensureStandardFamilyRelationship(standardConcept, familyConceptEntry, activeLogger) {
+    var familyConcept = familyConceptEntry ? familyConceptEntry.concept : null;
+    var familyCode = familyConceptEntry ? familyConceptEntry.code : null;
+    var familyTitle = familyConceptEntry ? familyConceptEntry.title : null;
+    var relationship;
+
+    if (!standardConcept || !familyConcept || isNullOrEmpty(familyCode)) {
+        return null;
+    }
+
+    relationship = findRelationship(standardConcept, familyConcept, "composition-relationship") ||
+        findRelationship(standardConcept, familyConcept, "association-relationship");
+
+    if (!relationship) {
+        relationship = ensurePreferredRelationship(
+            "composition-relationship",
+            "association-relationship",
+            standardConcept,
+            familyConcept,
+            "",
+            activeLogger
+        );
+    }
+
+    relationship.name = familyCode + " Family";
+    relationship.documentation = "Connects the NIST SP 800-53 standard with the " + safeString(familyTitle) + " family.";
+    relationship.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+    relationship.prop("FamilyCode", familyCode);
+    relationship.prop("RelationRole", "Standard-Family Structure");
+    moveRelationshipToStandardTreeWithSegments(
+        relationship,
+        [familyCode, "Structure"]
+    );
+
+    return relationship;
+}
+
+function ensureAndJunction(group) {
+    var junctionName = group.baseId + " Junction";
+    var junction = findConceptByTypeAndProperty("junction", "JunctionForControl", group.baseId);
+
+    if (!junction) {
+        junction = findConceptByTypeAndName("junction", junctionName);
+    }
+
+    if (junction) {
+        junction.name = junctionName;
+        junction.prop("JunctionForControl", group.baseId);
+        junction.prop("FamilyCode", group.familyCode);
+        junction.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+        return junction;
+    }
+
+    junction = model.createElement("junction", junctionName);
+    junction.junctionType = "and";
+    junction.prop("JunctionForControl", group.baseId);
+    junction.prop("FamilyCode", group.familyCode);
+    junction.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+    moveConceptToStandardTree(
+        junction,
+        "Other",
+        [group.familyCode, group.baseId]
+    );
+
+    return junction;
+}
+
+function addJunctionVisual(container, junctionConcept, x, y, size) {
+    var visual = container.add(junctionConcept, x, y, size, size);
+
+    visual.fillColor = "#000000";
+    visual.lineColor = "#000000";
+    visual.fontColor = "#000000";
+    return visual;
+}
+
+function addConnectionIfNeeded(view, relationship, sourceVisual, targetVisual, addedRelationshipIds) {
+    var connection;
+
+    if (!relationship || addedRelationshipIds[relationship.id]) {
+        return null;
+    }
+
+    connection = view.add(relationship, sourceVisual, targetVisual);
+    styleConnection(connection);
+    addedRelationshipIds[relationship.id] = true;
+    return connection;
+}
+
+function getUnderlyingEObject(proxy) {
+    var currentClass;
+    var method;
+    var methods;
+    var methodIndex;
+
+    if (!proxy) {
+        return null;
+    }
+
+    currentClass = proxy.getClass();
+
+    while (currentClass) {
+        try {
+            methods = currentClass.getDeclaredMethods();
+
+            for (methodIndex = 0; methodIndex < methods.length; methodIndex++) {
+                method = methods[methodIndex];
+
+                if (String(method.getName()) === "getEObject" && method.getParameterCount() === 0) {
+                    method.setAccessible(true);
+                    return method.invoke(proxy);
+                }
+            }
+        } catch (error) {
+            // Continue with the parent type.
+        }
+
+        currentClass = currentClass.getSuperclass();
+    }
+
+    throw new Error("Could not access underlying EObject for proxy.");
+}
+
+function toClassifierName(kebabName) {
+    return safeString(kebabName)
+        .split("-")
+        .map(function (part) {
+            var value = safeString(part);
+
+            if (isNullOrEmpty(value)) {
+                return "";
+            }
+
+            return value.charAt(0).toUpperCase() + value.slice(1);
+        })
+        .join("");
+}
+
+function createUncheckedRelationship(relationshipType, relationshipName, sourceConcept, targetConcept) {
+    var IArchimatePackage = Java.type("com.archimatetool.model.IArchimatePackage");
+    var IArchimateFactory = Java.type("com.archimatetool.model.IArchimateFactory");
+    var AddRelationshipCommand = Java.type("com.archimatetool.script.commands.AddRelationshipCommand");
+    var CommandHandler = Java.type("com.archimatetool.script.commands.CommandHandler");
+    var modelEObject = getUnderlyingEObject(model);
+    var sourceEObject = getUnderlyingEObject(sourceConcept);
+    var targetEObject = getUnderlyingEObject(targetConcept);
+    var classifierName = toClassifierName(relationshipType);
+    var relationshipEClass = IArchimatePackage.eINSTANCE.getEClassifier(classifierName);
+    var relationshipEObject;
+    var folderEObject;
+
+    if (!relationshipEClass) {
+        throw new Error("Unknown relationship type: " + relationshipType);
+    }
+
+    relationshipEObject = IArchimateFactory.eINSTANCE.create(relationshipEClass);
+    relationshipEObject.setName(relationshipName || "");
+    folderEObject = modelEObject.getDefaultFolderForObject(relationshipEObject);
+
+    CommandHandler.executeCommand(
+        new AddRelationshipCommand(
+            folderEObject,
+            relationshipEObject,
+            sourceEObject,
+            targetEObject
+        )
+    );
+
+    return findRelationship(sourceConcept, targetConcept, relationshipType);
+}
+
+function ensureJunctionRelationship(preferredType, fallbackType, sourceConcept, targetConcept, relationshipName, activeLogger) {
+    var relationship = findRelationship(sourceConcept, targetConcept, preferredType);
+
+    if (relationship) {
+        return relationship;
+    }
+
+    try {
+        relationship = createUncheckedRelationship(
+            preferredType,
+            relationshipName || "",
+            sourceConcept,
+            targetConcept
+        );
+
+        if (relationship) {
+            return relationship;
+        }
+    } catch (error) {
+        if (activeLogger) {
+            activeLogger.debug("Unchecked junction relationship creation fell back.", {
+                preferred_type: preferredType,
+                fallback_type: fallbackType,
+                source_name: safeString(sourceConcept.name),
+                target_name: safeString(targetConcept.name),
+                error: String(error)
+            }, "nist.view.junction.relationship.fallback");
+        }
+    }
+
+    relationship = findRelationship(sourceConcept, targetConcept, fallbackType);
+
+    if (relationship) {
+        return relationship;
+    }
+
+    return createUncheckedRelationship(
+        fallbackType,
+        relationshipName || "",
+        sourceConcept,
+        targetConcept
+    );
+}
+
+function ensureGroupingMembershipRelationship(sourceGroupConcept, targetConcept, familyCode, controlId, activeLogger) {
+    var membershipRelationship;
+
+    if (!sourceGroupConcept || !targetConcept) {
+        return null;
+    }
+
+    membershipRelationship = ensurePreferredRelationship(
+        "aggregation-relationship",
+        "association-relationship",
+        sourceGroupConcept,
+        targetConcept,
+        "",
+        activeLogger
+    );
+
+    moveRelationshipToStandardTree(
+        membershipRelationship,
+        familyCode,
+        controlId
+    );
+
+    return membershipRelationship;
+}
+
+function addGroupingMembershipConnection(view, sourceVisual, targetVisual, familyCode, controlId, addedRelationshipIds, activeLogger) {
+    var membershipRelationship;
+
+    if (!sourceVisual || !targetVisual || !sourceVisual.concept || !targetVisual.concept) {
+        return null;
+    }
+
+    membershipRelationship = ensureGroupingMembershipRelationship(
+        sourceVisual.concept,
+        targetVisual.concept,
+        familyCode,
+        controlId,
+        activeLogger
+    );
+
+    return addConnectionIfNeeded(
+        view,
+        membershipRelationship,
+        sourceVisual,
+        targetVisual,
+        addedRelationshipIds
+    );
+}
+
+function ensureChildObjectiveRelationship(childConcept, objectiveConcept, familyCode, controlId, activeLogger) {
+    var relationship;
+
+    if (!childConcept || !objectiveConcept) {
+        return null;
+    }
+
+    relationship =
+        findRelationship(childConcept, objectiveConcept, "realization-relationship") ||
+        findRelationship(childConcept, objectiveConcept, "association-relationship");
+
+    if (!relationship) {
+        relationship = ensurePreferredRelationship(
+            "realization-relationship",
+            "association-relationship",
+            childConcept,
+            objectiveConcept,
+            "",
+            activeLogger
+        );
+    }
+
+    moveRelationshipToStandardTree(
+        relationship,
+        familyCode,
+        controlId
+    );
+
+    return relationship;
+}
+
+function renderFamilyDetails(view, familyPlacement, standardVisual, visualByConceptId, addedRelationshipIds, renderOptions) {
+    var activeRenderOptions = normalizeRenderOptions(renderOptions);
+    var family = familyPlacement.family;
+    var familyVisual = standardVisual.add(
+        family.familyConcept,
+        familyPlacement.x,
+        familyPlacement.y,
+        familyPlacement.width,
+        familyPlacement.height
+    );
+    var currentY = CONST.Layout.FamilyInnerY;
+
+    styleVisual(familyVisual, CONST.Style.FamilyFill);
+    visualByConceptId[family.familyConcept.id] = familyVisual;
+
+    if (family.groups.length === 0) {
+        addNote(
+            familyVisual,
+            "No detailed control objectives or child elements were found for this family.",
+            CONST.Layout.FamilyInnerX,
+            currentY,
+            familyPlacement.width - CONST.Layout.FamilyInnerX - CONST.Layout.FamilyInnerRight,
+            CONST.Layout.EmptyNoteHeight
+        );
+        return;
+    }
+
+    family.groups.forEach(function (group, groupIndex) {
+        var clusterVisual = null;
+        var objectiveVisual = null;
+        var clusterTopY = currentY;
+        var clusterHeight = calculateControlClusterHeight(group, activeRenderOptions);
+        var clusterContentY = CONST.Layout.ClusterPaddingTop;
+        var familyInnerWidth = familyPlacement.width - CONST.Layout.FamilyInnerX - CONST.Layout.FamilyInnerRight;
+        var objectiveWidth = familyInnerWidth - CONST.Layout.ObjectiveIndent;
+        var childWidth = familyInnerWidth - CONST.Layout.ChildIndent;
+        var junctionConcept = null;
+        var junctionVisual = null;
+        var junctionY;
+        var clusterCurrentY;
+
+        clusterVisual = addClusterGroup(
+            familyVisual,
+            group,
+            CONST.Layout.FamilyInnerX,
+            clusterTopY,
+            familyInnerWidth,
+            clusterHeight
+        );
+        visualByConceptId[clusterVisual.concept.id] = clusterVisual;
+        clusterCurrentY = clusterContentY;
+
+        addGroupingMembershipConnection(
+            view,
+            familyVisual,
+            clusterVisual,
+            group.familyCode,
+            group.baseId,
+            addedRelationshipIds,
+            generatorLogger
+        );
+
+        if (group.objective) {
+            objectiveVisual = addConceptVisual(
+                clusterVisual,
+                group.objective,
+                CONST.Layout.ObjectiveIndent,
+                clusterCurrentY,
+                objectiveWidth,
+                CONST.Layout.ObjectiveHeight,
+                CONST.Style.ObjectiveFill
+            );
+            visualByConceptId[group.objective.id] = objectiveVisual;
+            addGroupingMembershipConnection(
+                view,
+                clusterVisual,
+                objectiveVisual,
+                group.familyCode,
+                group.baseId,
+                addedRelationshipIds,
+                generatorLogger
+            );
+            clusterCurrentY += CONST.Layout.ObjectiveHeight;
+        } else {
+            addNote(
+                clusterVisual,
+                group.baseId + ": No explicit control objective element was found in the model.",
+                0,
+                clusterCurrentY,
+                familyInnerWidth,
+                CONST.Layout.EmptyNoteHeight
+            );
+            clusterCurrentY += CONST.Layout.EmptyNoteHeight;
+        }
+
+        if (activeRenderOptions.includeChildren && group.children.length > 0) {
+            clusterCurrentY += CONST.Layout.ObjectiveGap;
+
+            if (activeRenderOptions.includeJunctions && group.objective) {
+                junctionConcept = ensureAndJunction(group);
+                junctionY =
+                    clusterCurrentY +
+                    Math.max(
+                        0,
+                        (((group.children.length * CONST.Layout.ChildHeight) +
+                        ((group.children.length - 1) * CONST.Layout.ChildGap)) - CONST.Layout.JunctionSize) / 2
+                );
+                junctionVisual = addJunctionVisual(
+                    clusterVisual,
+                    junctionConcept,
+                    CONST.Layout.JunctionIndent,
+                    junctionY,
+                    CONST.Layout.JunctionSize
+                );
+                visualByConceptId[junctionConcept.id] = junctionVisual;
+                addGroupingMembershipConnection(
+                    view,
+                    clusterVisual,
+                    junctionVisual,
+                    group.familyCode,
+                    group.baseId,
+                    addedRelationshipIds,
+                    generatorLogger
+                );
+            }
+
+            group.children.forEach(function (childConcept, childIndex) {
+                var childVisual = addConceptVisual(
+                    clusterVisual,
+                    childConcept,
+                    CONST.Layout.ChildIndent,
+                    clusterCurrentY,
+                    childWidth,
+                    CONST.Layout.ChildHeight,
+                    CONST.Style.ChildFill
+                );
+                var relationship;
+
+                visualByConceptId[childConcept.id] = childVisual;
+                addGroupingMembershipConnection(
+                    view,
+                    clusterVisual,
+                    childVisual,
+                    group.familyCode,
+                    group.baseId,
+                    addedRelationshipIds,
+                    generatorLogger
+                );
+
+                if (group.objective && objectiveVisual) {
+                    if (junctionVisual) {
+                        relationship = ensureJunctionRelationship(
+                            "realization-relationship",
+                            "association-relationship",
+                            childConcept,
+                            junctionConcept,
+                            "",
+                            generatorLogger
+                        );
+                        moveRelationshipToStandardTree(
+                            relationship,
+                            group.familyCode,
+                            group.baseId
+                        );
+                        addConnectionIfNeeded(
+                            view,
+                            relationship,
+                            childVisual,
+                            junctionVisual,
+                            addedRelationshipIds
+                        );
+                    } else {
+                        relationship = ensureChildObjectiveRelationship(
+                            childConcept,
+                            group.objective,
+                            group.familyCode,
+                            group.baseId,
+                            generatorLogger
+                        );
+                        addConnectionIfNeeded(
+                            view,
+                            relationship,
+                            childVisual,
+                            objectiveVisual,
+                            addedRelationshipIds
+                        );
+                    }
+                }
+
+                clusterCurrentY += CONST.Layout.ChildHeight;
+
+                if (childIndex < group.children.length - 1) {
+                    clusterCurrentY += CONST.Layout.ChildGap;
+                }
+            });
+
+            if (group.objective && junctionVisual && objectiveVisual) {
+                relationship = ensureJunctionRelationship(
+                    "realization-relationship",
+                    "association-relationship",
+                    junctionConcept,
+                    group.objective,
+                    "",
+                    generatorLogger
+                );
+                moveRelationshipToStandardTree(
+                    relationship,
+                    group.familyCode,
+                    group.baseId
+                );
+                addConnectionIfNeeded(
+                    view,
+                    relationship,
+                    junctionVisual,
+                    objectiveVisual,
+                    addedRelationshipIds
+                );
+            }
+        }
+
+        currentY = clusterTopY + clusterHeight;
+
+        if (groupIndex < family.groups.length - 1) {
+            currentY += CONST.Layout.ClusterGap;
+        }
+    });
+}
+
+function buildSummary(familyModels, renderOptions) {
+    var activeRenderOptions = normalizeRenderOptions(renderOptions);
+    var clusterGroupCount = 0;
+    var objectiveCount = 0;
+    var childCount = 0;
+    var junctionCount = 0;
+
+    familyModels.forEach(function (family) {
+        family.groups.forEach(function (group) {
+            clusterGroupCount++;
+
+            if (group.objective) {
+                objectiveCount++;
+            }
+
+            if (activeRenderOptions.includeChildren) {
+                childCount += group.children.length;
+            }
+
+            if (activeRenderOptions.includeChildren && activeRenderOptions.includeJunctions && group.objective && group.children.length > 0) {
+                junctionCount++;
+            }
+        });
+    });
+
+    return {
+        families: familyModels.length,
+        clusterGroups: clusterGroupCount,
+        objectives: objectiveCount,
+        children: childCount,
+        junctions: junctionCount
+    };
+}
+
+function collectAllElementVisuals(view) {
+    var visuals = [];
+
+    $(view).children("element").each(function (visual) {
+        visuals.push(visual);
+
+        $(visual).find("element").each(function (childVisual) {
+            visuals.push(childVisual);
+        });
+    });
+
+    return visuals;
+}
+
+function countVisualsForConcept(view, conceptId) {
+    var count = 0;
+
+    collectAllElementVisuals(view).forEach(function (visual) {
+        if (visual.concept && visual.concept.id === conceptId) {
+            count++;
+        }
+    });
+
+    return count;
+}
+
+function countViewConnections(view) {
+    var count = 0;
+
+    $(view).children("relationship").each(function () {
+        count++;
+    });
+
+    return count;
+}
+
+function getDefaultBootstrapExchangeFile() {
+    return new File(__DIR__ + "../../../exchange/Figure26-2_Structure-of-NIST-SP-800-53.view-exchange.json").getCanonicalFile();
+}
+
+function getDefaultDatasetFile() {
+    var candidateFiles = [
+        new File(__DIR__ + "../../../data/nist/nist-sp-800-53r5-controls_v4.json"),
+        new File(__DIR__ + "../../../data/nist/nist-sp-800-53r5-controls_v3.json"),
+        new File(__DIR__ + "../../../data/nist/nist-sp-800-53r5-controls.json")
+    ];
+    var selectedFile = null;
+
+    candidateFiles.some(function (candidateFile) {
+        if (candidateFile.exists()) {
+            selectedFile = candidateFile;
+            return true;
+        }
+
+        return false;
+    });
+
+    return (selectedFile || candidateFiles[candidateFiles.length - 1]).getCanonicalFile();
+}
+
+function readJsonFile(file) {
+    var Files = Java.type("java.nio.file.Files");
+    var Paths = Java.type("java.nio.file.Paths");
+    var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+    var content = new java.lang.String(
+        Files.readAllBytes(Paths.get(file.getCanonicalPath())),
+        StandardCharsets.UTF_8
+    );
+
+    return JSON.parse(String(content));
+}
+
+function beautifyDisplayText(text) {
+    return safeString(text)
+        .replace(/\bAND\b/g, "and")
+        .replace(/\bOR\b/g, "or")
+        .replace(/\bOF\b/g, "of")
+        .replace(/\bTHE\b/g, "the")
+        .replace(/\bFOR\b/g, "for")
+        .replace(/\bTO\b/g, "to")
+        .replace(/\bBY\b/g, "by")
+        .replace(/\bON\b/g, "on")
+        .replace(/\bIN\b/g, "in")
+        .replace(/\bWITH\b/g, "with");
+}
+
+function simplifyControlItemText(text) {
+    var simplified = beautifyDisplayText(text)
+        .replace(/\[Assignment:[^\]]+\]/g, "organization-defined value")
+        .replace(/\[Selection[^\]]+\]/g, "selected value")
+        .replace(/\s+/g, " ")
+        .replace(/:\s*1\..*$/, "")
+        .replace(/;\s*and\s*$/i, "")
+        .replace(/\.$/, "")
+        .trim();
+
+    if (simplified.length > 135) {
+        simplified = simplified.substring(0, 132).replace(/\s+\S*$/, "") + "...";
+    }
+
+    return simplified;
+}
+
+function buildSeededChildLabel(controlData, childData) {
+    var simplified = simplifyControlItemText(childData.text);
+
+    if (/^Develop, document, and disseminate to organization-defined value$/i.test(simplified)) {
+        simplified = "Develop, document, and disseminate " + safeString(controlData.title).toLowerCase();
+    }
+
+    return childData.id + ": " + simplified;
+}
+
+function buildFallbackChildData(controlData) {
+    var readableTitle = beautifyDisplayText(controlData.title);
+
+    return {
+        id: controlData.id + "a",
+        letter: "a",
+        label: controlData.id + "a: " + readableTitle + " requirement",
+        text:
+            "Primary control requirement for " +
+            readableTitle +
+            " derived from NIST SP 800-53 Rev. 5."
+    };
+}
+
+function findConceptByName(name) {
+    return $("concept").filter(function (concept) {
+        return concept.type.indexOf("relationship") === -1 &&
+            safeString(concept.name) === safeString(name);
+    }).first();
+}
+
+function findRelationship(sourceConcept, targetConcept, relationshipType) {
+    return $("relationship").filter(function (relationship) {
+        return relationship.type === relationshipType &&
+            relationship.source.id === sourceConcept.id &&
+            relationship.target.id === targetConcept.id;
+    }).first();
+}
+
+function ensureRelationship(relationshipType, sourceConcept, targetConcept, relationshipName) {
+    var relationship = findRelationship(sourceConcept, targetConcept, relationshipType);
+
+    if (relationship) {
+        return relationship;
+    }
+
+    return model.createRelationship(
+        relationshipType,
+        relationshipName || "",
+        sourceConcept,
+        targetConcept
+    );
+}
+
+function findFamilyConceptMap(familyConcepts) {
+    var familyMap = {};
+
+    familyConcepts.forEach(function (family) {
+        familyMap[family.code] = family.concept;
+    });
+
+    return familyMap;
+}
+
+function syncStandardMetadata(standardConcept) {
+    if (!standardConcept) {
+        return;
+    }
+
+    standardConcept.name = "NIST Special Publication 800-53";
+    standardConcept.prop("Stereotype", "«Standard»");
+    standardConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+}
+
+function syncFamilyMetadata(familyEntry) {
+    var familyConcept;
+
+    if (!familyEntry || !familyEntry.concept) {
+        return;
+    }
+
+    familyConcept = familyEntry.concept;
+    familyConcept.name = familyEntry.code + ": " + familyEntry.title;
+    familyConcept.prop("FamilyCode", familyEntry.code);
+    familyConcept.prop("FamilyTitle", familyEntry.title);
+    familyConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+}
+
+function buildObjectiveDocumentation(controlData) {
+    var sections = [];
+    var title = safeString(controlData.title);
+    var discussion = safeString(controlData.discussion);
+
+    if (!isNullOrEmpty(title)) {
+        sections.push(title);
+    }
+
+    if (!isNullOrEmpty(discussion)) {
+        sections.push("Discussion:\n" + discussion);
+    }
+
+    return sections.join("\n\n");
+}
+
+function syncSeededObjectiveMetadata(objective, controlData) {
+    if (!objective) {
+        return;
+    }
+
+    objective.documentation = buildObjectiveDocumentation(controlData);
+    objective.prop("Stereotype", safeString(controlData.objective_stereotype || "«Control Objective»"));
+    objective.prop("ControlId", controlData.id);
+    objective.prop("FamilyCode", controlData.family_code);
+    objective.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+    objective.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+}
+
+function createSeededObjective(controlData) {
+    var objective = model.createElement(controlData.objective_type || "goal", beautifyDisplayText(controlData.objective_name));
+
+    syncSeededObjectiveMetadata(objective, controlData);
+    moveConceptToStandardTree(
+        objective,
+        "Motivation",
+        [controlData.family_code, controlData.id]
+    );
+
+    return objective;
+}
+
+function createSeededChild(controlData, childData) {
+    var child = model.createElement("requirement", buildSeededChildLabel(controlData, childData));
+
+    child.documentation = safeString(childData.text);
+    child.prop("ControlId", controlData.id);
+    child.prop("ControlItemId", childData.id);
+    child.prop("ControlItemLetter", childData.letter);
+    child.prop("FamilyCode", controlData.family_code);
+    child.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+    child.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+    moveConceptToStandardTree(
+        child,
+        "Motivation",
+        [controlData.family_code, controlData.id]
+    );
+
+    return child;
+}
+
+function seedDetailedControlsFromDataset(activeLogger, familyConcepts) {
+    var datasetFile = getDefaultDatasetFile();
+    var dataset;
+    var familyConceptMap;
+    var objectiveCount = 0;
+    var childCount = 0;
+
+    if (!datasetFile.exists()) {
+        activeLogger.warn("No local NIST control dataset was found.", {
+            expected_path: datasetFile.getCanonicalPath()
+        }, "nist.view.dataset.missing");
+        return null;
+    }
+
+    dataset = readJsonFile(datasetFile);
+    familyConceptMap = findFamilyConceptMap(familyConcepts);
+
+    dataset.controls.forEach(function (controlData) {
+        var familyConcept = familyConceptMap[controlData.family_code];
+        var objective;
+        var childItems;
+
+        if (!familyConcept) {
+            return;
+        }
+
+        objective = findObjectiveConcept(controlData);
+
+        if (!objective) {
+            objective = createSeededObjective(controlData);
+            objectiveCount++;
+        } else {
+            syncSeededObjectiveMetadata(objective, controlData);
+        }
+
+        moveRelationshipToStandardTree(
+            ensureRelationship("association-relationship", familyConcept, objective, ""),
+            controlData.family_code,
+            controlData.id
+        );
+
+        childItems = controlData.items && controlData.items.length > 0
+            ? controlData.items
+            : [buildFallbackChildData(controlData)];
+
+        childItems.forEach(function (childData) {
+            var childConcept = findChildConcept(controlData, childData);
+
+            if (!childConcept) {
+                childConcept = createSeededChild(controlData, childData);
+                childCount++;
+            } else {
+                childConcept.name = buildSeededChildLabel(controlData, childData);
+                childConcept.documentation = safeString(childData.text);
+                childConcept.prop("ControlId", controlData.id);
+                childConcept.prop("ControlItemId", childData.id);
+                childConcept.prop("ControlItemLetter", childData.letter);
+                childConcept.prop("FamilyCode", controlData.family_code);
+                childConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
+                childConcept.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+            }
+        });
+    });
+
+    activeLogger.info("Seeded detailed NIST controls from the local dataset.", {
+        dataset_path: datasetFile.getCanonicalPath(),
+        control_objectives_created: objectiveCount,
+        child_elements_created: childCount
+    }, "nist.view.dataset.seeded");
+
+    return {
+        datasetFile: datasetFile,
+        controlObjectivesCreated: objectiveCount,
+        childElementsCreated: childCount
+    };
+}
+
+function tryBootstrapModelFromExchange(activeLogger) {
+    var exchangeFile = getDefaultBootstrapExchangeFile();
+    var importedView;
+    var importedPackage;
+
+    if (!exchangeFile.exists()) {
+        activeLogger.warn("No bootstrap exchange file was found for NIST 800-53.", {
+            expected_path: exchangeFile.getCanonicalPath()
+        }, "nist.view.bootstrap.missing");
+        return null;
+    }
+
+    importedPackage = ArchiViewExchange.readViewPackageFromFile(exchangeFile.getCanonicalPath());
+    importedView = ArchiViewExchange.importViewPackage(importedPackage, {
+        logger: activeLogger,
+        targetViewName: ArchiViewExchange.buildUniqueViewName(importedPackage.view.name + " Bootstrap")
+    });
+
+    activeLogger.info("Bootstrapped the model from the default NIST 800-53 exchange file.", {
+        bootstrap_file: exchangeFile.getCanonicalPath(),
+        imported_view_name: importedView.name
+    }, "nist.view.bootstrap.imported");
+    moveViewToStandardTree(importedView, CONST.Folders.ViewsBootstrap);
+
+    return {
+        exchangeFile: exchangeFile,
+        importedView: importedView
+    };
+}
+
+function generateDetailedNist80053View(options) {
+    var generationOptions = options || {};
+    var renderOptions = normalizeRenderOptions(generationOptions);
+    var activeLogger = generationOptions.logger || generatorLogger;
+    var activeDialogs = generationOptions.dialogs || generatorDialogs;
+    var showDialogs = generationOptions.showDialogs !== false;
+    var standardCandidates;
+    var standardConcept;
+    var familyConcepts;
+    var familyModels;
+    var layout;
+    var viewName;
+    var view;
+    var standardVisual;
+    var visualByConceptId = {};
+    var addedRelationshipIds = {};
+    var summary;
+    var dialogSummary;
+    var bootstrapResult = null;
+    var datasetSeedResult = null;
+
+    activeLogger.start("Detailed NIST 800-53 view generation started.");
+
+    standardCandidates = findStandardCandidates();
+
+    if (standardCandidates.length === 0 && generationOptions.autoBootstrapFromExchange !== false) {
+        bootstrapResult = tryBootstrapModelFromExchange(activeLogger);
+        standardCandidates = findStandardCandidates();
+    }
+
+    standardConcept = selectStandardConcept(standardCandidates, generationOptions, activeDialogs);
+
+    if (!standardConcept) {
+        if (showDialogs) {
+            activeDialogs.showError(
+                "No suitable NIST 800-53 standard element was found. Expected an element whose name contains 'NIST' and '800-53'. If you start from an empty model, import or create the NIST concepts first.",
+                "Detailed NIST 800-53 View"
+            );
+        }
+        activeLogger.fail("View generation aborted because no NIST 800-53 standard element was found.");
+        throw new Error("No NIST 800-53 standard element found.");
+    }
+
+    syncStandardMetadata(standardConcept);
+
+    familyConcepts = findFamilyConcepts();
+
+    if (familyConcepts.length === 0) {
+        if (showDialogs) {
+            activeDialogs.showError(
+                "No NIST family grouping elements were found. Expected grouping elements named like 'AC: Access Control'.",
+                "Detailed NIST 800-53 View"
+            );
+        }
+        activeLogger.fail("View generation aborted because no NIST family groupings were found.");
+        throw new Error("No NIST family groupings found.");
+    }
+
+    if (generationOptions.autoSeedFromDataset !== false) {
+        datasetSeedResult = seedDetailedControlsFromDataset(activeLogger, familyConcepts);
+    }
+
+    familyModels = buildFamilyModels(familyConcepts);
+    layout = calculateFamilyPlacements(familyModels, renderOptions);
+    viewName = generationOptions.viewName || buildUniqueViewName(
+        renderOptions.includeChildren ? "Detailed NIST SP 800-53 Controls" : "NIST SP 800-53 Control Objectives"
+    );
+    view = model.createArchimateView(viewName);
+
+    standardVisual = view.add(
+        standardConcept,
+        CONST.Layout.StandardX,
+        CONST.Layout.StandardY,
+        layout.standardWidth,
+        layout.standardHeight
+    );
+    styleVisual(standardVisual, CONST.Style.StandardFill);
+    tryApplyLabelExpression(standardVisual, getBestLabelExpression(standardConcept));
+    visualByConceptId[standardConcept.id] = standardVisual;
+    moveConceptToStandardTree(
+        standardConcept,
+        getConceptRootFolderName(standardConcept),
+        []
+    );
+
+    familyConcepts.forEach(function (family) {
+        syncFamilyMetadata(family);
+        moveConceptToStandardTree(
+            family.concept,
+            getConceptRootFolderName(family.concept),
+            [family.code]
+        );
+        ensureStandardFamilyRelationship(
+            standardConcept,
+            family,
+            activeLogger
+        );
+    });
+
+    layout.placements.forEach(function (familyPlacement) {
+        renderFamilyDetails(view, familyPlacement, standardVisual, visualByConceptId, addedRelationshipIds, renderOptions);
+    });
+    moveViewToStandardTree(view, CONST.Folders.ViewsGenerated);
+
+    summary = buildSummary(familyModels, renderOptions);
+
+    activeLogger.info("Detailed NIST 800-53 view generated.", {
+        view_name: view.name,
+        view_mode: renderOptions.includeChildren ? "detailed" : "objectives_only",
+        standard_name: standardConcept.name,
+        family_count: summary.families,
+        cluster_group_count: summary.clusterGroups,
+        objective_count: summary.objectives,
+        child_count: summary.children,
+        drawn_relationship_count: Object.keys(addedRelationshipIds).length,
+        bootstrap_used: bootstrapResult !== null,
+        dataset_seed_used: datasetSeedResult !== null
+    }, "nist.view.generated");
+
+    if (summary.objectives === 0) {
+        activeLogger.warn("No detailed control objective elements were found in the model. The generated view only contains the available family structure.", {
+            view_name: view.name,
+            bootstrap_used: bootstrapResult !== null
+        }, "nist.view.no_objectives_found");
+    }
+
+    if (showDialogs) {
+        dialogSummary =
+            "Generated view: " + view.name + "\n" +
+            "Standard: " + standardConcept.name + "\n" +
+            "Families: " + summary.families + "\n" +
+            "Cluster groups: " + summary.clusterGroups + "\n" +
+            "Control objectives: " + summary.objectives + "\n" +
+            "Child elements: " + summary.children + "\n" +
+            "Junctions: " + summary.junctions + "\n" +
+            "Drawn relationships: " + Object.keys(addedRelationshipIds).length;
+
+        activeDialogs.showInfo(dialogSummary, "Detailed NIST 800-53 View");
+    }
+
+    activeLogger.finish("Detailed NIST 800-53 view generation completed.", {
+        view_name: view.name
+    });
+
+    return {
+        view: view,
+        standardConcept: standardConcept,
+        familyModels: familyModels,
+        summary: summary,
+        renderOptions: renderOptions,
+        drawnRelationshipCount: Object.keys(addedRelationshipIds).length,
+        bootstrapResult: bootstrapResult,
+        datasetSeedResult: datasetSeedResult
+    };
+}
+
+function generateNist80053ObjectivesView(options) {
+    var objectiveViewOptions = options || {};
+    var mergedOptions = {};
+    var key;
+
+    for (key in objectiveViewOptions) {
+        if (objectiveViewOptions.hasOwnProperty(key)) {
+            mergedOptions[key] = objectiveViewOptions[key];
+        }
+    }
+
+    mergedOptions.includeChildren = false;
+    mergedOptions.includeJunctions = false;
+
+    if (!mergedOptions.viewName) {
+        mergedOptions.viewName = buildUniqueViewName("NIST SP 800-53 Control Objectives");
+    }
+
+    return generateDetailedNist80053View(mergedOptions);
+}
+
+function validateDetailedNist80053View(generationResult, validationLogger) {
+    var activeLogger = validationLogger || generatorLogger;
+    var view = generationResult.view;
+    var familyModels = generationResult.familyModels;
+    var summary = generationResult.summary;
+    var renderOptions = normalizeRenderOptions(generationResult.renderOptions);
+    var errors = [];
+    var expectedVisualCount =
+        1 +
+        summary.families +
+        summary.clusterGroups +
+        summary.objectives +
+        summary.children +
+        summary.junctions;
+    var actualVisualCount = collectAllElementVisuals(view).length;
+    var actualConnectionCount = countViewConnections(view);
+
+    if (!view) {
+        errors.push("No generated view was returned.");
+    }
+
+    if (countVisualsForConcept(view, generationResult.standardConcept.id) !== 1) {
+        errors.push("The standard container is missing or duplicated in the generated view.");
+    }
+
+    if (actualVisualCount !== expectedVisualCount) {
+        errors.push(
+            "Unexpected visual count. Expected " + expectedVisualCount + ", actual " + actualVisualCount + "."
+        );
+    }
+
+    if (summary.objectives === 0) {
+        errors.push("No control objectives were generated.");
+    }
+
+    if (renderOptions.includeChildren && summary.children === 0) {
+        errors.push("No child elements were generated.");
+    }
+
+    familyModels.forEach(function (family) {
+        if (countVisualsForConcept(view, family.familyConcept.id) !== 1) {
+            errors.push("Family container visual is missing or duplicated for " + family.code + ".");
+        }
+
+        family.groups.forEach(function (group) {
+            if (group.objective && countVisualsForConcept(view, group.objective.id) !== 1) {
+                errors.push("Control objective visual is missing or duplicated for " + group.baseId + ".");
+            }
+
+            if (renderOptions.includeChildren) {
+                group.children.forEach(function (childConcept) {
+                    if (countVisualsForConcept(view, childConcept.id) !== 1) {
+                        errors.push("Child control visual is missing or duplicated for " + childConcept.name + ".");
+                    }
+                });
+            }
+        });
+    });
+
+    if (actualConnectionCount < generationResult.drawnRelationshipCount) {
+        errors.push(
+            "The view contains fewer connections than expected. Expected at least " +
+            generationResult.drawnRelationshipCount +
+            ", actual " +
+            actualConnectionCount +
+            "."
+        );
+    }
+
+    activeLogger.info("Detailed NIST 800-53 view validation finished.", {
+        view_name: view ? view.name : null,
+        expected_visual_count: expectedVisualCount,
+        actual_visual_count: actualVisualCount,
+        expected_min_connection_count: generationResult.drawnRelationshipCount,
+        actual_connection_count: actualConnectionCount,
+        error_count: errors.length
+    }, "nist.view.validation.completed");
+
+    return {
+        isValid: errors.length === 0,
+        errors: errors,
+        expectedVisualCount: expectedVisualCount,
+        actualVisualCount: actualVisualCount,
+        expectedMinConnectionCount: generationResult.drawnRelationshipCount,
+        actualConnectionCount: actualConnectionCount
+    };
+}
+
+var ArchiNistViews = typeof ArchiNistViews !== "undefined" && ArchiNistViews ? ArchiNistViews : {};
+
+ArchiNistViews.buildUniqueViewName = buildUniqueViewName;
+ArchiNistViews.generateDetailedNist80053View = generateDetailedNist80053View;
+ArchiNistViews.generateNist80053ObjectivesView = generateNist80053ObjectivesView;
+ArchiNistViews.validateDetailedNist80053View = validateDetailedNist80053View;
+
+if (typeof ARCHI_NIST_SKIP_AUTORUN === "undefined" || !ARCHI_NIST_SKIP_AUTORUN) {
+    ArchiNistViews.generateDetailedNist80053View();
+}

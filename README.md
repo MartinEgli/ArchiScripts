@@ -30,8 +30,12 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
   gemeinsame Exchange-Helfer fuer View-Export und View-Import als JSON
 - `scripts/lib/ui/`
   gemeinsame Dialog-Helfer fuer Confirm-, Prompt-, Auswahl- und Datei-Dialoge
+- `data/nist/`
+  aus dem NIST-PDF abgeleitete Datensaetze fuer die automatische Generierung detaillierter NIST-Control-Strukturen
 - `scripts/Diverses/`
   Kleine allgemeine Hilfs- und Beispielskripte
+- `scripts/Diverses/NIST/`
+  NIST-bezogene Skripte zur View-Generierung fuer Standards, Familien und Controls, inklusive Detail- und Objective-only-Views
 - `scripts/Diverses/Logging/`
   Basisbeispiele fuer Konsolen-, Dialog- und strukturierte Log-Ausgaben
 - `scripts/Diverses/Dialogs/`
