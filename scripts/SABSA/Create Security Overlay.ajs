@@ -1,0 +1,756 @@
+﻿/*
+ * jArchi Script
+ * Security Overlay Metamodel - One Page Builder
+ *
+ * Was das Skript macht:
+ * - erstellt Spezialisierungen fuer die Security Overlay
+ * - erzeugt eine neue View
+ * - baut visuelle Gruppen fuer die Overlay-Bereiche
+ * - legt Beispiel-Elemente mit PascalCase-Properties an
+ * - erzeugt einige Beispiel-Beziehungen fuer das Metamodel
+ *
+ * Wichtige Hinweise:
+ * - Das Skript erzeugt bei jedem Lauf neue Elemente und eine neue View.
+ * - Es nutzt absichtlich keine Abkuerzungen.
+ * - Die Darstellung erfolgt mit <<Stereotyp>>-Notation im Namen.
+ * - Fuer <<Control>> werden mehrere Basistypen verwendet, weil Control
+ *   laut T100 keinen einzelnen Basistyp hat.
+ */
+
+console.show();
+console.clear();
+
+if (!model) {
+    throw "Kein aktives Modell vorhanden.";
+}
+
+function pad(value) {
+    return value < 10 ? "0" + value : "" + value;
+}
+
+function buildTimestamp() {
+    var now = new Date();
+    return now.getFullYear()
+        + "-" + pad(now.getMonth() + 1)
+        + "-" + pad(now.getDate())
+        + " "
+        + pad(now.getHours())
+        + "-" + pad(now.getMinutes())
+        + "-" + pad(now.getSeconds());
+}
+
+var viewName = "Security Overlay Metamodel " + buildTimestamp();
+var view = model.createArchimateView(viewName);
+view.documentation = "Automatisch erzeugte Metamodel-View fuer die SABSA Security Overlay.";
+
+function ensureSpecialization(name, conceptType) {
+    var existing = null;
+    try {
+        existing = model.findSpecialization(name, conceptType);
+    } catch (error) {
+        existing = null;
+    }
+    if (existing) {
+        return existing;
+    }
+    return model.createSpecialization(name, conceptType);
+}
+
+function ensureSpecializations() {
+    var specs = [
+        // Motivation und Compliance
+        { name: "Loss", conceptTypes: ["value"] },
+        { name: "Value Chain", conceptTypes: ["value"] },
+        { name: "SABSA Attribute", conceptTypes: ["principle"] },
+        { name: "Business Policy", conceptTypes: ["principle"] },
+        { name: "Trust", conceptTypes: ["principle"] },
+        { name: "Article", conceptTypes: ["principle"] },
+        { name: "Mandate", conceptTypes: ["principle"] },
+        { name: "Risk", conceptTypes: ["assessment"] },
+        { name: "Vulnerability", conceptTypes: ["assessment"] },
+        { name: "Control Objective", conceptTypes: ["goal"] },
+        { name: "Compliance Objective", conceptTypes: ["goal"] },
+        { name: "Control Measure", conceptTypes: ["requirement"] },
+        { name: "Exception", conceptTypes: ["requirement"] },
+
+        // Kontext
+        { name: "Threat Agent", conceptTypes: ["business-actor"] },
+        { name: "Threat Event", conceptTypes: ["business-event"] },
+        { name: "Loss Event", conceptTypes: ["business-event"] },
+        { name: "SecurityDomain", conceptTypes: ["grouping"] },
+
+        // Konzeptuell
+        { name: "Principal", conceptTypes: ["business-actor"] },
+        { name: "Authorisation", conceptTypes: ["business-role"] },
+        { name: "Credential", conceptTypes: ["business-object"] },
+
+        // SecurityEvent in mehreren Basistypen
+        { name: "SecurityEvent", conceptTypes: ["business-event", "application-event", "technology-event", "implementation-event"] },
+
+        // Logisch und technisch
+        { name: "Security Configuration", conceptTypes: ["data-object"] },
+        { name: "Malware", conceptTypes: ["application-component"] },
+        { name: "Executable", conceptTypes: ["artifact"] },
+        { name: "Data", conceptTypes: ["artifact"] },
+        { name: "Defect", conceptTypes: ["assessment"] },
+        { name: "HSM", conceptTypes: ["node"] },
+        { name: "VPN Gateway", conceptTypes: ["node"] },
+
+        // Control auf mehreren Basistypen
+        { name: "Control", conceptTypes: ["principle", "business-process", "application-service", "node"] },
+
+        // Beziehungen
+        { name: "Conceptualisation", conceptTypes: ["association-relationship"] },
+        { name: "Realisation", conceptTypes: ["association-relationship"] },
+        { name: "RACI", conceptTypes: ["association-relationship"] },
+        { name: "exploits", conceptTypes: ["association-relationship"] },
+        { name: "materialises", conceptTypes: ["association-relationship"] },
+        { name: "trusts", conceptTypes: ["flow-relationship"] }
+    ];
+
+    for (var i = 0; i < specs.length; i++) {
+        var spec = specs[i];
+        for (var j = 0; j < spec.conceptTypes.length; j++) {
+            ensureSpecialization(spec.name, spec.conceptTypes[j]);
+        }
+    }
+}
+
+ensureSpecializations();
+
+function setProperties(concept, properties) {
+    if (!properties) {
+        return;
+    }
+    for (var key in properties) {
+        if (properties.hasOwnProperty(key)) {
+            concept.prop(key, String(properties[key]));
+        }
+    }
+}
+
+function createElement(type, stereotype, displayName, baseTypeLabel, documentation, properties) {
+    var element = model.createElement(type, displayName);
+    if (stereotype) {
+        element.specialization = stereotype;
+        element.prop("Stereotype", "<<" + stereotype + ">>");
+    }
+    element.prop("BaseType", baseTypeLabel);
+    element.documentation = documentation || "";
+    setProperties(element, properties);
+    return element;
+}
+
+function createAssociation(name, stereotype, source, target, properties, directed) {
+    var relation = model.createRelationship("association-relationship", name, source, target);
+    relation.specialization = stereotype;
+    relation.prop("Stereotype", "<<" + stereotype + ">>");
+    if (directed) {
+        relation.associationDirected = true;
+        relation.prop("IsDirected", "True");
+    }
+    setProperties(relation, properties);
+    return relation;
+}
+
+function createFlow(name, stereotype, source, target, properties) {
+    var relation = model.createRelationship("flow-relationship", name, source, target);
+    relation.specialization = stereotype;
+    relation.prop("Stereotype", "<<" + stereotype + ">>");
+    setProperties(relation, properties);
+    return relation;
+}
+
+function styleVisual(visual, fillColor, lineColor, fontColor) {
+    if (fillColor) {
+        visual.fillColor = fillColor;
+    }
+    if (lineColor) {
+        visual.lineColor = lineColor;
+    }
+    if (fontColor) {
+        visual.fontColor = fontColor;
+    }
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function createGroup(name, x, y, width, height, fillColor) {
+    var group = view.createObject("group", x, y, width, height, true);
+    group.name = name;
+    group.borderType = BORDER.TABBED;
+    styleVisual(group, fillColor, "#666666", "#000000");
+    return group;
+}
+
+function createNote(parent, text, x, y, width, height, fillColor) {
+    var note = parent.createObject("note", x, y, width, height, false);
+    note.text = text;
+    styleVisual(note, fillColor || "#FFF9CC", "#999999", "#000000");
+    return note;
+}
+
+function addElementToGroup(group, element, x, y, width, height, fillColor) {
+    var visual = group.add(element, x, y, width, height);
+    styleVisual(visual, fillColor || "#FFFFFF", "#555555", "#000000");
+    return visual;
+}
+
+function createGrid(group, definitions, startX, startY, columns, boxWidth, boxHeight, gapX, gapY, fillColor) {
+    var result = {};
+    for (var i = 0; i < definitions.length; i++) {
+        var row = Math.floor(i / columns);
+        var column = i % columns;
+        var x = startX + (column * (boxWidth + gapX));
+        var y = startY + (row * (boxHeight + gapY));
+
+        var def = definitions[i];
+        var element = createElement(
+            def.type,
+            def.stereotype,
+            def.label,
+            def.baseTypeLabel,
+            def.documentation,
+            def.properties
+        );
+
+        result[def.key] = {
+            element: element,
+            visual: addElementToGroup(group, element, x, y, boxWidth, boxHeight, fillColor)
+        };
+    }
+    return result;
+}
+
+var titleNote = view.createObject("note", 20, 20, 1420, 90, false);
+titleNote.text =
+    "Security Overlay Metamodel\n" +
+    "Stereotypen werden mit <<Stereotyp>> dargestellt. Properties verwenden PascalCase.\n" +
+    "Die View gruppiert Motivation, Kontext, konzeptionelle Sicherheit, logische Sicherheit, physische Sicherheit, Control-Polymorphie und Beziehungs-Stereotypen.";
+styleVisual(titleNote, "#EEF5FF", "#6D8FB3", "#000000");
+
+// Gruppen
+var motivationGroup = createGroup("Motivation und Compliance", 20, 130, 760, 360, "#F8E8F0");
+var contextualGroup = createGroup("Kontext und Domänen", 800, 130, 320, 260, "#EAF5EA");
+var conceptualGroup = createGroup("Konzeptionelle Sicherheitsarchitektur", 1140, 130, 300, 260, "#EAF0FF");
+var logicalGroup = createGroup("Logische Sicherheitsarchitektur", 800, 410, 320, 260, "#E9F7FF");
+var technicalGroup = createGroup("Physische und technische Sicherheitsarchitektur", 1140, 410, 300, 300, "#FFF3E6");
+var controlGroup = createGroup("Control Muster", 20, 510, 760, 200, "#F4F0FF");
+var relationshipGroup = createGroup("Beziehungs-Stereotypen", 20, 730, 1420, 260, "#F6F6F6");
+
+// Motivation und Compliance
+var motivationDefinitions = [
+    {
+        key: "Loss",
+        type: "value",
+        stereotype: "Loss",
+        label: "<<Loss>>\nValue",
+        baseTypeLabel: "Value",
+        documentation: "Verlust als Gegenstueck zu Wert.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ValueChain",
+        type: "value",
+        stereotype: "Value Chain",
+        label: "<<Value Chain>>\nValue",
+        baseTypeLabel: "Value",
+        documentation: "Wertschoepfung und Kostenzerlegung entlang der Kette.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "SABSAAttribute",
+        type: "principle",
+        stereotype: "SABSA Attribute",
+        label: "<<SABSA Attribute>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "SABSA Business Attribute als Zielqualitaet.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "BusinessPolicy",
+        type: "principle",
+        stereotype: "Business Policy",
+        label: "<<Business Policy>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "Normative Vorgabe oder Sicherheitsleitlinie.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "Trust",
+        type: "principle",
+        stereotype: "Trust",
+        label: "<<Trust>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "Explizite Modellierung von Vertrauen.",
+        properties: { Source: "", ReferenceCode: "", Directionality: "Forward" }
+    },
+    {
+        key: "Article",
+        type: "principle",
+        stereotype: "Article",
+        label: "<<Article>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "Gesetzes- oder Regelwerksartikel.",
+        properties: { Namespace: "", ReferenceCode: "" }
+    },
+    {
+        key: "Mandate",
+        type: "principle",
+        stereotype: "Mandate",
+        label: "<<Mandate>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "Normative Vorgabe aus Standard oder Rahmenwerk.",
+        properties: { Namespace: "", ReferenceCode: "" }
+    },
+    {
+        key: "Risk",
+        type: "assessment",
+        stereotype: "Risk",
+        label: "<<Risk>>\nAssessment",
+        baseTypeLabel: "Assessment",
+        documentation: "Bewertetes Risiko.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "Vulnerability",
+        type: "assessment",
+        stereotype: "Vulnerability",
+        label: "<<Vulnerability>>\nAssessment",
+        baseTypeLabel: "Assessment",
+        documentation: "Bewertete Schwachstelle.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ControlObjective",
+        type: "goal",
+        stereotype: "Control Objective",
+        label: "<<Control Objective>>\nGoal",
+        baseTypeLabel: "Goal",
+        documentation: "Zu erreichendes Sicherheits- oder Kontrollziel.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ComplianceObjective",
+        type: "goal",
+        stereotype: "Compliance Objective",
+        label: "<<Compliance Objective>>\nGoal",
+        baseTypeLabel: "Goal",
+        documentation: "Regulatorisch motiviertes Ziel.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ControlMeasure",
+        type: "requirement",
+        stereotype: "Control Measure",
+        label: "<<Control Measure>>\nRequirement",
+        baseTypeLabel: "Requirement",
+        documentation: "Anforderung an eine Schutzmassnahme.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "Exception",
+        type: "requirement",
+        stereotype: "Exception",
+        label: "<<Exception>>\nRequirement",
+        baseTypeLabel: "Requirement",
+        documentation: "Begruendete Ausnahme von einer Forderung.",
+        properties: { Source: "", ReferenceCode: "" }
+    }
+];
+
+var motivationObjects = createGrid(motivationGroup, motivationDefinitions, 15, 40, 4, 170, 68, 10, 10, "#FFFDFD");
+
+// Kontext
+var contextualDefinitions = [
+    {
+        key: "ThreatAgent",
+        type: "business-actor",
+        stereotype: "Threat Agent",
+        label: "<<Threat Agent>>\nBusiness Actor",
+        baseTypeLabel: "Business Actor",
+        documentation: "Bedrohungsakteur.",
+        properties: { Type: "Human" }
+    },
+    {
+        key: "ThreatEvent",
+        type: "business-event",
+        stereotype: "Threat Event",
+        label: "<<Threat Event>>\nBusiness Event",
+        baseTypeLabel: "Business Event",
+        documentation: "Bedrohungsereignis.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "LossEvent",
+        type: "business-event",
+        stereotype: "Loss Event",
+        label: "<<Loss Event>>\nBusiness Event",
+        baseTypeLabel: "Business Event",
+        documentation: "Materialisiertes Verlustereignis.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "SecurityDomain",
+        type: "grouping",
+        stereotype: "SecurityDomain",
+        label: "<<SecurityDomain>>\nGrouping",
+        baseTypeLabel: "Grouping",
+        documentation: "Explizite Sicherheitsdomaene.",
+        properties: { IsSecurityDomain: "True" }
+    },
+    {
+        key: "SecurityLocation",
+        type: "location",
+        stereotype: "",
+        label: "Location\nIsSecurityDomain = True",
+        baseTypeLabel: "Location",
+        documentation: "Bestehende Location als Sicherheitsdomaene markiert.",
+        properties: { IsSecurityDomain: "True" }
+    }
+];
+
+var contextualObjects = createGrid(contextualGroup, contextualDefinitions, 15, 40, 2, 135, 68, 10, 10, "#FFFFFF");
+
+// Konzeptuell
+var conceptualDefinitions = [
+    {
+        key: "Principal",
+        type: "business-actor",
+        stereotype: "Principal",
+        label: "<<Principal>>\nBusiness Actor",
+        baseTypeLabel: "Business Actor",
+        documentation: "Konzeptionelle Entitaet, die ein Konto halten kann.",
+        properties: { IdentityAssurance: "" }
+    },
+    {
+        key: "Authorisation",
+        type: "business-role",
+        stereotype: "Authorisation",
+        label: "<<Authorisation>>\nBusiness Role",
+        baseTypeLabel: "Business Role",
+        documentation: "Konzeptionelle Berechtigungszuordnung.",
+        properties: { RecertificationPeriod: "", Owner: "" }
+    },
+    {
+        key: "Credential",
+        type: "business-object",
+        stereotype: "Credential",
+        label: "<<Credential>>\nBusiness Object",
+        baseTypeLabel: "Business Object",
+        documentation: "Konzeptioneller Identitaetsnachweis.",
+        properties: { Type: "", AuthenticationAssurance: "", ValidityPeriod: "" }
+    },
+    {
+        key: "BusinessSecurityEvent",
+        type: "business-event",
+        stereotype: "SecurityEvent",
+        label: "<<SecurityEvent>>\nBusiness Event",
+        baseTypeLabel: "Business Event",
+        documentation: "Sicherheitsrelevantes Ereignis in der Business-Schicht.",
+        properties: { Security: "True", Criticality: "" }
+    }
+];
+
+var conceptualObjects = createGrid(conceptualGroup, conceptualDefinitions, 15, 40, 2, 130, 68, 10, 10, "#FFFFFF");
+
+// Logisch
+var logicalDefinitions = [
+    {
+        key: "SecurityConfiguration",
+        type: "data-object",
+        stereotype: "Security Configuration",
+        label: "<<Security Configuration>>\nData Object",
+        baseTypeLabel: "Data Object",
+        documentation: "Abweichung von der Baseline-Konfiguration.",
+        properties: { ExampleSetting: "Enabled" }
+    },
+    {
+        key: "Malware",
+        type: "application-component",
+        stereotype: "Malware",
+        label: "<<Malware>>\nApplication Component",
+        baseTypeLabel: "Application Component",
+        documentation: "Nicht-menschlicher Bedrohungsakteur oder Schadsoftware.",
+        properties: { Type: "Trojan" }
+    },
+    {
+        key: "ApplicationSecurityEvent",
+        type: "application-event",
+        stereotype: "SecurityEvent",
+        label: "<<SecurityEvent>>\nApplication Event",
+        baseTypeLabel: "Application Event",
+        documentation: "Sicherheitsrelevantes Ereignis in der Application-Schicht.",
+        properties: { Security: "True", Criticality: "" }
+    }
+];
+
+var logicalObjects = createGrid(logicalGroup, logicalDefinitions, 15, 40, 1, 270, 68, 10, 10, "#FFFFFF");
+
+// Technisch
+var technicalDefinitions = [
+    {
+        key: "Executable",
+        type: "artifact",
+        stereotype: "Executable",
+        label: "<<Executable>>\nArtefact",
+        baseTypeLabel: "Artefact",
+        documentation: "Ausfuehrbares technisches Artefakt.",
+        properties: { Type: "File" }
+    },
+    {
+        key: "Data",
+        type: "artifact",
+        stereotype: "Data",
+        label: "<<Data>>\nArtefact",
+        baseTypeLabel: "Artefact",
+        documentation: "Technisches Datenartefakt.",
+        properties: { Type: "DatabaseTable" }
+    },
+    {
+        key: "Defect",
+        type: "assessment",
+        stereotype: "Defect",
+        label: "<<Defect>>\nAssessment",
+        baseTypeLabel: "Assessment",
+        documentation: "Konkreter Befund mit externer Referenz.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "HSM",
+        type: "node",
+        stereotype: "HSM",
+        label: "<<HSM>>\nNode",
+        baseTypeLabel: "Node",
+        documentation: "Technischer Sicherheitsknoten mit Spezialzweck.",
+        properties: {}
+    },
+    {
+        key: "VPNGateway",
+        type: "node",
+        stereotype: "VPN Gateway",
+        label: "<<VPN Gateway>>\nNode",
+        baseTypeLabel: "Node",
+        documentation: "Technischer Sicherheitsknoten fuer abgesicherten Zugriff.",
+        properties: {}
+    },
+    {
+        key: "TechnologySecurityEvent",
+        type: "technology-event",
+        stereotype: "SecurityEvent",
+        label: "<<SecurityEvent>>\nTechnology Event",
+        baseTypeLabel: "Technology Event",
+        documentation: "Sicherheitsrelevantes Ereignis in der Technology-Schicht.",
+        properties: { Security: "True", Criticality: "" }
+    }
+];
+
+var technicalObjects = createGrid(technicalGroup, technicalDefinitions, 15, 40, 2, 125, 68, 10, 10, "#FFFFFF");
+
+// Control Muster
+createNote(
+    controlGroup,
+    "Control ist polymorph.\nEs erweitert keinen einzelnen Basistyp, sondern mehrere passende Basistypen.",
+    15, 35, 230, 70, "#FFF8D9"
+);
+
+var controlDefinitions = [
+    {
+        key: "ControlPrinciple",
+        type: "principle",
+        stereotype: "Control",
+        label: "<<Control>>\nPrinciple",
+        baseTypeLabel: "Principle",
+        documentation: "Control als Policy-Klausel oder Leitprinzip.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ControlProcess",
+        type: "business-process",
+        stereotype: "Control",
+        label: "<<Control>>\nBusiness Process",
+        baseTypeLabel: "Business Process",
+        documentation: "Control als Prozessschritt.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ControlService",
+        type: "application-service",
+        stereotype: "Control",
+        label: "<<Control>>\nApplication Service",
+        baseTypeLabel: "Application Service",
+        documentation: "Control als logischer Sicherheitsdienst.",
+        properties: { Source: "", ReferenceCode: "" }
+    },
+    {
+        key: "ControlNode",
+        type: "node",
+        stereotype: "Control",
+        label: "<<Control>>\nNode",
+        baseTypeLabel: "Node",
+        documentation: "Control als physisches oder technisches Schutzartefakt.",
+        properties: { Source: "", ReferenceCode: "" }
+    }
+];
+
+var controlObjects = createGrid(controlGroup, controlDefinitions, 270, 35, 4, 110, 70, 10, 10, "#FFFFFF");
+
+// Beziehungs-Stereotypen
+createNote(
+    relationshipGroup,
+    "Relationen werden hier als Metamodel-Objekte und Beispielverknuepfungen dargestellt.\n" +
+    "Die Spezialisierungen selbst werden im Modell angelegt.",
+    15, 20, 360, 70, "#F0F8FF"
+);
+
+// Basiselemente fuer Beziehungsbeispiele
+var baseBusinessActor = createElement(
+    "business-actor",
+    "",
+    "Business Actor",
+    "Business Actor",
+    "Basiselement fuer Ableitungsbeispiel.",
+    {}
+);
+var baseBusinessRole = createElement(
+    "business-role",
+    "",
+    "Business Role",
+    "Business Role",
+    "Basiselement fuer Berechtigungsbeispiel.",
+    {}
+);
+var baseApplicationComponent = createElement(
+    "application-component",
+    "",
+    "Application Component",
+    "Application Component",
+    "Basiselement fuer logisches Ziel.",
+    {}
+);
+var baseGoal = createElement(
+    "goal",
+    "",
+    "Goal",
+    "Goal",
+    "Basiselement fuer Verantwortungsbeispiel.",
+    {}
+);
+
+var relationVisualBusinessActor = addElementToGroup(relationshipGroup, baseBusinessActor, 20, 115, 150, 70, "#FFFFFF");
+var relationVisualPrincipal = addElementToGroup(relationshipGroup, conceptualObjects.Principal.element, 220, 115, 170, 70, "#FFFFFF");
+var relationVisualBusinessRole = addElementToGroup(relationshipGroup, baseBusinessRole, 20, 225, 150, 70, "#FFFFFF");
+var relationVisualAuthorisation = addElementToGroup(relationshipGroup, conceptualObjects.Authorisation.element, 220, 225, 170, 70, "#FFFFFF");
+var relationVisualApplicationComponent = addElementToGroup(relationshipGroup, baseApplicationComponent, 440, 225, 190, 70, "#FFFFFF");
+var relationVisualThreatEvent = addElementToGroup(relationshipGroup, contextualObjects.ThreatEvent.element, 700, 115, 170, 70, "#FFFFFF");
+var relationVisualVulnerability = addElementToGroup(relationshipGroup, motivationObjects.Vulnerability.element, 920, 115, 190, 70, "#FFFFFF");
+var relationVisualRisk = addElementToGroup(relationshipGroup, motivationObjects.Risk.element, 700, 225, 170, 70, "#FFFFFF");
+var relationVisualLossEvent = addElementToGroup(relationshipGroup, contextualObjects.LossEvent.element, 920, 225, 190, 70, "#FFFFFF");
+var relationVisualActorForRaci = addElementToGroup(relationshipGroup, baseBusinessActor, 1180, 115, 150, 70, "#FFFFFF");
+var relationVisualControlObjective = addElementToGroup(relationshipGroup, motivationObjects.ControlObjective.element, 1180, 225, 220, 70, "#FFFFFF");
+
+// Beispielrelationen
+var conceptualisationRelation = createAssociation(
+    "<<Conceptualisation>>",
+    "Conceptualisation",
+    baseBusinessActor,
+    conceptualObjects.Principal.element,
+    {},
+    true
+);
+view.add(conceptualisationRelation, relationVisualBusinessActor, relationVisualPrincipal);
+
+var secondConceptualisationRelation = createAssociation(
+    "<<Conceptualisation>>",
+    "Conceptualisation",
+    baseBusinessRole,
+    conceptualObjects.Authorisation.element,
+    {},
+    true
+);
+view.add(secondConceptualisationRelation, relationVisualBusinessRole, relationVisualAuthorisation);
+
+var realisationRelation = createAssociation(
+    "<<Realisation>>",
+    "Realisation",
+    conceptualObjects.Authorisation.element,
+    baseApplicationComponent,
+    {},
+    true
+);
+view.add(realisationRelation, relationVisualAuthorisation, relationVisualApplicationComponent);
+
+var exploitsRelation = createAssociation(
+    "<<exploits>>",
+    "exploits",
+    contextualObjects.ThreatEvent.element,
+    motivationObjects.Vulnerability.element,
+    {},
+    true
+);
+view.add(exploitsRelation, relationVisualThreatEvent, relationVisualVulnerability);
+
+var materialisesRelation = createAssociation(
+    "<<materialises>>",
+    "materialises",
+    motivationObjects.Risk.element,
+    contextualObjects.LossEvent.element,
+    {},
+    true
+);
+view.add(materialisesRelation, relationVisualRisk, relationVisualLossEvent);
+
+var raciRelation = createAssociation(
+    "<<RACI>>",
+    "RACI",
+    baseBusinessActor,
+    motivationObjects.ControlObjective.element,
+    { ResponsibilityType: "Accountable" },
+    true
+);
+view.add(raciRelation, relationVisualActorForRaci, relationVisualControlObjective);
+
+// trusts als Note, weil die konkrete Flow-Verankerung je nach Modellierungskontext unterschiedlich ausfaellt
+createNote(
+    relationshipGroup,
+    "<<trusts>>\nFlow Relationship\nDirectionality wird ueber das Trust-Element und den Kontext konkretisiert.",
+    440, 20, 320, 70, "#FFFFFF"
+);
+
+// Zusatzerlaeuterung SecurityEvent und SecurityDomain
+createNote(
+    contextualGroup,
+    "Hinweis:\n<<SecurityDomain>> ist ein Stereotyp von Grouping.\nLocation kann alternativ ueber IsSecurityDomain = True markiert werden.",
+    15, 180, 280, 60, "#FFF8D9"
+);
+
+createNote(
+    conceptualGroup,
+    "Hinweis:\n<<SecurityEvent>> kann aus Business Event,\nApplication Event, Technology Event oder Implementation Event gebildet werden.",
+    15, 180, 260, 60, "#FFF8D9"
+);
+
+createNote(
+    logicalGroup,
+    "Hinweis:\n<<Security Configuration>> verwendet ein offenes Schema.\nWerte werden typischerweise zwischen Enabled und Disabled getoggelt.",
+    15, 150, 270, 70, "#FFF8D9"
+);
+
+createNote(
+    technicalGroup,
+    "Hinweis:\n<<Defect>> ist eine Spezialisierung von <<Vulnerability>>.\n<<Executable>> und <<Data>> sind Stereotypen von Artefact.",
+    15, 195, 260, 70, "#FFF8D9"
+);
+
+// Meta-Properties-Hinweis
+createNote(
+    relationshipGroup,
+    "Empfohlene globale PascalCase-Properties:\n" +
+    "Stereotype, BaseType, Source, ReferenceCode, Namespace, Directionality,\n" +
+    "IsSecurityDomain, IdentityAssurance, AuthenticationAssurance,\n" +
+    "ValidityPeriod, RecertificationPeriod, Owner, Type, Criticality, Security",
+    700, 20, 700, 70, "#FFF8D9"
+);
+
+console.log("Fertig: View '" + viewName + "' wurde erzeugt.");
+console.log("Hinweis: Das Modell wurde nicht automatisch gespeichert.");

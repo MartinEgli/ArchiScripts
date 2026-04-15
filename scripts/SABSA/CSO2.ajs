@@ -1,0 +1,453 @@
+﻿/*
+===============================================================================
+Security Overlay Builder - Minimal Stable Version
+===============================================================================
+
+Creates:
+- one Overview view
+- one Overlay Type Model view
+- one Overlay Template Library view
+
+Conceptual split:
+- Overlay Type Model = types, no specialization
+- Overlay Template Library = templates, with specialization
+
+Naming:
+- Types use the label concept: «Overlay Type» + Name
+- Templates use the label concept: «Specialization» + Name
+
+Important:
+- Specializations are model-wide in Archi
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+/* ============================================================================
+ * Constants
+ * ========================================================================== */
+
+var CONST = {
+    ScriptName: "Security Overlay Builder",
+    Namespace: "SecurityOverlay",
+    Kind: {
+        OverlayType: "OverlayType",
+        Template: "Template"
+    },
+    Property: {
+        Namespace: "Namespace",
+        Kind: "Kind",
+        BaseType: "BaseType",
+        Category: "Category",
+        TypeName: "TypeName",
+        Stereotype: "Stereotype"
+    },
+    View: {
+        Overview: "Overview",
+        OverlayTypeModel: "Overlay Type Model",
+        OverlayTemplateLibrary: "Overlay Template Library"
+    },
+    Layout: {
+        Margin: 20,
+        HeaderX: 20,
+        HeaderY: 20,
+        HeaderWidth: 900,
+        HeaderHeight: 90,
+        GroupX: 20,
+        GroupY: 130,
+        GroupWidth: 1450,
+        GroupHeight: 900,
+        CardWidth: 240,
+        CardHeight: 90,
+        CardGapX: 20,
+        CardGapY: 20,
+        CardStartX: 20,
+        CardStartY: 30,
+        OverviewCardWidth: 620,
+        OverviewCardHeight: 100,
+        OverviewGapX: 700,
+        OverviewGapY: 170
+    },
+    Color: {
+        Header: "#EEF5FF",
+        Group: "#F9F9F9",
+        TypeGroup: "#EAF0FF",
+        TemplateGroup: "#F8F5EA",
+        Element: "#FFFFFF",
+        Line: "#666666",
+        Font: "#000000"
+    }
+};
+
+/* ============================================================================
+ * Definitions
+ * ========================================================================== */
+
+var OVERLAY_TYPES = [
+    { category: "Motivation And Compliance", name: "Loss", baseType: "Value", conceptTypes: ["value"], description: "Loss as the counterpart to value." },
+    { category: "Motivation And Compliance", name: "Value Chain", baseType: "Value", conceptTypes: ["value"], description: "Value chain decomposition." },
+    { category: "Motivation And Compliance", name: "SABSA Attribute", baseType: "Principle", conceptTypes: ["principle"], description: "SABSA business attribute." },
+    { category: "Motivation And Compliance", name: "Business Policy", baseType: "Principle", conceptTypes: ["principle"], description: "Business policy principle." },
+    { category: "Motivation And Compliance", name: "Trust", baseType: "Principle", conceptTypes: ["principle"], description: "Explicit trust statement." },
+    { category: "Motivation And Compliance", name: "Article", baseType: "Principle", conceptTypes: ["principle"], description: "Article from a law or regulation." },
+    { category: "Motivation And Compliance", name: "Mandate", baseType: "Principle", conceptTypes: ["principle"], description: "Mandate from a standard or framework." },
+    { category: "Motivation And Compliance", name: "Risk", baseType: "Assessment", conceptTypes: ["assessment"], description: "Evaluated risk." },
+    { category: "Motivation And Compliance", name: "Vulnerability", baseType: "Assessment", conceptTypes: ["assessment"], description: "Evaluated vulnerability." },
+    { category: "Motivation And Compliance", name: "Control Objective", baseType: "Goal", conceptTypes: ["goal"], description: "Security control objective." },
+    { category: "Motivation And Compliance", name: "Compliance Objective", baseType: "Goal", conceptTypes: ["goal"], description: "Compliance objective." },
+    { category: "Motivation And Compliance", name: "Control Measure", baseType: "Requirement", conceptTypes: ["requirement"], description: "Required control measure." },
+    { category: "Motivation And Compliance", name: "Exception", baseType: "Requirement", conceptTypes: ["requirement"], description: "Approved exception." },
+
+    { category: "Context And Domains", name: "Threat Agent", baseType: "Business Actor", conceptTypes: ["business-actor"], description: "Threat actor." },
+    { category: "Context And Domains", name: "Threat Event", baseType: "Business Event", conceptTypes: ["business-event"], description: "Threat event." },
+    { category: "Context And Domains", name: "Loss Event", baseType: "Business Event", conceptTypes: ["business-event"], description: "Loss event." },
+    { category: "Context And Domains", name: "SecurityDomain", baseType: "Grouping", conceptTypes: ["grouping"], description: "Explicit security domain." },
+
+    { category: "Conceptual Security Architecture", name: "Principal", baseType: "Business Actor", conceptTypes: ["business-actor"], description: "Conceptual principal." },
+    { category: "Conceptual Security Architecture", name: "Authorisation", baseType: "Business Role", conceptTypes: ["business-role"], description: "Conceptual authorisation." },
+    { category: "Conceptual Security Architecture", name: "Credential", baseType: "Business Object", conceptTypes: ["business-object"], description: "Conceptual credential." },
+    { category: "Conceptual Security Architecture", name: "SecurityEvent", baseType: "Business Event | Application Event | Technology Event", conceptTypes: ["business-event", "application-event", "technology-event"], description: "Security-relevant event across layers." },
+
+    { category: "Logical Security Architecture", name: "Security Configuration", baseType: "Data Object", conceptTypes: ["data-object"], description: "Security configuration profile or setting." },
+    { category: "Logical Security Architecture", name: "Malware", baseType: "Application Component", conceptTypes: ["application-component"], description: "Malicious software component." },
+
+    { category: "Technical And Physical Security Architecture", name: "Executable", baseType: "Artefact", conceptTypes: ["artifact"], description: "Executable artefact." },
+    { category: "Technical And Physical Security Architecture", name: "Data", baseType: "Artefact", conceptTypes: ["artifact"], description: "Technical data artefact." },
+    { category: "Technical And Physical Security Architecture", name: "Defect", baseType: "Assessment", conceptTypes: ["assessment"], description: "Concrete defect or finding." },
+    { category: "Technical And Physical Security Architecture", name: "HSM", baseType: "Node", conceptTypes: ["node"], description: "Hardware security module." },
+    { category: "Technical And Physical Security Architecture", name: "VPN Gateway", baseType: "Node", conceptTypes: ["node"], description: "Virtual private network gateway." },
+
+    { category: "Control Polymorphism", name: "Control", baseType: "Principle | Business Process | Application Service | Node", conceptTypes: ["principle", "business-process", "application-service", "node"], description: "Polymorphic control concept." }
+];
+
+/* ============================================================================
+ * Logging
+ * ========================================================================== */
+
+function logInfo(message) {
+    console.log("[INFO] " + message);
+}
+
+function logWarn(message) {
+    console.log("[WARNING] " + message);
+}
+
+function logError(message) {
+    console.log("[ERROR] " + message);
+}
+
+/* ============================================================================
+ * Utilities
+ * ========================================================================== */
+
+function ensureModelAvailable() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+}
+
+function pad(value) {
+    return value < 10 ? "0" + value : "" + value;
+}
+
+function timestamp() {
+    var now = new Date();
+    return now.getFullYear()
+        + "-" + pad(now.getMonth() + 1)
+        + "-" + pad(now.getDate())
+        + " "
+        + pad(now.getHours())
+        + "-" + pad(now.getMinutes())
+        + "-" + pad(now.getSeconds());
+}
+
+function setProperties(concept, properties) {
+    for (var key in properties) {
+        if (properties.hasOwnProperty(key)) {
+            concept.prop(key, String(properties[key]));
+        }
+    }
+}
+
+function styleVisual(visual, fillColor) {
+    if (fillColor) visual.fillColor = fillColor;
+    visual.lineColor = CONST.Color.Line;
+    visual.fontColor = CONST.Color.Font;
+}
+
+function createView(name, documentation) {
+    logInfo("Creating view: " + name);
+    var view = model.createArchimateView(name);
+    view.documentation = documentation || "";
+    return view;
+}
+
+function addNote(container, text, x, y, width, height, fillColor) {
+    var note = container.createObject("note", x, y, width, height);
+    note.text = text;
+    styleVisual(note, fillColor || CONST.Color.Header);
+    return note;
+}
+
+function addGroup(view, name, x, y, width, height, fillColor) {
+    var group = view.createObject("group", x, y, width, height);
+    group.name = name;
+    styleVisual(group, fillColor || CONST.Color.Group);
+    return group;
+}
+
+function addConcept(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor || CONST.Color.Element);
+    return visual;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        logWarn("Could not apply label expression: " + expression);
+    }
+}
+
+function tryCreateSpecialization(name, conceptType) {
+    try {
+        model.createSpecialization(name, conceptType);
+        logInfo("Created specialization: " + name + " for type " + conceptType);
+    } catch (error) {
+        logWarn("Skipped specialization " + name + " for type " + conceptType + ". It may already exist.");
+    }
+}
+
+function ensureSpecializations() {
+    OVERLAY_TYPES.forEach(function (definition) {
+        definition.conceptTypes.forEach(function (conceptType) {
+            tryCreateSpecialization(definition.name, conceptType);
+        });
+    });
+}
+
+function distinctCategories() {
+    var seen = {};
+    var categories = [];
+
+    OVERLAY_TYPES.forEach(function (definition) {
+        if (!seen[definition.category]) {
+            seen[definition.category] = true;
+            categories.push(definition.category);
+        }
+    });
+
+    return categories;
+}
+
+function definitionsByCategory(category) {
+    return OVERLAY_TYPES.filter(function (definition) {
+        return definition.category === category;
+    });
+}
+
+/* ============================================================================
+ * Model Creation
+ * ========================================================================== */
+
+function createTypeCard(definition) {
+    var concept = model.createElement("grouping", definition.name);
+    concept.documentation = definition.description;
+
+    setProperties(concept, {
+        Namespace: CONST.Namespace,
+        Kind: CONST.Kind.OverlayType,
+        BaseType: definition.baseType,
+        Category: definition.category,
+        TypeName: definition.name
+    });
+
+    return concept;
+}
+
+function createTemplateCard(definition, conceptType) {
+    var concept = model.createElement(conceptType, definition.name);
+    concept.specialization = definition.name;
+    concept.documentation = definition.description;
+
+    setProperties(concept, {
+        Namespace: CONST.Namespace,
+        Kind: CONST.Kind.Template,
+        BaseType: definition.baseType,
+        Category: definition.category,
+        TypeName: definition.name,
+        Stereotype: "«" + definition.name + "»"
+    });
+
+    return concept;
+}
+
+function buildOverview(viewNamePrefix) {
+    var view = createView(viewNamePrefix + CONST.View.Overview, "Overview for the Security Overlay structure.");
+
+    addNote(
+        view,
+        "Security Overlay Overview\n" +
+        "This script creates an Overlay Type Model and an Overlay Template Library.\n" +
+        "Important note: specializations remain model-wide in the same model.",
+        CONST.Layout.HeaderX,
+        CONST.Layout.HeaderY,
+        CONST.Layout.HeaderWidth,
+        CONST.Layout.HeaderHeight,
+        CONST.Color.Header
+    );
+
+    var group = addGroup(
+        view,
+        "Created Views",
+        CONST.Layout.GroupX,
+        CONST.Layout.GroupY,
+        CONST.Layout.GroupWidth,
+        CONST.Layout.GroupHeight,
+        CONST.Color.Group
+    );
+
+    var items = [
+        CONST.View.OverlayTypeModel,
+        CONST.View.OverlayTemplateLibrary
+    ];
+
+    items.forEach(function (name, index) {
+        var row = Math.floor(index / 2);
+        var col = index % 2;
+        var x = CONST.Layout.CardStartX + (col * CONST.Layout.OverviewGapX);
+        var y = CONST.Layout.CardStartY + (row * CONST.Layout.OverviewGapY);
+
+        addNote(
+            group,
+            name,
+            x,
+            y,
+            CONST.Layout.OverviewCardWidth,
+            CONST.Layout.OverviewCardHeight,
+            CONST.Color.Element
+        );
+    });
+
+    return view;
+}
+
+function buildOverlayTypeModel(viewNamePrefix) {
+    var view = createView(viewNamePrefix + CONST.View.OverlayTypeModel, "Overlay type model. Types are not specialized.");
+
+    addNote(
+        view,
+        "Overlay Type Model\nType elements are not specialized.\nDisplay intent: «Overlay Type» plus type name.",
+        CONST.Layout.HeaderX,
+        CONST.Layout.HeaderY,
+        CONST.Layout.HeaderWidth,
+        CONST.Layout.HeaderHeight,
+        CONST.Color.Header
+    );
+
+    var categories = distinctCategories();
+
+    categories.forEach(function (category, categoryIndex) {
+        var groupY = CONST.Layout.GroupY + (categoryIndex * (CONST.Layout.GroupHeight + CONST.Layout.Margin));
+        var group = addGroup(
+            view,
+            category,
+            CONST.Layout.GroupX,
+            groupY,
+            CONST.Layout.GroupWidth,
+            CONST.Layout.GroupHeight,
+            CONST.Color.TypeGroup
+        );
+
+        var definitions = definitionsByCategory(category);
+
+        definitions.forEach(function (definition, index) {
+            var row = Math.floor(index / 4);
+            var col = index % 4;
+            var x = CONST.Layout.CardStartX + (col * (CONST.Layout.CardWidth + CONST.Layout.CardGapX));
+            var y = CONST.Layout.CardStartY + (row * (CONST.Layout.CardHeight + CONST.Layout.CardGapY));
+
+            var concept = createTypeCard(definition);
+            var visual = addConcept(group, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, CONST.Color.Element);
+            tryApplyLabelExpression(visual, "«Overlay Type»\n${name}");
+        });
+    });
+
+    return view;
+}
+
+function buildOverlayTemplateLibrary(viewNamePrefix) {
+    var view = createView(viewNamePrefix + CONST.View.OverlayTemplateLibrary, "Overlay template library. Templates are specialized.");
+
+    addNote(
+        view,
+        "Overlay Template Library\nTemplate elements are specialized.\nDisplay intent: «Specialization» plus name.",
+        CONST.Layout.HeaderX,
+        CONST.Layout.HeaderY,
+        CONST.Layout.HeaderWidth,
+        CONST.Layout.HeaderHeight,
+        CONST.Color.Header
+    );
+
+    var categories = distinctCategories();
+
+    categories.forEach(function (category, categoryIndex) {
+        var groupY = CONST.Layout.GroupY + (categoryIndex * (CONST.Layout.GroupHeight + CONST.Layout.Margin));
+        var group = addGroup(
+            view,
+            category,
+            CONST.Layout.GroupX,
+            groupY,
+            CONST.Layout.GroupWidth,
+            CONST.Layout.GroupHeight,
+            CONST.Color.TemplateGroup
+        );
+
+        var definitions = definitionsByCategory(category);
+        var visualIndex = 0;
+
+        definitions.forEach(function (definition) {
+            definition.conceptTypes.forEach(function (conceptType) {
+                var row = Math.floor(visualIndex / 4);
+                var col = visualIndex % 4;
+                var x = CONST.Layout.CardStartX + (col * (CONST.Layout.CardWidth + CONST.Layout.CardGapX));
+                var y = CONST.Layout.CardStartY + (row * (CONST.Layout.CardHeight + CONST.Layout.CardGapY));
+
+                var concept = createTemplateCard(definition, conceptType);
+                var visual = addConcept(group, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, CONST.Color.Element);
+                tryApplyLabelExpression(visual, "«${specialization}»\n${name}");
+
+                visualIndex++;
+            });
+        });
+    });
+
+    return view;
+}
+
+/* ============================================================================
+ * Main
+ * ========================================================================== */
+
+try {
+    ensureModelAvailable();
+
+    logInfo("Starting " + CONST.ScriptName + ".");
+    logInfo("Target model: " + model.name);
+
+    var viewNamePrefix = CONST.ScriptName + " " + timestamp() + " - ";
+
+    ensureSpecializations();
+    buildOverview(viewNamePrefix);
+    buildOverlayTypeModel(viewNamePrefix);
+    buildOverlayTemplateLibrary(viewNamePrefix);
+
+    logInfo("Finished " + CONST.ScriptName + " successfully.");
+
+} catch (error) {
+    var message = "The script failed.\n\n" + (error && error.message ? error.message : String(error));
+    logError(message);
+    throw error;
+}

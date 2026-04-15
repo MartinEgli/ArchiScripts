@@ -1,0 +1,177 @@
+/*
+===============================================================================
+Dump Security Overlay Template Cache
+===============================================================================
+
+Standalone helper script for Archi.
+
+Important:
+- A separate script file cannot access the in-memory TemplateCache variable from
+  another running script instance.
+- Therefore this script reads the persisted template index from the model
+  property 'SecurityOverlayTemplateIndexJson' and outputs it in a readable form.
+- Functionally this shows you the effective cache source used by the apply script.
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+var CONST = {
+    ScriptName: "Dump Security Overlay Template Cache",
+    Property: {
+        TemplateIndexJson: "SecurityOverlayTemplateIndexJson"
+    },
+    Dialog: {
+        Title: "Dump Security Overlay Template Cache",
+        ErrorTitle: "Dump Security Overlay Template Cache - Error"
+    }
+};
+
+function logInfo(message) {
+    console.log("[INFO] " + message);
+}
+
+function logWarn(message) {
+    console.log("[WARNING] " + message);
+}
+
+function logError(message) {
+    console.log("[ERROR] " + message);
+}
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        } else if (level === "WARNING") {
+            iconType = JOptionPane.WARNING_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+function ensureModelAvailable() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+}
+
+function readTemplateIndex() {
+    var json = model.prop(CONST.Property.TemplateIndexJson);
+
+    if (!json || String(json).trim() === "") {
+        throw new Error(
+            "Model property '" + CONST.Property.TemplateIndexJson + "' is empty. " +
+            "Please run the Build Security Overlay Library script first."
+        );
+    }
+
+    var entries = JSON.parse(String(json));
+
+    if (!entries || !entries.length) {
+        throw new Error("The template index does not contain any entries.");
+    }
+
+    return entries;
+}
+
+function dumpTemplateIndex(entries) {
+    console.log("==================================================");
+    console.log("Security Overlay Template Cache Dump");
+    console.log("==================================================");
+    console.log("Model: " + model.name);
+    console.log("Property: " + CONST.Property.TemplateIndexJson);
+    console.log("Total Entries: " + entries.length);
+    console.log("");
+
+    for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+
+        console.log("[" + (i + 1) + "]");
+        console.log("  Namespace: " + valueOrEmpty(entry.Namespace));
+        console.log("  Kind: " + valueOrEmpty(entry.Kind));
+        console.log("  TypeName: " + valueOrEmpty(entry.TypeName));
+        console.log("  BaseType: " + valueOrEmpty(entry.BaseType));
+        console.log("  Category: " + valueOrEmpty(entry.Category));
+        console.log("  ConceptType: " + valueOrEmpty(entry.ConceptType));
+        console.log("  DefaultLabelExpression: " + valueOrEmpty(entry.DefaultLabelExpression));
+
+        if (entry.DefaultProperties && hasOwnProperties(entry.DefaultProperties)) {
+            console.log("  DefaultProperties:");
+            for (var key in entry.DefaultProperties) {
+                if (entry.DefaultProperties.hasOwnProperty(key)) {
+                    console.log("    - " + key + ": " + entry.DefaultProperties[key]);
+                }
+            }
+        } else {
+            console.log("  DefaultProperties: none");
+        }
+
+        console.log("");
+    }
+
+    console.log("==================================================");
+}
+
+function buildSummary(entries) {
+    var lines = [];
+    lines.push("Template Cache Summary");
+    lines.push("");
+    lines.push("Model: " + model.name);
+    lines.push("Entries: " + entries.length);
+    lines.push("");
+
+    for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+        lines.push(
+            (i + 1) + ". " +
+            valueOrEmpty(entry.TypeName) + " | " +
+            valueOrEmpty(entry.ConceptType) + " | " +
+            valueOrEmpty(entry.BaseType)
+        );
+    }
+
+    return lines.join("\n");
+}
+
+function hasOwnProperties(object) {
+    for (var key in object) {
+        if (object.hasOwnProperty(key)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function valueOrEmpty(value) {
+    return value === undefined || value === null ? "" : String(value);
+}
+
+try {
+    ensureModelAvailable();
+    logInfo("Starting " + CONST.ScriptName + ".");
+
+    var entries = readTemplateIndex();
+    dumpTemplateIndex(entries);
+
+    showMessage(
+        CONST.Dialog.Title,
+        buildSummary(entries),
+        "INFO"
+    );
+
+    logInfo("Finished " + CONST.ScriptName + ".");
+
+} catch (error) {
+    var message = "The script failed.\n\n" + (error && error.message ? error.message : String(error));
+    logError(message);
+    showMessage(CONST.Dialog.ErrorTitle, message, "ERROR");
+    throw error;
+}

@@ -1,0 +1,64 @@
+﻿/*
+ * jArchi Script
+ * Ergänzt dem aktuell ausgewählten Element Properties.
+ *
+ * Regel pro Property:
+ * - fehlt -> anlegen
+ * - vorhanden, aber leer -> füllen
+ * - vorhanden und nicht leer -> unverändert lassen
+ *
+ * Zielprofil hier: Value-Basisprofilelement
+ */
+
+var selected = $(selection).first();
+
+if (!selected) {
+    console.log("Kein Element ausgewählt.");
+    exit();
+}
+
+function isBlank(value) {
+    return value === null || value === undefined || String(value).trim() === "";
+}
+
+function ensureProperty(element, propertyName, propertyValue) {
+    var currentValue = element.prop(propertyName);
+
+    // Property fehlt
+    if (currentValue === null || currentValue === undefined) {
+        element.prop(propertyName, propertyValue);
+        console.log("ANGELEGT: " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    // Property existiert, aber ist leer
+    if (isBlank(currentValue)) {
+        element.prop(propertyName, propertyValue);
+        console.log("GEFÜLLT: " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    // Property existiert und hat schon Inhalt
+    console.log("ÜBERSPRUNGEN: " + propertyName + " = " + currentValue);
+}
+
+// Standardwerte für dein Value-Basisprofilelement
+var propertiesToEnsure = [
+    { name: "Id",                  value: "SABSA-VAL-PROFILE-BASE-001" },
+    { name: "IsAbstract",          value: "true" },
+    { name: "ModelLevel",          value: "Profile" },
+    { name: "ProfileRole",         value: "Base" },
+    { name: "StereotypeOf",        value: "ArchiMate:Value" },
+    { name: "ProfileNamespace",    value: "SABSA.SecurityOverlay.Motivation" },
+    { name: "Description",         value: "Base profile definition for Value" },
+    { name: "Allowed.ValueType",    value: "FINANCIAL|REGULATORY|REPUTATION" },
+    { name: "Allowed.Rating",       value: "VLOW|LOW|MEDIUM|HIGH|VHIGH" },
+    { name: "Allowed.ValuationType", value: "Point|Range|Qualitative" }
+];
+
+// Jedes Property einzeln prüfen
+for (var i = 0; i < propertiesToEnsure.length; i++) {
+    ensureProperty(selected, propertiesToEnsure[i].name, propertiesToEnsure[i].value);
+}
+
+console.log("Fertig für Element: " + selected.name);

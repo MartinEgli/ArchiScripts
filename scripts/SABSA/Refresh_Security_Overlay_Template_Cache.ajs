@@ -1,0 +1,179 @@
+/*
+===============================================================================
+Refresh Security Overlay Template Cache (No UI)
+===============================================================================
+
+Important:
+- A separate script run cannot refresh the in-memory cache of another script run.
+- This script therefore reloads the persisted template index from the model property,
+  validates it, rebuilds a local cache for this run, and outputs the result.
+- Use this as a cache/index validation and local reload script.
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+/* ============================================================================
+ * Constants
+ * ========================================================================== */
+
+var CONST = {
+    ScriptName: "Refresh Security Overlay Template Cache (No UI)",
+    Property: {
+        TemplateIndexJson: "SecurityOverlayTemplateIndexJson"
+    },
+    Dialog: {
+        Title: "Refresh Security Overlay Template Cache",
+        ErrorTitle: "Refresh Security Overlay Template Cache - Error"
+    }
+};
+
+/* ============================================================================
+ * Runtime Cache
+ * ========================================================================== */
+
+var TemplateCache = {
+    IsLoaded: false,
+    LastRefresh: null,
+    All: [],
+    ByConceptType: {},
+    ByTypeName: {}
+};
+
+/* ============================================================================
+ * Logging and Messages
+ * ========================================================================== */
+
+function logInfo(message) {
+    console.log("[INFO] " + message);
+}
+
+function logWarn(message) {
+    console.log("[WARNING] " + message);
+}
+
+function logError(message) {
+    console.log("[ERROR] " + message);
+}
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        } else if (level === "WARNING") {
+            iconType = JOptionPane.WARNING_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+/* ============================================================================
+ * Helpers
+ * ========================================================================== */
+
+function ensureModelAvailable() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+}
+
+function resetTemplateCache() {
+    TemplateCache = {
+        IsLoaded: false,
+        LastRefresh: null,
+        All: [],
+        ByConceptType: {},
+        ByTypeName: {}
+    };
+}
+
+function rebuildTemplateCache() {
+    logInfo("Rebuilding template cache from persisted model property.");
+    resetTemplateCache();
+
+    var json = model.prop(CONST.Property.TemplateIndexJson);
+
+    if (!json || String(json).trim() === "") {
+        throw new Error(
+            "Model property '" + CONST.Property.TemplateIndexJson + "' is empty. " +
+            "Please run the Build Security Overlay Library script first."
+        );
+    }
+
+    var entries = JSON.parse(String(json));
+
+    if (!entries || !entries.length) {
+        throw new Error("The template index does not contain any entries.");
+    }
+
+    entries.forEach(function (entry) {
+        TemplateCache.All.push(entry);
+
+        if (!TemplateCache.ByConceptType[entry.ConceptType]) {
+            TemplateCache.ByConceptType[entry.ConceptType] = [];
+        }
+        TemplateCache.ByConceptType[entry.ConceptType].push(entry);
+
+        TemplateCache.ByTypeName[entry.TypeName + "|" + entry.ConceptType] = entry;
+    });
+
+    TemplateCache.IsLoaded = true;
+    TemplateCache.LastRefresh = new Date();
+
+    logInfo("Template cache loaded. Entries: " + TemplateCache.All.length);
+}
+
+function printSummary() {
+    var conceptTypes = [];
+    for (var conceptType in TemplateCache.ByConceptType) {
+        if (TemplateCache.ByConceptType.hasOwnProperty(conceptType)) {
+            conceptTypes.push(conceptType + " (" + TemplateCache.ByConceptType[conceptType].length + ")");
+        }
+    }
+
+    console.log("==================================================");
+    console.log("Template Cache Refresh Summary");
+    console.log("==================================================");
+    console.log("IsLoaded: " + TemplateCache.IsLoaded);
+    console.log("LastRefresh: " + TemplateCache.LastRefresh);
+    console.log("Entries: " + TemplateCache.All.length);
+    console.log("ConceptTypes: " + conceptTypes.join(", "));
+    console.log("==================================================");
+
+    showMessage(
+        CONST.Dialog.Title,
+        "Template cache reloaded locally from model property.\n\n" +
+        "Entries: " + TemplateCache.All.length + "\n" +
+        "Concept types: " + conceptTypes.length + "\n\n" +
+        "Hinweis: Dieser Lauf kann keinen In-Memory-Cache eines anderen Skriptlaufs aktualisieren.",
+        "INFO"
+    );
+}
+
+/* ============================================================================
+ * Main
+ * ========================================================================== */
+
+try {
+    ensureModelAvailable();
+
+    logInfo("Starting " + CONST.ScriptName + ".");
+
+    rebuildTemplateCache();
+    printSummary();
+
+    logInfo("Finished " + CONST.ScriptName + ".");
+
+} catch (error) {
+    var message = "The script failed.\n\n" + (error && error.message ? error.message : String(error));
+    logError(message);
+    showMessage(CONST.Dialog.ErrorTitle, message, "ERROR");
+    throw error;
+}

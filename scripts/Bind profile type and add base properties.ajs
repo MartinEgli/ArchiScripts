@@ -1,0 +1,164 @@
+﻿/*
+ * jArchi Script - Step 1
+ * Bind exactly one profile type to one or more target elements
+ * and add the base properties to the targets.
+ *
+ * Selection:
+ * - exactly 1 profile type (ModelLevel = Profile)
+ * - 1..n target elements
+ */
+
+var BINDING_RELATION_TYPE = "association-relationship";
+var BINDING_RELATION_NAME = "ProfileBinding";
+
+var BASE_PROPERTY_MAPPINGS = [
+    { target: "Namespace", source: "Namespace" },
+    { target: "ProfileType", source: "ProfileType" },
+    { target: "Stereotype", source: "Stereotype" },
+    { target: "StereotypeOf", source: "StereotypeOf" },
+    { target: "SchemaVersion", source: "SchemaVersion" }
+];
+
+function isBlank(value) {
+    return value === null || value === undefined || String(value).trim() === "";
+}
+
+function toConcept(obj) {
+    if (!obj) {
+        return null;
+    }
+
+    return obj.concept ? obj.concept : obj;
+}
+
+function getSelectedConcepts() {
+    var concepts = [];
+    var seen = {};
+
+    $(selection).each(function(obj) {
+        var concept = toConcept(obj);
+
+        if (!concept || !concept.id) {
+            return;
+        }
+
+        if (!seen[concept.id]) {
+            seen[concept.id] = true;
+            concepts.push(concept);
+        }
+    });
+
+    return concepts;
+}
+
+function isProfileType(element) {
+    return element && element.prop("ModelLevel") === "Profile";
+}
+
+function ensureProperty(element, propertyName, propertyValue) {
+    var currentValue = element.prop(propertyName);
+
+    if (currentValue === null || currentValue === undefined) {
+        element.prop(propertyName, propertyValue);
+        console.log("CREATED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    if (isBlank(currentValue)) {
+        element.prop(propertyName, propertyValue);
+        console.log("FILLED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    console.log("SKIPPED: " + element.name + " -> " + propertyName + " = " + currentValue);
+}
+
+function findExistingBinding(profileType, target) {
+    var found = null;
+
+    $(target).inRels().each(function(rel) {
+        if (rel.type === BINDING_RELATION_TYPE &&
+            rel.name === BINDING_RELATION_NAME &&
+            rel.source &&
+            rel.source.id === profileType.id) {
+            found = rel;
+        }
+    });
+
+    return found;
+}
+
+function bindProfileToTarget(profileType, target) {
+    var existingBinding = findExistingBinding(profileType, target);
+
+    if (!existingBinding) {
+        model.createRelationship(
+            BINDING_RELATION_TYPE,
+            BINDING_RELATION_NAME,
+            profileType,
+            target
+        );
+        console.log("BINDING CREATED: " + profileType.name + " -> " + target.name);
+    } else {
+        console.log("BINDING ALREADY EXISTS: " + profileType.name + " -> " + target.name);
+    }
+
+    for (var i = 0; i < BASE_PROPERTY_MAPPINGS.length; i++) {
+        var mapping = BASE_PROPERTY_MAPPINGS[i];
+        var value = profileType.prop(mapping.source);
+
+        if (!isBlank(value)) {
+            ensureProperty(target, mapping.target, value);
+        }
+    }
+}
+
+var selectedConcepts = getSelectedConcepts();
+
+console.log("Selected unique concepts: " + selectedConcepts.length);
+for (var i = 0; i < selectedConcepts.length; i++) {
+    console.log(
+        "- " + selectedConcepts[i].name +
+        " | type=" + selectedConcepts[i].type +
+        " | ModelLevel=" + selectedConcepts[i].prop("ModelLevel")
+    );
+}
+
+if (selectedConcepts.length < 2) {
+    console.log("ERROR: Select exactly one profile type and at least one target element.");
+    exit();
+}
+
+var profileTypes = [];
+var targets = [];
+
+for (var j = 0; j < selectedConcepts.length; j++) {
+    var concept = selectedConcepts[j];
+
+    if (isProfileType(concept)) {
+        profileTypes.push(concept);
+    } else {
+        targets.push(concept);
+    }
+}
+
+console.log("Detected profile types: " + profileTypes.length);
+console.log("Detected targets: " + targets.length);
+
+if (profileTypes.length !== 1) {
+    console.log("ERROR: Exactly one profile type with ModelLevel = Profile must be selected.");
+    exit();
+}
+
+if (targets.length === 0) {
+    console.log("ERROR: No target element was selected.");
+    exit();
+}
+
+var profileType = profileTypes[0];
+
+for (var t = 0; t < targets.length; t++) {
+    bindProfileToTarget(profileType, targets[t]);
+}
+
+console.log("Step 1 completed.");

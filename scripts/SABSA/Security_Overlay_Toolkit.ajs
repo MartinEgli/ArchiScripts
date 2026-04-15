@@ -1,0 +1,653 @@
+/*
+===============================================================================
+Security Overlay Toolkit
+===============================================================================
+
+Zentraler Einstiegspunkt fuer die Security Overlay Generator (SOG) Funktionen.
+
+Enthaelt:
+- Build Security Overlay Library
+- Apply Stereotype From Template
+- Dump Template Cache
+- Refresh Template Cache Summary
+
+Hinweis:
+- Dieses Skript buendelt die wichtigsten Funktionen der bisherigen Einzelskripte.
+- Die bestehenden Skripte bleiben erhalten, aber dieses Toolkit soll kuenftig der
+  bevorzugte Einstiegspunkt fuer die taegliche Nutzung sein.
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+var SOG = (function () {
+    var CONST = {
+        ScriptName: "Security Overlay Toolkit",
+        Namespace: "SecurityOverlay",
+        Kind: {
+            OverlayType: "OverlayType",
+            RelationshipType: "RelationshipType",
+            Template: "Template",
+            TypedElement: "TypedElement"
+        },
+        Property: {
+            Namespace: "Namespace",
+            Kind: "Kind",
+            BaseType: "BaseType",
+            Category: "Category",
+            TypeName: "TypeName",
+            ConceptType: "ConceptType",
+            Stereotype: "Stereotype",
+            DefaultLabelExpression: "DefaultLabelExpression",
+            TemplateIndexJson: "SecurityOverlayTemplateIndexJson",
+            RelationshipIndexJson: "SecurityOverlayRelationshipIndexJson"
+        },
+        LabelExpression: {
+            OverlayType: "«Overlay Type»\n${name}",
+            Template: "«${specialization}»\n${name}",
+            TemplateLibrary: "«${specialization}»\n${name}\n${property:BaseType}",
+            Fallback: "«${specialization}»\n${name}"
+        },
+        View: {
+            Overview: "Overview",
+            OverlayTypeModel: "Overlay Type Model",
+            OverlayTemplateLibrary: "Overlay Template Library"
+        },
+        Layout: {
+            Margin: 20,
+            HeaderX: 20,
+            HeaderY: 20,
+            HeaderWidth: 980,
+            HeaderHeight: 90,
+            GroupX: 20,
+            GroupY: 130,
+            GroupWidth: 1450,
+            GroupInnerX: 20,
+            GroupInnerY: 30,
+            CardWidth: 250,
+            CardHeight: 90,
+            CardGapX: 20,
+            CardGapY: 20,
+            GroupColumns: 4,
+            OverviewCardWidth: 620,
+            OverviewCardHeight: 100,
+            OverviewGapX: 700,
+            OverviewGapY: 170
+        },
+        Color: {
+            Header: "#EEF5FF",
+            Group: "#F9F9F9",
+            TypeGroup: "#EAF0FF",
+            TemplateGroup: "#F8F5EA",
+            Element: "#FFFFFF",
+            Line: "#666666",
+            Font: "#000000"
+        },
+        Dialog: {
+            Title: "Security Overlay Toolkit",
+            ErrorTitle: "Security Overlay Toolkit - Error"
+        }
+    };
+
+    var OVERLAY_ELEMENT_TYPES = [
+        { category: "Motivation And Compliance", name: "Loss", baseType: "Value", conceptTypes: ["value"], description: "Loss as the counterpart to value.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Value Chain", baseType: "Value", conceptTypes: ["value"], description: "Value chain decomposition.", defaults: {} },
+        { category: "Motivation And Compliance", name: "SABSA Attribute", baseType: "Principle", conceptTypes: ["principle"], description: "SABSA business attribute.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Business Policy", baseType: "Principle", conceptTypes: ["principle"], description: "Business policy principle.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Trust", baseType: "Principle", conceptTypes: ["principle"], description: "Explicit trust statement.", defaults: { Directionality: "Forward" } },
+        { category: "Motivation And Compliance", name: "Article", baseType: "Principle", conceptTypes: ["principle"], description: "Article from a law or regulation.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Mandate", baseType: "Principle", conceptTypes: ["principle"], description: "Mandate from a standard or framework.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Risk", baseType: "Assessment", conceptTypes: ["assessment"], description: "Evaluated risk.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Vulnerability", baseType: "Assessment", conceptTypes: ["assessment"], description: "Evaluated vulnerability.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Control Objective", baseType: "Goal", conceptTypes: ["goal"], description: "Security control objective.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Compliance Objective", baseType: "Goal", conceptTypes: ["goal"], description: "Compliance objective.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Control Measure", baseType: "Requirement", conceptTypes: ["requirement"], description: "Required control measure.", defaults: {} },
+        { category: "Motivation And Compliance", name: "Exception", baseType: "Requirement", conceptTypes: ["requirement"], description: "Approved exception.", defaults: {} },
+        { category: "Context And Domains", name: "Threat Agent", baseType: "Business Actor", conceptTypes: ["business-actor"], description: "Threat actor.", defaults: { Type: "Human" } },
+        { category: "Context And Domains", name: "Threat Event", baseType: "Business Event", conceptTypes: ["business-event"], description: "Threat event.", defaults: {} },
+        { category: "Context And Domains", name: "Loss Event", baseType: "Business Event", conceptTypes: ["business-event"], description: "Loss event.", defaults: {} },
+        { category: "Context And Domains", name: "SecurityDomain", baseType: "Grouping", conceptTypes: ["grouping"], description: "Explicit security domain.", defaults: { IsSecurityDomain: "True" } },
+        { category: "Conceptual Security Architecture", name: "Principal", baseType: "Business Actor", conceptTypes: ["business-actor"], description: "Conceptual principal.", defaults: { IdentityAssurance: "" } },
+        { category: "Conceptual Security Architecture", name: "Authorisation", baseType: "Business Role", conceptTypes: ["business-role"], description: "Conceptual authorisation.", defaults: { RecertificationPeriod: "", Owner: "" } },
+        { category: "Conceptual Security Architecture", name: "Credential", baseType: "Business Object", conceptTypes: ["business-object"], description: "Conceptual credential.", defaults: { AuthenticationAssurance: "", ValidityPeriod: "" } },
+        { category: "Conceptual Security Architecture", name: "SecurityEvent", baseType: "Business Event | Application Event | Technology Event", conceptTypes: ["business-event", "application-event", "technology-event"], description: "Security-relevant event across layers.", defaults: { Security: "True", Criticality: "" } },
+        { category: "Logical Security Architecture", name: "Security Configuration", baseType: "Data Object", conceptTypes: ["data-object"], description: "Security configuration profile or setting.", defaults: { ExampleSetting: "Enabled" } },
+        { category: "Logical Security Architecture", name: "Malware", baseType: "Application Component", conceptTypes: ["application-component"], description: "Malicious software component.", defaults: { Type: "Trojan" } },
+        { category: "Technical And Physical Security Architecture", name: "Executable", baseType: "Artefact", conceptTypes: ["artifact"], description: "Executable artefact.", defaults: { Type: "File" } },
+        { category: "Technical And Physical Security Architecture", name: "Data", baseType: "Artefact", conceptTypes: ["artifact"], description: "Technical data artefact.", defaults: { Type: "DatabaseTable" } },
+        { category: "Technical And Physical Security Architecture", name: "Defect", baseType: "Assessment", conceptTypes: ["assessment"], description: "Concrete defect or finding.", defaults: {} },
+        { category: "Technical And Physical Security Architecture", name: "HSM", baseType: "Node", conceptTypes: ["node"], description: "Hardware security module.", defaults: {} },
+        { category: "Technical And Physical Security Architecture", name: "VPN Gateway", baseType: "Node", conceptTypes: ["node"], description: "Virtual private network gateway.", defaults: {} },
+        { category: "Control Polymorphism", name: "Control", baseType: "Principle | Business Process | Application Service | Node", conceptTypes: ["principle", "business-process", "application-service", "node"], description: "Polymorphic control concept.", defaults: {} }
+    ];
+
+    var OVERLAY_RELATIONSHIP_TYPES = [
+        { category: "Relationship Types", name: "Conceptualisation", baseType: "Association Relationship", conceptTypes: ["association-relationship"], description: "From a business concept to a conceptual security concept." },
+        { category: "Relationship Types", name: "Realisation", baseType: "Association Relationship", conceptTypes: ["association-relationship"], description: "From a conceptual concept to a logical or technical concept." },
+        { category: "Relationship Types", name: "RACI", baseType: "Association Relationship", conceptTypes: ["association-relationship"], description: "Responsibility assignment relationship." },
+        { category: "Relationship Types", name: "exploits", baseType: "Association Relationship", conceptTypes: ["association-relationship"], description: "Threat or actor exploits a vulnerability." },
+        { category: "Relationship Types", name: "materialises", baseType: "Association Relationship", conceptTypes: ["association-relationship"], description: "Loss event materialises risk." },
+        { category: "Relationship Types", name: "trusts", baseType: "Flow Relationship", conceptTypes: ["flow-relationship"], description: "Trust flow between parties." }
+    ];
+
+    var TemplateCache = {
+        IsLoaded: false,
+        LastRefresh: null,
+        All: [],
+        ByConceptType: {},
+        ByTypeName: {}
+    };
+
+    function log(level, message) { console.log("[" + level + "] " + message); }
+    function logInfo(message) { log("INFO", message); }
+    function logWarn(message) { log("WARNING", message); }
+
+    function showMessage(title, message, level) {
+        try {
+            var JOptionPane = Java.type("javax.swing.JOptionPane");
+            var iconType = JOptionPane.INFORMATION_MESSAGE;
+            if (level === "ERROR") { iconType = JOptionPane.ERROR_MESSAGE; }
+            else if (level === "WARNING") { iconType = JOptionPane.WARNING_MESSAGE; }
+            JOptionPane.showMessageDialog(null, message, title, iconType);
+        } catch (error) {
+            console.log("[" + title + "] " + message);
+        }
+    }
+
+    function chooseFromList(title, message, values) {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var options = Java.to(values, "java.lang.Object[]");
+        var result = JOptionPane.showInputDialog(null, message, title, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        return result === null ? null : String(result);
+    }
+
+    function ensureModelAvailable() {
+        if (!model) { throw new Error("No active model is open."); }
+    }
+
+    function pad(value) { return value < 10 ? "0" + value : "" + value; }
+
+    function timestamp() {
+        var now = new Date();
+        return now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + "-" + pad(now.getMinutes()) + "-" + pad(now.getSeconds());
+    }
+
+    function setProperties(concept, properties) {
+        for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                concept.prop(key, String(properties[key]));
+            }
+        }
+    }
+
+    function styleVisual(visual, fillColor) {
+        if (fillColor) { visual.fillColor = fillColor; }
+        visual.lineColor = CONST.Color.Line;
+        visual.fontColor = CONST.Color.Font;
+    }
+
+    function tryApplyLabelExpression(visual, expression) {
+        try { visual.labelExpression = expression; }
+        catch (error) { logWarn("Could not apply label expression: " + expression); }
+    }
+
+    function createView(name, documentation) {
+        var view = model.createArchimateView(name);
+        view.documentation = documentation || "";
+        return view;
+    }
+
+    function addNote(container, text, x, y, width, height, fillColor) {
+        var note = container.createObject("note", x, y, width, height);
+        note.text = text;
+        styleVisual(note, fillColor);
+        return note;
+    }
+
+    function addGroup(view, name, x, y, width, height, fillColor) {
+        var group = view.createObject("group", x, y, width, height);
+        group.name = name;
+        styleVisual(group, fillColor);
+        return group;
+    }
+
+    function addConcept(container, concept, x, y, width, height, fillColor, labelExpression) {
+        var visual = container.add(concept, x, y, width, height);
+        styleVisual(visual, fillColor);
+        if (labelExpression) { tryApplyLabelExpression(visual, labelExpression); }
+        return visual;
+    }
+
+    function distinctCategories(definitions) {
+        var seen = {};
+        var result = [];
+        definitions.forEach(function (definition) {
+            if (!seen[definition.category]) {
+                seen[definition.category] = true;
+                result.push(definition.category);
+            }
+        });
+        return result;
+    }
+
+    function byCategory(definitions, category) {
+        return definitions.filter(function (definition) { return definition.category === category; });
+    }
+
+    function calculateGroupHeight(itemCount, columns) {
+        var rows = Math.max(1, Math.ceil(itemCount / columns));
+        return CONST.Layout.GroupInnerY + (rows * CONST.Layout.CardHeight) + ((rows - 1) * CONST.Layout.CardGapY) + CONST.Layout.Margin;
+    }
+
+    function calculateGroupY(previousY, previousHeight) {
+        return previousY + previousHeight + CONST.Layout.Margin;
+    }
+
+    function tryCreateSpecialization(name, conceptType) {
+        try {
+            model.createSpecialization(name, conceptType);
+            logInfo("Created specialization: " + name + " for type " + conceptType);
+        } catch (error) {
+            logWarn("Skipped specialization " + name + " for type " + conceptType + ". It may already exist.");
+        }
+    }
+
+    function ensureSpecializations() {
+        OVERLAY_ELEMENT_TYPES.forEach(function (definition) {
+            definition.conceptTypes.forEach(function (conceptType) { tryCreateSpecialization(definition.name, conceptType); });
+        });
+        OVERLAY_RELATIONSHIP_TYPES.forEach(function (definition) {
+            definition.conceptTypes.forEach(function (conceptType) { tryCreateSpecialization(definition.name, conceptType); });
+        });
+    }
+
+    function createTypeCard(definition, kindValue) {
+        var concept = model.createElement("grouping", definition.name);
+        concept.documentation = definition.description;
+        setProperties(concept, {
+            Namespace: CONST.Namespace,
+            Kind: kindValue,
+            BaseType: definition.baseType,
+            Category: definition.category,
+            TypeName: definition.name
+        });
+        return concept;
+    }
+
+    function createTemplateCard(definition, conceptType) {
+        var concept = model.createElement(conceptType, definition.name);
+        concept.specialization = definition.name;
+        concept.documentation = definition.description;
+        var properties = {
+            Namespace: CONST.Namespace,
+            Kind: CONST.Kind.Template,
+            BaseType: definition.baseType,
+            Category: definition.category,
+            TypeName: definition.name,
+            ConceptType: conceptType,
+            Stereotype: "«" + definition.name + "»",
+            DefaultLabelExpression: CONST.LabelExpression.Template
+        };
+        for (var key in definition.defaults) {
+            if (definition.defaults.hasOwnProperty(key)) { properties[key] = definition.defaults[key]; }
+        }
+        setProperties(concept, properties);
+        return concept;
+    }
+
+    function buildTemplateIndex() {
+        var entries = [];
+        OVERLAY_ELEMENT_TYPES.forEach(function (definition) {
+            definition.conceptTypes.forEach(function (conceptType) {
+                entries.push({
+                    Namespace: CONST.Namespace,
+                    Kind: CONST.Kind.Template,
+                    TypeName: definition.name,
+                    BaseType: definition.baseType,
+                    Category: definition.category,
+                    ConceptType: conceptType,
+                    DefaultLabelExpression: CONST.LabelExpression.Template,
+                    DefaultProperties: definition.defaults || {}
+                });
+            });
+        });
+        return entries;
+    }
+
+    function buildRelationshipIndex() {
+        var entries = [];
+        OVERLAY_RELATIONSHIP_TYPES.forEach(function (definition) {
+            definition.conceptTypes.forEach(function (conceptType) {
+                entries.push({
+                    Namespace: CONST.Namespace,
+                    Kind: CONST.Kind.RelationshipType,
+                    TypeName: definition.name,
+                    BaseType: definition.baseType,
+                    Category: definition.category,
+                    ConceptType: conceptType
+                });
+            });
+        });
+        return entries;
+    }
+
+    function persistIndexes() {
+        model.prop(CONST.Property.TemplateIndexJson, JSON.stringify(buildTemplateIndex(), null, 2));
+        model.prop(CONST.Property.RelationshipIndexJson, JSON.stringify(buildRelationshipIndex(), null, 2));
+        logInfo("Persisted template and relationship indexes to model properties.");
+    }
+
+    function resetTemplateCache() {
+        TemplateCache = { IsLoaded: false, LastRefresh: null, All: [], ByConceptType: {}, ByTypeName: {} };
+    }
+
+    function rebuildTemplateCache() {
+        resetTemplateCache();
+        var json = model.prop(CONST.Property.TemplateIndexJson);
+        if (!json || String(json).trim() === "") {
+            throw new Error("Model property '" + CONST.Property.TemplateIndexJson + "' is empty. Please run the Build Library action first.");
+        }
+        var entries = JSON.parse(String(json));
+        if (!entries || !entries.length) { throw new Error("The template index does not contain any entries."); }
+        entries.forEach(function (entry) {
+            TemplateCache.All.push(entry);
+            if (!TemplateCache.ByConceptType[entry.ConceptType]) { TemplateCache.ByConceptType[entry.ConceptType] = []; }
+            TemplateCache.ByConceptType[entry.ConceptType].push(entry);
+            TemplateCache.ByTypeName[entry.TypeName + "|" + entry.ConceptType] = entry;
+        });
+        TemplateCache.IsLoaded = true;
+        TemplateCache.LastRefresh = new Date();
+        logInfo("Template cache loaded. Entries: " + TemplateCache.All.length);
+    }
+
+    function ensureTemplateCache() {
+        if (!TemplateCache.IsLoaded) { rebuildTemplateCache(); }
+    }
+
+    function getSelectedDiagramObject() {
+        if (!selection || selection.length !== 1) { throw new Error("Please select exactly one diagram element."); }
+        var selected = selection[0];
+        if (!selected.concept) { throw new Error("The selected object has no underlying concept."); }
+        return selected;
+    }
+
+    function buildCandidateDisplayValues(candidates) {
+        return candidates.map(function (entry) { return entry.TypeName + " [" + entry.BaseType + "]"; });
+    }
+
+    function findCandidateByDisplayValue(candidates, displayValue) {
+        for (var i = 0; i < candidates.length; i++) {
+            var currentDisplay = candidates[i].TypeName + " [" + candidates[i].BaseType + "]";
+            if (currentDisplay === displayValue) { return candidates[i]; }
+        }
+        return null;
+    }
+
+    function buildOverview(viewPrefix) {
+        var view = createView(viewPrefix + CONST.View.Overview, "Overview for the Security Overlay structure.");
+        addNote(
+            view,
+            "Security Overlay Overview\n" +
+            "This toolkit creates an Overlay Type Model and an Overlay Template Library.\n" +
+            "Important note: specializations remain model-wide in the same model.",
+            CONST.Layout.HeaderX,
+            CONST.Layout.HeaderY,
+            CONST.Layout.HeaderWidth,
+            CONST.Layout.HeaderHeight,
+            CONST.Color.Header
+        );
+
+        var group = addGroup(view, "Created Views", CONST.Layout.GroupX, CONST.Layout.GroupY, CONST.Layout.GroupWidth, 300, CONST.Color.Group);
+
+        [CONST.View.OverlayTypeModel, CONST.View.OverlayTemplateLibrary].forEach(function (name, index) {
+            var row = Math.floor(index / 2);
+            var col = index % 2;
+            var x = CONST.Layout.GroupInnerX + (col * CONST.Layout.OverviewGapX);
+            var y = CONST.Layout.GroupInnerY + (row * CONST.Layout.OverviewGapY);
+            addNote(group, name, x, y, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Color.Element);
+        });
+    }
+
+    function buildOverlayTypeModel(viewPrefix) {
+        var view = createView(viewPrefix + CONST.View.OverlayTypeModel, "Overlay type model. Types are not specialized.");
+        addNote(view, "Overlay Type Model\nType elements are not specialized.\nRelationship types are included here as type cards.", CONST.Layout.HeaderX, CONST.Layout.HeaderY, CONST.Layout.HeaderWidth, CONST.Layout.HeaderHeight, CONST.Color.Header);
+
+        var combined = OVERLAY_ELEMENT_TYPES.concat(OVERLAY_RELATIONSHIP_TYPES);
+        var categories = distinctCategories(combined);
+        var currentY = CONST.Layout.GroupY;
+
+        categories.forEach(function (category) {
+            var definitions = byCategory(combined, category);
+            var groupHeight = calculateGroupHeight(definitions.length, CONST.Layout.GroupColumns);
+            var group = addGroup(view, category, CONST.Layout.GroupX, currentY, CONST.Layout.GroupWidth, groupHeight, CONST.Color.TypeGroup);
+
+            definitions.forEach(function (definition, index) {
+                var row = Math.floor(index / CONST.Layout.GroupColumns);
+                var col = index % CONST.Layout.GroupColumns;
+                var x = CONST.Layout.GroupInnerX + (col * (CONST.Layout.CardWidth + CONST.Layout.CardGapX));
+                var y = CONST.Layout.GroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.CardGapY));
+                var kindValue = category === "Relationship Types" ? CONST.Kind.RelationshipType : CONST.Kind.OverlayType;
+                var concept = createTypeCard(definition, kindValue);
+                addConcept(group, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, CONST.Color.Element, CONST.LabelExpression.OverlayType);
+            });
+
+            currentY = calculateGroupY(currentY, groupHeight);
+        });
+    }
+
+    function buildOverlayTemplateLibrary(viewPrefix) {
+        var view = createView(viewPrefix + CONST.View.OverlayTemplateLibrary, "Overlay template library. Templates are specialized.");
+        addNote(view, "Overlay Template Library\nTemplate elements are specialized and carry the properties used by the apply function.", CONST.Layout.HeaderX, CONST.Layout.HeaderY, CONST.Layout.HeaderWidth, CONST.Layout.HeaderHeight, CONST.Color.Header);
+
+        var categories = distinctCategories(OVERLAY_ELEMENT_TYPES);
+        var currentY = CONST.Layout.GroupY;
+
+        categories.forEach(function (category) {
+            var definitions = byCategory(OVERLAY_ELEMENT_TYPES, category);
+            var templateCount = 0;
+
+            definitions.forEach(function (definition) {
+                templateCount += definition.conceptTypes.length;
+            });
+
+            var groupHeight = calculateGroupHeight(templateCount, CONST.Layout.GroupColumns);
+            var group = addGroup(view, category, CONST.Layout.GroupX, currentY, CONST.Layout.GroupWidth, groupHeight, CONST.Color.TemplateGroup);
+            var visualIndex = 0;
+
+            definitions.forEach(function (definition) {
+                definition.conceptTypes.forEach(function (conceptType) {
+                    var row = Math.floor(visualIndex / CONST.Layout.GroupColumns);
+                    var col = visualIndex % CONST.Layout.GroupColumns;
+                    var x = CONST.Layout.GroupInnerX + (col * (CONST.Layout.CardWidth + CONST.Layout.CardGapX));
+                    var y = CONST.Layout.GroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.CardGapY));
+
+                    var concept = createTemplateCard(definition, conceptType);
+                    addConcept(group, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, CONST.Color.Element, CONST.LabelExpression.TemplateLibrary);
+                    visualIndex++;
+                });
+            });
+
+            currentY = calculateGroupY(currentY, groupHeight);
+        });
+    }
+
+    function buildLibrary() {
+        var viewPrefix = "Security Overlay " + timestamp() + " - ";
+        logInfo("Starting build library action.");
+        ensureSpecializations();
+        buildOverview(viewPrefix);
+        buildOverlayTypeModel(viewPrefix);
+        buildOverlayTemplateLibrary(viewPrefix);
+        persistIndexes();
+        resetTemplateCache();
+
+        showMessage(
+            CONST.Dialog.Title,
+            "Security Overlay library created successfully.\n\n" +
+            "Views created:\n" +
+            "- Overview\n" +
+            "- Overlay Type Model\n" +
+            "- Overlay Template Library\n\n" +
+            "Model properties written:\n" +
+            "- " + CONST.Property.TemplateIndexJson + "\n" +
+            "- " + CONST.Property.RelationshipIndexJson,
+            "INFO"
+        );
+    }
+
+    function applyTemplateToSelection() {
+        ensureTemplateCache();
+
+        var selectedDiagramObject = getSelectedDiagramObject();
+        var selectedConcept = selectedDiagramObject.concept;
+        var selectedConceptType = selectedConcept.type;
+        var candidates = TemplateCache.ByConceptType[selectedConceptType];
+
+        if (!candidates || candidates.length === 0) {
+            throw new Error("No matching templates found for concept type '" + selectedConceptType + "'.");
+        }
+
+        var displayValues = buildCandidateDisplayValues(candidates);
+        var chosenDisplayValue = chooseFromList(CONST.Dialog.Title, "Choose the stereotype template for concept type '" + selectedConceptType + "'.", displayValues);
+
+        if (chosenDisplayValue === null) {
+            logInfo("Template selection cancelled.");
+            return;
+        }
+
+        var chosenTemplate = findCandidateByDisplayValue(candidates, chosenDisplayValue);
+        if (!chosenTemplate) {
+            throw new Error("The chosen template could not be resolved.");
+        }
+
+        selectedConcept.specialization = chosenTemplate.TypeName;
+        setProperties(selectedConcept, {
+            Namespace: chosenTemplate.Namespace,
+            Kind: CONST.Kind.TypedElement,
+            BaseType: chosenTemplate.BaseType,
+            Category: chosenTemplate.Category,
+            TypeName: chosenTemplate.TypeName,
+            ConceptType: chosenTemplate.ConceptType,
+            Stereotype: "«" + chosenTemplate.TypeName + "»",
+            DefaultLabelExpression: chosenTemplate.DefaultLabelExpression || CONST.LabelExpression.Fallback
+        });
+
+        if (chosenTemplate.DefaultProperties) {
+            setProperties(selectedConcept, chosenTemplate.DefaultProperties);
+        }
+
+        tryApplyLabelExpression(selectedDiagramObject, chosenTemplate.DefaultLabelExpression || CONST.LabelExpression.Fallback);
+
+        showMessage(
+            CONST.Dialog.Title,
+            "Template applied successfully.\n\n" +
+            "Element name: " + selectedConcept.name + "\n" +
+            "Stereotype: «" + chosenTemplate.TypeName + "»\n" +
+            "ConceptType: " + chosenTemplate.ConceptType,
+            "INFO"
+        );
+    }
+
+    function dumpTemplateCache() {
+        ensureTemplateCache();
+
+        console.log("==================================================");
+        console.log("Security Overlay Template Cache Dump");
+        console.log("==================================================");
+        console.log("Model: " + model.name);
+        console.log("Property: " + CONST.Property.TemplateIndexJson);
+        console.log("Total Entries: " + TemplateCache.All.length);
+        console.log("");
+
+        TemplateCache.All.forEach(function (entry, index) {
+            console.log("[" + (index + 1) + "]");
+            console.log("  Namespace: " + entry.Namespace);
+            console.log("  Kind: " + entry.Kind);
+            console.log("  TypeName: " + entry.TypeName);
+            console.log("  BaseType: " + entry.BaseType);
+            console.log("  Category: " + entry.Category);
+            console.log("  ConceptType: " + entry.ConceptType);
+            console.log("  DefaultLabelExpression: " + (entry.DefaultLabelExpression || ""));
+            console.log("");
+        });
+
+        showMessage(CONST.Dialog.Title, "Template cache dumped to console.\nEntries: " + TemplateCache.All.length, "INFO");
+    }
+
+    function refreshTemplateCacheSummary() {
+        rebuildTemplateCache();
+
+        var conceptTypes = [];
+        for (var conceptType in TemplateCache.ByConceptType) {
+            if (TemplateCache.ByConceptType.hasOwnProperty(conceptType)) {
+                conceptTypes.push(conceptType + " (" + TemplateCache.ByConceptType[conceptType].length + ")");
+            }
+        }
+
+        showMessage(
+            CONST.Dialog.Title,
+            "Template cache reloaded locally from model property.\n\n" +
+            "Entries: " + TemplateCache.All.length + "\n" +
+            "Concept types: " + conceptTypes.length + "\n\n" +
+            conceptTypes.join("\n"),
+            "INFO"
+        );
+    }
+
+    function chooseAction() {
+        return chooseFromList(
+            CONST.Dialog.Title,
+            "Choose the Security Overlay action.",
+            [
+                "Build Library",
+                "Apply Template To Selected Element",
+                "Dump Template Cache",
+                "Refresh Template Cache Summary"
+            ]
+        );
+    }
+
+    function run() {
+        ensureModelAvailable();
+        logInfo("Starting " + CONST.ScriptName + ".");
+
+        var action = chooseAction();
+        if (action === null) {
+            logInfo("Action selection cancelled.");
+            return;
+        }
+
+        if (action === "Build Library") {
+            buildLibrary();
+        } else if (action === "Apply Template To Selected Element") {
+            applyTemplateToSelection();
+        } else if (action === "Dump Template Cache") {
+            dumpTemplateCache();
+        } else if (action === "Refresh Template Cache Summary") {
+            refreshTemplateCacheSummary();
+        } else {
+            throw new Error("Unsupported action: " + action);
+        }
+
+        logInfo("Finished " + CONST.ScriptName + ".");
+    }
+
+    return {
+        run: run
+    };
+})();
+
+try {
+    SOG.run();
+} catch (error) {
+    var message = "The toolkit failed.\n\n" + (error && error.message ? error.message : String(error));
+    console.log("[ERROR] " + message);
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        JOptionPane.showMessageDialog(null, message, "Security Overlay Toolkit - Error", JOptionPane.ERROR_MESSAGE);
+    } catch (dialogError) {
+        console.log("[Security Overlay Toolkit - Error] " + message);
+    }
+    throw error;
+}

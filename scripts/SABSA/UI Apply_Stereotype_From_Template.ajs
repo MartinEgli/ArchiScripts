@@ -1,0 +1,365 @@
+/*
+===============================================================================
+Apply Stereotype From Template
+===============================================================================
+
+Works on exactly one selected diagram object with an underlying concept.
+
+Flow:
+- load template index from model property into an in-memory cache
+- optionally refresh the cache
+- detect selected concept type
+- show only matching templates
+- apply specialization, properties, and label expression
+
+Important:
+- This script applies element templates only
+- Relationship types remain part of the Overlay Type Model for now
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+/* ============================================================================
+ * Constants
+ * ========================================================================== */
+
+var CONST = {
+    ScriptName: "Apply Stereotype From Template",
+    Namespace: "SecurityOverlay",
+    Kind: {
+        Template: "Template",
+        TypedElement: "TypedElement"
+    },
+    Property: {
+        Namespace: "Namespace",
+        Kind: "Kind",
+        BaseType: "BaseType",
+        Category: "Category",
+        TypeName: "TypeName",
+        ConceptType: "ConceptType",
+        Stereotype: "Stereotype",
+        DefaultLabelExpression: "DefaultLabelExpression",
+        TemplateIndexJson: "SecurityOverlayTemplateIndexJson"
+    },
+    LabelExpression: {
+        Fallback: "«${specialization}»\n${name}"
+    },
+    Dialog: {
+        Title: "Apply Stereotype From Template",
+        RefreshTitle: "Refresh Template Cache",
+        ErrorTitle: "Apply Stereotype From Template - Error"
+    },
+    Action: {
+        Apply: "Apply Template To Selected Element",
+        Refresh: "Refresh Template Cache",
+        Cancel: "Cancel"
+    }
+};
+
+/* ============================================================================
+ * Runtime Cache
+ * ========================================================================== */
+
+var TemplateCache = {
+    IsLoaded: false,
+    LastRefresh: null,
+    All: [],
+    ByConceptType: {},
+    ByTypeName: {}
+};
+
+/* ============================================================================
+ * Logging and Messages
+ * ========================================================================== */
+
+function logInfo(message) {
+    console.log("[INFO] " + message);
+}
+
+function logWarn(message) {
+    console.log("[WARNING] " + message);
+}
+
+function logError(message) {
+    console.log("[ERROR] " + message);
+}
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        } else if (level === "WARNING") {
+            iconType = JOptionPane.WARNING_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+function chooseFromList(title, message, values) {
+    var JOptionPane = Java.type("javax.swing.JOptionPane");
+    var options = Java.to(values, "java.lang.Object[]");
+
+    var result = JOptionPane.showInputDialog(
+        null,
+        message,
+        title,
+        JOptionPane.QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]
+    );
+
+    if (result === null) {
+        return null;
+    }
+
+    return String(result);
+}
+
+/* ============================================================================
+ * Helpers
+ * ========================================================================== */
+
+function ensureModelAvailable() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+}
+
+function getSelectedDiagramObject() {
+    if (!selection || selection.length !== 1) {
+        throw new Error("Please select exactly one diagram element.");
+    }
+
+    var selected = selection[0];
+
+    if (!selected.concept) {
+        throw new Error("The selected object has no underlying concept. Please select a real element, not only a note or a group.");
+    }
+
+    return selected;
+}
+
+function getSelectedConceptType(diagramObject) {
+    var concept = diagramObject.concept;
+
+    if (!concept || !concept.type) {
+        throw new Error("Could not determine the concept type of the selected element.");
+    }
+
+    return concept.type;
+}
+
+function setProperties(concept, properties) {
+    for (var key in properties) {
+        if (properties.hasOwnProperty(key)) {
+            concept.prop(key, String(properties[key]));
+        }
+    }
+}
+
+function tryApplyLabelExpression(diagramObject, expression) {
+    try {
+        diagramObject.labelExpression = expression;
+    } catch (error) {
+        logWarn("Could not apply label expression: " + expression);
+    }
+}
+
+/* ============================================================================
+ * Cache
+ * ========================================================================== */
+
+function resetTemplateCache() {
+    TemplateCache = {
+        IsLoaded: false,
+        LastRefresh: null,
+        All: [],
+        ByConceptType: {},
+        ByTypeName: {}
+    };
+}
+
+function rebuildTemplateCache() {
+    logInfo("Rebuilding template cache.");
+    resetTemplateCache();
+
+    var json = model.prop(CONST.Property.TemplateIndexJson);
+
+    if (!json || String(json).trim() === "") {
+        throw new Error(
+            "Model property '" + CONST.Property.TemplateIndexJson + "' is empty. " +
+            "Please run the Build Security Overlay Library script first."
+        );
+    }
+
+    var entries = JSON.parse(String(json));
+
+    if (!entries || !entries.length) {
+        throw new Error("The template index does not contain any entries.");
+    }
+
+    entries.forEach(function (entry) {
+        TemplateCache.All.push(entry);
+
+        if (!TemplateCache.ByConceptType[entry.ConceptType]) {
+            TemplateCache.ByConceptType[entry.ConceptType] = [];
+        }
+        TemplateCache.ByConceptType[entry.ConceptType].push(entry);
+
+        TemplateCache.ByTypeName[entry.TypeName + "|" + entry.ConceptType] = entry;
+    });
+
+    TemplateCache.IsLoaded = true;
+    TemplateCache.LastRefresh = new Date();
+
+    logInfo("Template cache loaded. Entries: " + TemplateCache.All.length);
+}
+
+function ensureTemplateCache(forceRefresh) {
+    if (!TemplateCache.IsLoaded || forceRefresh) {
+        rebuildTemplateCache();
+    }
+}
+
+/* ============================================================================
+ * Apply Logic
+ * ========================================================================== */
+
+function chooseAction() {
+    return chooseFromList(
+        CONST.Dialog.Title,
+        "Choose an action.",
+        [CONST.Action.Apply, CONST.Action.Refresh, CONST.Action.Cancel]
+    );
+}
+
+function buildCandidateDisplayValues(candidates) {
+    return candidates.map(function (entry) {
+        return entry.TypeName + " [" + entry.BaseType + "]";
+    });
+}
+
+function findCandidateByDisplayValue(candidates, displayValue) {
+    for (var i = 0; i < candidates.length; i++) {
+        var candidate = candidates[i];
+        var currentDisplay = candidate.TypeName + " [" + candidate.BaseType + "]";
+        if (currentDisplay === displayValue) {
+            return candidate;
+        }
+    }
+    return null;
+}
+
+function applyTemplateToSelectedElement() {
+    var selectedDiagramObject = getSelectedDiagramObject();
+    var selectedConcept = selectedDiagramObject.concept;
+    var selectedConceptType = getSelectedConceptType(selectedDiagramObject);
+
+    logInfo("Selected concept: " + selectedConcept.name + " [" + selectedConceptType + "]");
+
+    var candidates = TemplateCache.ByConceptType[selectedConceptType];
+
+    if (!candidates || candidates.length === 0) {
+        throw new Error(
+            "No matching templates were found for concept type '" + selectedConceptType + "'."
+        );
+    }
+
+    var displayValues = buildCandidateDisplayValues(candidates);
+    var chosenDisplayValue = chooseFromList(
+        CONST.Dialog.Title,
+        "Choose the stereotype template for concept type '" + selectedConceptType + "'.",
+        displayValues
+    );
+
+    if (chosenDisplayValue === null) {
+        logInfo("Template selection cancelled.");
+        return;
+    }
+
+    var chosenTemplate = findCandidateByDisplayValue(candidates, chosenDisplayValue);
+
+    if (!chosenTemplate) {
+        throw new Error("The chosen template could not be resolved.");
+    }
+
+    logInfo("Applying template: " + chosenTemplate.TypeName + " [" + chosenTemplate.ConceptType + "]");
+
+    selectedConcept.specialization = chosenTemplate.TypeName;
+
+    var typedElementProperties = {
+        Namespace: chosenTemplate.Namespace,
+        Kind: CONST.Kind.TypedElement,
+        BaseType: chosenTemplate.BaseType,
+        Category: chosenTemplate.Category,
+        TypeName: chosenTemplate.TypeName,
+        ConceptType: chosenTemplate.ConceptType,
+        Stereotype: "«" + chosenTemplate.TypeName + "»",
+        DefaultLabelExpression: chosenTemplate.DefaultLabelExpression || CONST.LabelExpression.Fallback
+    };
+
+    setProperties(selectedConcept, typedElementProperties);
+
+    if (chosenTemplate.DefaultProperties) {
+        setProperties(selectedConcept, chosenTemplate.DefaultProperties);
+    }
+
+    tryApplyLabelExpression(
+        selectedDiagramObject,
+        chosenTemplate.DefaultLabelExpression || CONST.LabelExpression.Fallback
+    );
+
+    showMessage(
+        CONST.Dialog.Title,
+        "Template applied successfully.\n\n" +
+        "Element name: " + selectedConcept.name + "\n" +
+        "Stereotype: «" + chosenTemplate.TypeName + "»\n" +
+        "ConceptType: " + chosenTemplate.ConceptType,
+        "INFO"
+    );
+}
+
+/* ============================================================================
+ * Main
+ * ========================================================================== */
+
+try {
+    ensureModelAvailable();
+
+    logInfo("Starting " + CONST.ScriptName + ".");
+
+    ensureTemplateCache(false);
+
+    var action = chooseAction();
+
+    if (action === CONST.Action.Cancel || action === null) {
+        logInfo("User cancelled.");
+    } else if (action === CONST.Action.Refresh) {
+        ensureTemplateCache(true);
+        showMessage(
+            CONST.Dialog.RefreshTitle,
+            "Template cache refreshed successfully.\n\n" +
+            "Entries loaded: " + TemplateCache.All.length,
+            "INFO"
+        );
+    } else if (action === CONST.Action.Apply) {
+        applyTemplateToSelectedElement();
+    }
+
+    logInfo("Finished " + CONST.ScriptName + ".");
+
+} catch (error) {
+    var message = "The script failed.\n\n" + (error && error.message ? error.message : String(error));
+    logError(message);
+    showMessage(CONST.Dialog.ErrorTitle, message, "ERROR");
+    throw error;
+}

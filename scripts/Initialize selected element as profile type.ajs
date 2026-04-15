@@ -1,0 +1,123 @@
+﻿/*
+ * jArchi Script - Step 0
+ * Initialize one or more selected elements as profile types.
+ * Existing non-empty values are preserved.
+ */
+
+var PROFILE_ID_PREFIX = "ISABSA-PROFILE-";
+var PROFILE_ID_WIDTH = 3;
+
+var DEFAULT_PROFILE_PROPERTIES = [
+    { name: "IsAbstract", value: "true" },
+    { name: "ModelLevel", value: "Profile" },
+    { name: "Namespace", value: "SABSA.SecurityOverlay.Motivation" },
+    { name: "ProfileType", value: "Undefined" },
+    { name: "SchemaVersion", value: "1.0" },
+    { name: "InstanceMode", value: "AugmentExisting" },
+    { name: "ConceptType", value: "" },
+    { name: "SingletonName", value: "" },
+    { name: "Stereotype", value: "" },
+    { name: "StereotypeOf", value: "" }
+];
+
+function isBlank(value) {
+    return value === null || value === undefined || String(value).trim() === "";
+}
+
+function toConcept(obj) {
+    if (!obj) {
+        return null;
+    }
+    return obj.concept ? obj.concept : obj;
+}
+
+function getSelectedConcepts() {
+    var concepts = [];
+    var seen = {};
+
+    $(selection).each(function(obj) {
+        var concept = toConcept(obj);
+        if (!concept || !concept.id) {
+            return;
+        }
+        if (!seen[concept.id]) {
+            seen[concept.id] = true;
+            concepts.push(concept);
+        }
+    });
+
+    return concepts;
+}
+
+function ensureProperty(element, propertyName, propertyValue) {
+    var currentValue = element.prop(propertyName);
+
+    if (currentValue === null || currentValue === undefined) {
+        element.prop(propertyName, propertyValue);
+        console.log("CREATED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    if (isBlank(currentValue)) {
+        element.prop(propertyName, propertyValue);
+        console.log("FILLED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    console.log("SKIPPED: " + element.name + " -> " + propertyName + " = " + currentValue);
+}
+
+function escapeRegex(text) {
+    return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function padNumber(number, width) {
+    var text = String(number);
+    while (text.length < width) {
+        text = "0" + text;
+    }
+    return text;
+}
+
+function getNextProfileId(prefix, width) {
+    var maxNumber = 0;
+    var pattern = new RegExp("^" + escapeRegex(prefix) + "(\\d{" + width + "})$");
+
+    $("element").each(function(element) {
+        var currentValue = element.prop("Id");
+        if (isBlank(currentValue)) {
+            return;
+        }
+
+        var match = String(currentValue).match(pattern);
+        if (match) {
+            var number = parseInt(match[1], 10);
+            if (number > maxNumber) {
+                maxNumber = number;
+            }
+        }
+    });
+
+    return prefix + padNumber(maxNumber + 1, width);
+}
+
+function initializeProfileType(element) {
+    ensureProperty(element, "Id", getNextProfileId(PROFILE_ID_PREFIX, PROFILE_ID_WIDTH));
+
+    for (var i = 0; i < DEFAULT_PROFILE_PROPERTIES.length; i++) {
+        ensureProperty(element, DEFAULT_PROFILE_PROPERTIES[i].name, DEFAULT_PROFILE_PROPERTIES[i].value);
+    }
+}
+
+var selectedConcepts = getSelectedConcepts();
+
+if (selectedConcepts.length === 0) {
+    console.log("Please select at least one element.");
+    exit();
+}
+
+for (var i = 0; i < selectedConcepts.length; i++) {
+    initializeProfileType(selectedConcepts[i]);
+}
+
+console.log("Step 0 completed.");

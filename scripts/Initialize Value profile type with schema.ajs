@@ -1,0 +1,170 @@
+﻿/*
+ * jArchi Script
+ * Initialize exactly one selected element as a Value profile type
+ * including schema and default properties.
+ *
+ * Existing non-empty values are preserved.
+ */
+
+var PROFILE_ID_PREFIX = "ISABSA-VAL-PROFILE-";
+var PROFILE_ID_WIDTH = 3;
+
+var VALUE_PROFILE_PROPERTIES = [
+    { name: "IsAbstract", value: "true" },
+    { name: "ModelLevel", value: "Profile" },
+    { name: "Namespace", value: "SABSA.SecurityOverlay.Motivation" },
+    { name: "ProfileType", value: "Value" },
+    { name: "SchemaVersion", value: "1.0" },
+    { name: "InstanceMode", value: "AugmentExisting" },
+    { name: "ConceptType", value: "value" },
+    { name: "SingletonName", value: "" },
+    { name: "Stereotype", value: "" },
+    { name: "StereotypeOf", value: "Value" },
+
+    { name: "Schema__Id__Presence", value: "Required" },
+    { name: "Schema__Id__DataType", value: "String" },
+    { name: "Schema__Id__Generator", value: "NextNumber" },
+    { name: "Schema__Id__Scope", value: "Instance" },
+
+    { name: "Schema__ValueType__Presence", value: "Required" },
+    { name: "Schema__ValueType__DataType", value: "Enum" },
+    { name: "Schema__ValueType__Allowed", value: "Financial|Regulatory|Reputation" },
+    { name: "Schema__ValueType__Scope", value: "Instance" },
+
+    { name: "Schema__ValuationType__Presence", value: "Required" },
+    { name: "Schema__ValuationType__DataType", value: "Enum" },
+    { name: "Schema__ValuationType__Allowed", value: "Point|Range|Qualitative" },
+    { name: "Schema__ValuationType__Scope", value: "Instance" },
+
+    { name: "Schema__CurrencyUnits__Presence", value: "Optional" },
+    { name: "Schema__CurrencyUnits__DataType", value: "Number" },
+    { name: "Schema__CurrencyUnits__Scope", value: "Instance" },
+
+    { name: "Schema__CurrencyCode__Presence", value: "Optional" },
+    { name: "Schema__CurrencyCode__DataType", value: "String" },
+    { name: "Schema__CurrencyCode__Pattern", value: "^[A-Z]{3}$" },
+    { name: "Schema__CurrencyCode__Scope", value: "Instance" },
+
+    { name: "Schema__Rating__Presence", value: "Optional" },
+    { name: "Schema__Rating__DataType", value: "Enum" },
+    { name: "Schema__Rating__Allowed", value: "VeryLow|Low|Medium|High|VeryHigh" },
+    { name: "Schema__Rating__Scope", value: "Instance" },
+
+    { name: "Schema__Description__Presence", value: "Optional" },
+    { name: "Schema__Description__DataType", value: "String" },
+    { name: "Schema__Description__Scope", value: "Instance" },
+
+    { name: "Default__Id__Prefix", value: "ISABSA-VAL-INSTANCE-" },
+    { name: "Default__Id__Width", value: "3" },
+    { name: "Default__ValueType__Value", value: "Financial" },
+    { name: "Default__ValuationType__Value", value: "Qualitative" },
+    { name: "Default__Rating__Value", value: "Medium" }
+];
+
+function isBlank(value) {
+    return value === null || value === undefined || String(value).trim() === "";
+}
+
+function toConcept(obj) {
+    if (!obj) {
+        return null;
+    }
+    return obj.concept ? obj.concept : obj;
+}
+
+function getSelectedConcepts() {
+    var concepts = [];
+    var seen = {};
+
+    $(selection).each(function(obj) {
+        var concept = toConcept(obj);
+
+        if (!concept || !concept.id) {
+            return;
+        }
+
+        if (!seen[concept.id]) {
+            seen[concept.id] = true;
+            concepts.push(concept);
+        }
+    });
+
+    return concepts;
+}
+
+function ensureProperty(element, propertyName, propertyValue) {
+    var currentValue = element.prop(propertyName);
+
+    if (currentValue === null || currentValue === undefined) {
+        element.prop(propertyName, propertyValue);
+        console.log("CREATED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    if (isBlank(currentValue)) {
+        element.prop(propertyName, propertyValue);
+        console.log("FILLED: " + element.name + " -> " + propertyName + " = " + propertyValue);
+        return;
+    }
+
+    console.log("SKIPPED: " + element.name + " -> " + propertyName + " = " + currentValue);
+}
+
+function escapeRegex(text) {
+    return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function padNumber(number, width) {
+    var text = String(number);
+    while (text.length < width) {
+        text = "0" + text;
+    }
+    return text;
+}
+
+function getNextProfileId(prefix, width) {
+    var maxNumber = 0;
+    var pattern = new RegExp("^" + escapeRegex(prefix) + "(\\d{" + width + "})$");
+
+    $("element").each(function(element) {
+        var currentValue = element.prop("Id");
+
+        if (isBlank(currentValue)) {
+            return;
+        }
+
+        var match = String(currentValue).match(pattern);
+
+        if (match) {
+            var number = parseInt(match[1], 10);
+            if (number > maxNumber) {
+                maxNumber = number;
+            }
+        }
+    });
+
+    return prefix + padNumber(maxNumber + 1, width);
+}
+
+function initializeValueProfileType(element) {
+    ensureProperty(element, "Id", getNextProfileId(PROFILE_ID_PREFIX, PROFILE_ID_WIDTH));
+
+    for (var i = 0; i < VALUE_PROFILE_PROPERTIES.length; i++) {
+        ensureProperty(
+            element,
+            VALUE_PROFILE_PROPERTIES[i].name,
+            VALUE_PROFILE_PROPERTIES[i].value
+        );
+    }
+}
+
+var selectedConcepts = getSelectedConcepts();
+
+if (selectedConcepts.length !== 1) {
+    console.log("ERROR: Please select exactly one element.");
+    exit();
+}
+
+initializeValueProfileType(selectedConcepts[0]);
+
+console.log("Value profile type initialized.");

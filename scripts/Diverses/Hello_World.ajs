@@ -1,0 +1,2 @@
+// Minimaler jArchi-Test zum Verifizieren der Skriptumgebung.
+console.log("Hello World from ArchiScripts/scripts/Diverses/Hello_World.ajs");
