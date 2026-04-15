@@ -1,0 +1,17 @@
+// Einfache Konsolenausgaben ueber den zentralen Logger.
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Console_Basic_Output", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+
+logger.start("Console logging example started.");
+logger.info("Hello from the logging basics script.", {
+    model_available: !!model
+}, "example.console.hello");
+logger.info("Current timestamp created.", {
+    generated_at: ArchiLogging.nowIso()
+}, "example.console.timestamp");
+logger.finish("Console logging example finished.");

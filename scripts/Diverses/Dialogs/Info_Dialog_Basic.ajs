@@ -1,0 +1,15 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Info_Dialog_Basic", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Dialog Basics"
+});
+
+logger.start("Info dialog example started.");
+dialogs.showInfo("Hello World from Diverses/Dialogs.", "Dialog Basics");
+logger.finish("Info dialog example finished.");

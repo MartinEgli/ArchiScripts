@@ -1,0 +1,25 @@
+// Beispiel fuer Konsolen- und Dialogausgabe ueber den zentralen Logger.
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Dialog_Basic_Output", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var title = "Logging Basics";
+var message = "Hello World from Diverses/Logging.";
+
+logger.start("Dialog logging example started.");
+logger.info(message, {
+    dialog_title: title
+}, "example.dialog.message");
+
+try {
+    logger.infoDialog(title, message);
+} catch (error) {
+    logger.warn("Dialog could not be shown.", {
+        error: String(error)
+    }, "example.dialog.warning");
+}
+
+logger.finish("Dialog logging example finished.");

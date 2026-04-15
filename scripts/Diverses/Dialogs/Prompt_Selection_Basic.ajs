@@ -1,0 +1,34 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Prompt_Selection_Basic", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Dialog Basics"
+});
+var selected;
+
+logger.start("Prompt selection example started.");
+
+selected = dialogs.selectFromList(
+    "Choose one option:",
+    ["Option 1", "Option 2", "Option 3"],
+    "Dialog Basics"
+);
+
+if (selected === null) {
+    logger.warn("User cancelled the selection dialog.", {}, "example.dialog.selection.cancelled");
+    dialogs.showWarning("No option selected.", "Dialog Basics");
+} else {
+    logger.info("Selection captured.", {
+        selected_value: selected
+    }, "example.dialog.selection.value");
+    dialogs.showInfo("Selected value: " + selected, "Dialog Basics");
+}
+
+logger.finish("Prompt selection example finished.", {
+    cancelled: selected === null
+});

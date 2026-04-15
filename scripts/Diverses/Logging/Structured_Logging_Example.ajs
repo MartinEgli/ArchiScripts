@@ -1,0 +1,33 @@
+// Strukturierte Basislogs ueber den zentralen Logger.
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Structured_Logging_Example", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+
+logger.start("Structured logging example started.", {
+    example_group: "Diverses/Logging"
+});
+
+logger.debug("Preparing structured example context.", {
+    run_id: logger.getRunId()
+}, "example.structured.prepare");
+
+logger.info("Current model context resolved.", {
+    model_name: model ? model.name : "<none>",
+    model_available: !!model
+}, "example.structured.model");
+
+logger.warn("This is only a baseline helper example.", {
+    recommendation: "Replace ad-hoc console.log calls with the shared logger."
+}, "example.structured.warn");
+
+logger.error("Example error output without failing the script.", {
+    simulated: true
+}, "example.structured.error");
+
+logger.finish("Structured logging example finished.", {
+    outcome: "success"
+});

@@ -1,0 +1,46 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("File_Dialogs_Basic", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Dialog Basics"
+});
+var openFilePath;
+var openDirectoryPath;
+var saveFilePath;
+
+logger.start("File dialog example started.");
+
+openFilePath = dialogs.chooseOpenFile({
+    title: "Open a model file",
+    filterExtensions: ["*.archimate", "*.xml", "*.*"]
+});
+
+openDirectoryPath = dialogs.chooseOpenDirectory({
+    title: "Choose a target directory"
+});
+
+saveFilePath = dialogs.chooseSaveFile({
+    title: "Choose an export target",
+    filterExtensions: ["*.json", "*.txt", "*.*"],
+    fileName: "example-output.json"
+});
+
+logger.info("File dialog results captured.", {
+    open_file_path: openFilePath,
+    open_directory_path: openDirectoryPath,
+    save_file_path: saveFilePath
+}, "example.dialog.file.results");
+
+dialogs.showInfo(
+    "Open file: " + (openFilePath || "<cancelled>") + "\n" +
+    "Open directory: " + (openDirectoryPath || "<cancelled>") + "\n" +
+    "Save file: " + (saveFilePath || "<cancelled>"),
+    "Dialog Basics"
+);
+
+logger.finish("File dialog example finished.");

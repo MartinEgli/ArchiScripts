@@ -1,0 +1,33 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Confirm_Dialog_Basic", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Dialog Basics"
+});
+var confirmed;
+
+logger.start("Confirm dialog example started.");
+
+confirmed = dialogs.confirmWarning(
+    "This is a simple confirm example. Continue?",
+    "Dialog Basics"
+);
+
+logger.info("Confirm result captured.", {
+    confirmed: confirmed
+}, "example.dialog.confirm.result");
+
+if (confirmed) {
+    dialogs.showInfo("You confirmed the action.", "Dialog Basics");
+} else {
+    dialogs.showWarning("You cancelled the action.", "Dialog Basics");
+}
+
+logger.finish("Confirm dialog example finished.", {
+    confirmed: confirmed
+});

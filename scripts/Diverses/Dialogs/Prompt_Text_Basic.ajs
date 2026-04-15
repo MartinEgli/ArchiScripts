@@ -1,0 +1,34 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Prompt_Text_Basic", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "Dialog Basics"
+});
+var answer;
+
+logger.start("Prompt text example started.");
+
+answer = dialogs.promptText(
+    "Please enter a short text value:",
+    "Example Value",
+    "Dialog Basics"
+);
+
+if (answer === null) {
+    logger.warn("User cancelled the text prompt.", {}, "example.dialog.prompt.cancelled");
+    dialogs.showWarning("No value entered.", "Dialog Basics");
+} else {
+    logger.info("Prompt value captured.", {
+        entered_value: answer
+    }, "example.dialog.prompt.value");
+    dialogs.showInfo("Entered value: " + answer, "Dialog Basics");
+}
+
+logger.finish("Prompt text example finished.", {
+    cancelled: answer === null
+});
