@@ -1,0 +1,116 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/exchange/ViewExchange.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Roundtrip_Export_Import_And_Verify", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "View Exchange Roundtrip"
+});
+var selectedView = ArchiViewExchange.getSelectedView();
+var exchangeDirectory;
+var exportFile;
+var exportPath;
+var exportedPackage;
+var importedView;
+var importedPackage;
+var comparison;
+var summaryLines;
+
+function ensureDirectoryExists(path) {
+    var directory = new File(path);
+
+    if (!directory.exists()) {
+        directory.mkdirs();
+    }
+
+    return directory;
+}
+
+function toSafeFileName(value) {
+    return String(value).replace(/[\\\/:\*\?"<>\|]/g, "_");
+}
+
+function buildSummaryLines(result, targetViewName, filePath) {
+    var lines = [];
+
+    lines.push("Roundtrip verification completed.");
+    lines.push("");
+    lines.push("Export file: " + filePath);
+    lines.push("Imported view: " + targetViewName);
+    lines.push("Elements: " + result.actual_elements + " / expected " + result.expected_elements);
+    lines.push("Relationships: " + result.actual_relationships + " / expected " + result.expected_relationships);
+    lines.push("");
+
+    if (result.is_match) {
+        lines.push("Verification status: MATCH");
+    } else {
+        lines.push("Verification status: MISMATCH");
+        lines.push("Element missing: " + result.element_delta.missing.length);
+        lines.push("Element unexpected: " + result.element_delta.unexpected.length);
+        lines.push("Relationship missing: " + result.relationship_delta.missing.length);
+        lines.push("Relationship unexpected: " + result.relationship_delta.unexpected.length);
+    }
+
+    return lines;
+}
+
+logger.start("View roundtrip verification started.");
+
+if (!selectedView) {
+    logger.errorDialog("View Exchange Roundtrip", "Please select exactly one Archi view before running the roundtrip verification.");
+    logger.fail("Roundtrip verification aborted because no Archi view was selected.", null, {});
+    throw new Error("No Archi view selected.");
+}
+
+exchangeDirectory = ensureDirectoryExists(new File(__DIR__ + "../../../exchange").getCanonicalPath());
+exportFile = new File(
+    exchangeDirectory,
+    toSafeFileName(selectedView.name) + ".roundtrip.view-exchange.json"
+);
+exportPath = exportFile.getCanonicalPath();
+
+exportedPackage = ArchiViewExchange.createViewPackage(selectedView);
+ArchiViewExchange.writeViewPackageToFile(exportedPackage, exportPath);
+
+logger.info("Roundtrip export created.", {
+    export_path: exportPath,
+    exported_elements: exportedPackage.elements.length,
+    exported_relationships: exportedPackage.relationships.length
+}, "view.exchange.roundtrip.exported");
+
+importedView = ArchiViewExchange.importViewPackage(exportedPackage, {
+    logger: logger,
+    targetViewName: ArchiViewExchange.buildUniqueViewName(selectedView.name + " Roundtrip")
+});
+
+importedPackage = ArchiViewExchange.createViewPackage(importedView);
+comparison = ArchiViewExchange.compareViewPackages(exportedPackage, importedPackage);
+summaryLines = buildSummaryLines(comparison, importedView.name, exportPath);
+
+logger.info("Roundtrip verification finished.", {
+    export_path: exportPath,
+    imported_view_name: importedView.name,
+    is_match: comparison.is_match,
+    expected_elements: comparison.expected_elements,
+    actual_elements: comparison.actual_elements,
+    expected_relationships: comparison.expected_relationships,
+    actual_relationships: comparison.actual_relationships,
+    element_missing: comparison.element_delta.missing.length,
+    element_unexpected: comparison.element_delta.unexpected.length,
+    relationship_missing: comparison.relationship_delta.missing.length,
+    relationship_unexpected: comparison.relationship_delta.unexpected.length
+}, "view.exchange.roundtrip.verified");
+
+if (comparison.is_match) {
+    dialogs.showInfo(summaryLines.join("\n"), "View Exchange Roundtrip");
+} else {
+    dialogs.showWarning(summaryLines.join("\n"), "View Exchange Roundtrip");
+}
+
+logger.finish("View roundtrip verification completed.", {
+    result: comparison.is_match ? "match" : "mismatch"
+});

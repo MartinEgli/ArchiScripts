@@ -166,9 +166,26 @@ var ArchiViewExchange = (function (existing) {
         };
     }
 
+    function getBoundsSnapshot(bounds) {
+        return {
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height
+        };
+    }
+
+    function hasCompleteBounds(bounds) {
+        return bounds &&
+            typeof bounds.x !== "undefined" &&
+            typeof bounds.y !== "undefined" &&
+            typeof bounds.width !== "undefined" &&
+            typeof bounds.height !== "undefined";
+    }
+
     function buildElementRecord(visualObject, parentVisualObject, parentAbsoluteBounds) {
         var concept = visualObject.concept;
-        var relativeBounds = cloneObject(visualObject.bounds);
+        var relativeBounds = getBoundsSnapshot(visualObject.bounds);
         var absoluteBounds = getAbsoluteBounds(visualObject, parentAbsoluteBounds);
 
         return {
@@ -191,6 +208,36 @@ var ArchiViewExchange = (function (existing) {
                 font_size: visualObject.fontSize,
                 text_position: visualObject.textPosition
             }
+        };
+    }
+
+    function resolveRelativeBounds(record, recordByViewObjectId) {
+        var relativeBounds = record.visual.relative_bounds;
+        var absoluteBounds = record.visual.absolute_bounds;
+        var parentRecord;
+        var parentAbsoluteBounds;
+
+        if (hasCompleteBounds(relativeBounds)) {
+            return relativeBounds;
+        }
+
+        if (!record.parent_view_object_id) {
+            return absoluteBounds;
+        }
+
+        parentRecord = recordByViewObjectId[record.parent_view_object_id];
+
+        if (!parentRecord) {
+            return absoluteBounds;
+        }
+
+        parentAbsoluteBounds = parentRecord.visual.absolute_bounds;
+
+        return {
+            x: absoluteBounds.x - parentAbsoluteBounds.x,
+            y: absoluteBounds.y - parentAbsoluteBounds.y,
+            width: absoluteBounds.width,
+            height: absoluteBounds.height
         };
     }
 
@@ -437,20 +484,188 @@ var ArchiViewExchange = (function (existing) {
         return candidate;
     }
 
+    function getSourceConceptKeyFromRecord(record) {
+        var properties = record.concept.properties || {};
+        return properties[PROP.SourceConceptId] || record.concept.source_concept_id;
+    }
+
+    function buildSourceConceptKeyMap(viewPackage) {
+        var result = {};
+
+        viewPackage.elements.forEach(function (record) {
+            result[record.source_view_object_id] = getSourceConceptKeyFromRecord(record);
+        });
+
+        return result;
+    }
+
+    function buildParentConceptKey(record, conceptKeyByViewObjectId) {
+        if (!record.parent_view_object_id) {
+            return "";
+        }
+
+        return conceptKeyByViewObjectId[record.parent_view_object_id] || "";
+    }
+
+    function buildElementSignature(record, conceptKeyByViewObjectId) {
+        var conceptKey = getSourceConceptKeyFromRecord(record);
+        var parentConceptKey = buildParentConceptKey(record, conceptKeyByViewObjectId);
+        var absoluteBounds = record.visual.absolute_bounds;
+
+        return [
+            conceptKey,
+            record.concept.type,
+            safeString(record.concept.name),
+            parentConceptKey,
+            absoluteBounds.x,
+            absoluteBounds.y,
+            absoluteBounds.width,
+            absoluteBounds.height
+        ].join("|");
+    }
+
+    function getSourceRelationshipKeyFromRecord(record) {
+        var properties = record.relationship.properties || {};
+        return properties[PROP.SourceRelationshipId] || record.relationship.source_relationship_id || "";
+    }
+
+    function buildRelationshipSignature(record, conceptKeyByViewObjectId) {
+        var relationshipKey = getSourceRelationshipKeyFromRecord(record);
+        var sourceConceptKey = conceptKeyByViewObjectId[record.source_view_object_id] || "";
+        var targetConceptKey = conceptKeyByViewObjectId[record.target_view_object_id] || "";
+
+        return [
+            relationshipKey,
+            record.relationship.type,
+            safeString(record.relationship.name),
+            sourceConceptKey,
+            targetConceptKey
+        ].join("|");
+    }
+
+    function toCountMap(signatures) {
+        var counts = {};
+
+        signatures.forEach(function (signature) {
+            counts[signature] = (counts[signature] || 0) + 1;
+        });
+
+        return counts;
+    }
+
+    function compareCountMaps(expectedCounts, actualCounts) {
+        var missing = [];
+        var unexpected = [];
+        var key;
+        var expectedValue;
+        var actualValue;
+
+        for (key in expectedCounts) {
+            if (expectedCounts.hasOwnProperty(key)) {
+                expectedValue = expectedCounts[key];
+                actualValue = actualCounts[key] || 0;
+
+                if (actualValue < expectedValue) {
+                    missing.push({
+                        signature: key,
+                        expected: expectedValue,
+                        actual: actualValue
+                    });
+                }
+            }
+        }
+
+        for (key in actualCounts) {
+            if (actualCounts.hasOwnProperty(key)) {
+                expectedValue = expectedCounts[key] || 0;
+                actualValue = actualCounts[key];
+
+                if (actualValue > expectedValue) {
+                    unexpected.push({
+                        signature: key,
+                        expected: expectedValue,
+                        actual: actualValue
+                    });
+                }
+            }
+        }
+
+        return {
+            missing: missing,
+            unexpected: unexpected
+        };
+    }
+
+    function compareViewPackages(expectedPackage, actualPackage) {
+        var expectedConceptKeyMap = buildSourceConceptKeyMap(expectedPackage);
+        var actualConceptKeyMap = buildSourceConceptKeyMap(actualPackage);
+        var expectedElementSignatures = [];
+        var actualElementSignatures = [];
+        var expectedRelationshipSignatures = [];
+        var actualRelationshipSignatures = [];
+        var elementDelta;
+        var relationshipDelta;
+
+        expectedPackage.elements.forEach(function (record) {
+            expectedElementSignatures.push(buildElementSignature(record, expectedConceptKeyMap));
+        });
+
+        actualPackage.elements.forEach(function (record) {
+            actualElementSignatures.push(buildElementSignature(record, actualConceptKeyMap));
+        });
+
+        expectedPackage.relationships.forEach(function (record) {
+            expectedRelationshipSignatures.push(buildRelationshipSignature(record, expectedConceptKeyMap));
+        });
+
+        actualPackage.relationships.forEach(function (record) {
+            actualRelationshipSignatures.push(buildRelationshipSignature(record, actualConceptKeyMap));
+        });
+
+        elementDelta = compareCountMaps(
+            toCountMap(expectedElementSignatures),
+            toCountMap(actualElementSignatures)
+        );
+
+        relationshipDelta = compareCountMaps(
+            toCountMap(expectedRelationshipSignatures),
+            toCountMap(actualRelationshipSignatures)
+        );
+
+        return {
+            is_match:
+                elementDelta.missing.length === 0 &&
+                elementDelta.unexpected.length === 0 &&
+                relationshipDelta.missing.length === 0 &&
+                relationshipDelta.unexpected.length === 0,
+            expected_elements: expectedPackage.elements.length,
+            actual_elements: actualPackage.elements.length,
+            expected_relationships: expectedPackage.relationships.length,
+            actual_relationships: actualPackage.relationships.length,
+            element_delta: elementDelta,
+            relationship_delta: relationshipDelta
+        };
+    }
+
     function importViewPackage(viewPackage, options) {
         var logger = options && options.logger ? options.logger : null;
         var targetViewName = options && options.targetViewName ? options.targetViewName : buildUniqueViewName(safeString(viewPackage.view.name) + " Imported");
         var targetView = model.createArchimateView(targetViewName);
         var conceptByViewObjectId = {};
         var visualByViewObjectId = {};
+        var recordByViewObjectId = {};
 
         targetView.documentation = safeString(viewPackage.view.documentation);
+
+        viewPackage.elements.forEach(function (record) {
+            recordByViewObjectId[record.source_view_object_id] = record;
+        });
 
         viewPackage.elements.forEach(function (record) {
             var concept = getOrCreateElement(record, logger);
             var visual;
             var parentVisual = record.parent_view_object_id ? visualByViewObjectId[record.parent_view_object_id] : null;
-            var relativeBounds = record.visual.relative_bounds;
+            var relativeBounds = resolveRelativeBounds(record, recordByViewObjectId);
             var absoluteBounds = record.visual.absolute_bounds;
 
             if (parentVisual) {
@@ -509,6 +724,7 @@ var ArchiViewExchange = (function (existing) {
         createViewPackage: createViewPackage,
         writeViewPackageToFile: writeViewPackageToFile,
         readViewPackageFromFile: readViewPackageFromFile,
+        compareViewPackages: compareViewPackages,
         importViewPackage: importViewPackage,
         buildUniqueViewName: buildUniqueViewName
     };

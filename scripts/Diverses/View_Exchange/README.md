@@ -10,6 +10,9 @@ shared exchange helper.
   relationships to a JSON package
 - `Import_View_From_JSON.ajs`
   imports a JSON package into the current model and creates a new target view
+- `Roundtrip_Export_Import_And_Verify.ajs`
+  exports the selected view, imports it into a new view, and verifies the
+  imported result against the exported package
 
 ## Import behavior
 
@@ -31,3 +34,4 @@ Relationship matching order:
 - Existing documentation and properties are kept when already populated.
 - Imported concepts receive source-tracking properties to improve matching on
   later imports.
+- The roundtrip script writes its export package to `ArchiScripts/exchange/`.
