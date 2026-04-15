@@ -1,0 +1,1109 @@
+{
+  "schema": "archiscripts.view-exchange/1",
+  "exported_at": "2026-04-15T10:26:03.638Z",
+  "model": {
+    "name": "ArchiMate_SABSA"
+  },
+  "view": {
+    "id": "id-3a6b760efa1d425387556c5f9b88286a",
+    "name": "Figure26-2_Structure-of-NIST-SP-800-53",
+    "documentation": ""
+  },
+  "elements": [
+    {
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-642dfac64c6c4ebc8bfbbbac36065df8",
+        "type": "representation",
+        "name": "NIST Special Publication 800-53",
+        "documentation": "",
+        "specialization": "",
+        "properties": {
+          "Stereotype": "«Standard»"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 73,
+          "y": 91,
+          "width": 816,
+          "height": 426
+        },
+        "absolute_bounds": {
+          "x": 73,
+          "y": 91,
+          "width": 816,
+          "height": 426
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-613fdef5ada449cba73488c9bd8ce261",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-8a01d20e866c400fa36e4f0e77ec216b",
+        "type": "grouping",
+        "name": "PE: Physical and Environmental Protection",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 420,
+          "y": 181,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 493,
+          "y": 272,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-37dee39d501545d5a6a8e3455f17703f",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-3249e4729a9e450c89c34e1cb2baf006",
+        "type": "grouping",
+        "name": "CP: Contingency Planning",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 228,
+          "y": 109,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 301,
+          "y": 200,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-47e5789377724f26ab7f95e4fc3b53d0",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-5ecc9ca5aede4c29a6ed4f0529e5503d",
+        "type": "grouping",
+        "name": "MA: Maintenance",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 181,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 109,
+          "y": 272,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-7ab1e5b8586c43f0bf6c5988afc9fa68",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-8173395ea0fd4a9191b860f2d4265750",
+        "type": "grouping",
+        "name": "SC: System and Communications Protection",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 228,
+          "y": 325,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 301,
+          "y": 416,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-a7e98540a355412796e0de7012b4778b",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-abda422bc093460494356a4750d911d1",
+        "type": "grouping",
+        "name": "IR: Incident Response",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 612,
+          "y": 109,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 685,
+          "y": 200,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c6675ca859ff41e691e12ad0cd4e7cb5",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-07917c02d5444f068fa5579021fdd016",
+        "type": "grouping",
+        "name": "CA: Assessment, Authorization, and Monitoring",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 612,
+          "y": 36,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 685,
+          "y": 127,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c49bf8ae1b6c414f9f92692f050ec3bd",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-cbefd746b0714ea08ea16b4777fec8f5",
+        "type": "grouping",
+        "name": "PS: Personnel Security",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 228,
+          "y": 253,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 301,
+          "y": 344,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-8fe6712745114afe80cb6f18f51371e1",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-bcc6445259fa4d688843aba0343f8f5a",
+        "type": "grouping",
+        "name": "AU: Audit and Accountability",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 420,
+          "y": 36,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 493,
+          "y": 127,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c3fc1d7fea2d42f8abef744769aa8462",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-731230b367aa4feba817136b528688c0",
+        "type": "grouping",
+        "name": "SA: System and Services Acquisition",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 325,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 109,
+          "y": 416,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-fb46fe3ba3704d3a85ae0db0f6195bfd",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-f811b2449f0e4cc3a258ab96fe133e9a",
+        "type": "grouping",
+        "name": "CM: Configuration Management",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 109,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 109,
+          "y": 200,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c2fdf8c464644ae59694694863d41a67",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-8bd6042127204da9bab5500c8b78c17c",
+        "type": "grouping",
+        "name": "RA: Risk Assessment",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 612,
+          "y": 253,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 685,
+          "y": 344,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c935fae4fd614bc48e9b6ea25b233534",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-960f9fde4ba640b8b9d3a3c9c1b1efd7",
+        "type": "grouping",
+        "name": "IA: Identification and Authentication",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 420,
+          "y": 109,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 493,
+          "y": 200,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-a48e10acfea442a7aabd989220247994",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-c49c782e8904476680f496d7dc60642d",
+        "type": "grouping",
+        "name": "MP: Media Protection",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 228,
+          "y": 181,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 301,
+          "y": 272,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-75ab57ca693e402da101c8927643d6b8",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-14d1d139e1fe45db83439079b2eff980",
+        "type": "grouping",
+        "name": "PL: Planning",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 612,
+          "y": 181,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 685,
+          "y": 272,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-6cc88bc1517e4c8e9f9c052b698c3903",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-1f676d43c2254182bc26b56332c1f6eb",
+        "type": "grouping",
+        "name": "PM: Program Management",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 253,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 109,
+          "y": 344,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-65082d18ff754c57b347c6a89deaba3d",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-7a3ee43f03314b03838bcd7ec42113d0",
+        "type": "grouping",
+        "name": "AC: Access Control",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 36,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 109,
+          "y": 127,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-eba0e8743bbd464ba83c08af9713a0a2",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-23b946ea0ea544bdac47c74137030bec",
+        "type": "grouping",
+        "name": "SI: System and Information Integrity",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 420,
+          "y": 325,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 493,
+          "y": 416,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-5106516c2ed54fd89fb7e43e8af05ba7",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-1cea68c9c6e4458daa33206920e41277",
+        "type": "grouping",
+        "name": "SR: Supply Chain Risk Management",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 612,
+          "y": 325,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 685,
+          "y": 416,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-ed66655a30fb44f5a1003d86a258519b",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-0f4c58a3c183487683a01baec909bcaa",
+        "type": "grouping",
+        "name": "PT: Personally Identifiable Information Processing and Transparency",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 420,
+          "y": 253,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 493,
+          "y": 344,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-c6809e6cb5eb4ba281f6a9f499070166",
+      "parent_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "concept": {
+        "source_concept_id": "id-ad7eb7bf2b754636a300ad09916f7838",
+        "type": "grouping",
+        "name": "AT: Awareness and Training",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 228,
+          "y": 36,
+          "width": 175,
+          "height": 62
+        },
+        "absolute_bounds": {
+          "x": 301,
+          "y": 127,
+          "width": 175,
+          "height": 62
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source_view_connection_id": "id-2a2c7cffc0f14a1a84fd0976d117d1bb",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c6675ca859ff41e691e12ad0cd4e7cb5",
+      "relationship": {
+        "source_relationship_id": "id-201c7492a62840d1a9ef34f0040c4d63",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-7a423bf99408467c9871401e4ecedab7",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-eba0e8743bbd464ba83c08af9713a0a2",
+      "relationship": {
+        "source_relationship_id": "id-d94c8c89df5f47f39eda7da0451b1263",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-d1e719be2aa749e5a0b992a8324e07da",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-75ab57ca693e402da101c8927643d6b8",
+      "relationship": {
+        "source_relationship_id": "id-ce3dc6a64ae24a04ae36f710e26a07ff",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-34f2c9ed51804993b2bee0d2273a1270",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-7ab1e5b8586c43f0bf6c5988afc9fa68",
+      "relationship": {
+        "source_relationship_id": "id-7ac77a604d9b41f1a9eae27c73320916",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-fefe2a98d3ad4e6b88daa6b31d1d4595",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-fb46fe3ba3704d3a85ae0db0f6195bfd",
+      "relationship": {
+        "source_relationship_id": "id-dd27db30e31b4438ab05da05ae41fd55",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-d0dc14841ed74fdc82190059d0a22169",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-65082d18ff754c57b347c6a89deaba3d",
+      "relationship": {
+        "source_relationship_id": "id-be813889de19483491b0cffc8744b6eb",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-378798c53a02425a9e109b9805e7b4af",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-5106516c2ed54fd89fb7e43e8af05ba7",
+      "relationship": {
+        "source_relationship_id": "id-5d556616554b4cd38116b2244d7899d9",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-4371a32f05614113b5dcdc961579baa3",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c2fdf8c464644ae59694694863d41a67",
+      "relationship": {
+        "source_relationship_id": "id-b00b4d5bb7f149018ff1e4c65a3747b7",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-38d2037ebf7740eda770e685a13d93bd",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c935fae4fd614bc48e9b6ea25b233534",
+      "relationship": {
+        "source_relationship_id": "id-1320eb9ff7d34db6beb63580d278c465",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-89d3a4704d5b4e10a989129c549d55f8",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-a48e10acfea442a7aabd989220247994",
+      "relationship": {
+        "source_relationship_id": "id-41f867ea4d0042f19979e115a7aa0091",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-2c8ceb705f7d417f83be353a6c7938ae",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c6809e6cb5eb4ba281f6a9f499070166",
+      "relationship": {
+        "source_relationship_id": "id-fb8916b6e12e4b47bfc99ff70d76a1db",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-ae3c9dbe434e44e7beaf5909129103bd",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-8fe6712745114afe80cb6f18f51371e1",
+      "relationship": {
+        "source_relationship_id": "id-e045a4eff5384dde934718af781f5bd9",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-b737f3bf70cd42fcb7a59a87cfcea96f",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-6cc88bc1517e4c8e9f9c052b698c3903",
+      "relationship": {
+        "source_relationship_id": "id-0219248dade446cf87fdc8cd8520230b",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-fadceaae0d094fa7a5c274c33ede2b5d",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-613fdef5ada449cba73488c9bd8ce261",
+      "relationship": {
+        "source_relationship_id": "id-3b582ca5f4ab4382a0feaf2b1de16f72",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-86c7c283a371410cbd156e0c9c22dab2",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-a7e98540a355412796e0de7012b4778b",
+      "relationship": {
+        "source_relationship_id": "id-4b035c644847434eb2410685b081eb59",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-3d1aab3b91144dfe8d677c680cbe8318",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c3fc1d7fea2d42f8abef744769aa8462",
+      "relationship": {
+        "source_relationship_id": "id-38a68bb7649a4aada6901896306a5f8d",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-1b317dd0e3b94b18b10f4157170be39b",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-47e5789377724f26ab7f95e4fc3b53d0",
+      "relationship": {
+        "source_relationship_id": "id-cbb08067205f49e6a48a9d569f1cf8ac",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-97deb704f157409a9f25165543fc5606",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-ed66655a30fb44f5a1003d86a258519b",
+      "relationship": {
+        "source_relationship_id": "id-2a146fd523fe4789ab57954e5c4fd878",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-87f417e4907546c1ae83182e45269da2",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-37dee39d501545d5a6a8e3455f17703f",
+      "relationship": {
+        "source_relationship_id": "id-27d2db32471243c381dd9675ad18a24d",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-c0708c18c573469f89a2bf0cc65fc422",
+      "source_view_object_id": "id-ac9063081b71475ead1ea0ccdfda5b3d",
+      "target_view_object_id": "id-c49bf8ae1b6c414f9f92692f050ec3bd",
+      "relationship": {
+        "source_relationship_id": "id-1dba6fbbbeac41ba843ee8b84ba9194b",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    }
+  ]
+}
