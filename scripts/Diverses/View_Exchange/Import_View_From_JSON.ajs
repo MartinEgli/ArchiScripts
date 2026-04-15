@@ -1,0 +1,63 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/exchange/ViewExchange.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Import_View_From_JSON", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "View Exchange"
+});
+var filePath;
+var viewPackage;
+var targetViewName;
+var importedView;
+
+logger.start("View import started.");
+
+filePath = dialogs.chooseOpenFile({
+    title: "Import view from JSON",
+    filterExtensions: ["*.json", "*.*"]
+});
+
+if (!filePath) {
+    logger.warn("User cancelled the import file selection.", {}, "view.exchange.import.cancelled");
+    logger.finish("View import cancelled by user.");
+} else {
+    viewPackage = ArchiViewExchange.readViewPackageFromFile(filePath);
+    targetViewName = dialogs.promptText(
+        "Target view name:",
+        ArchiViewExchange.buildUniqueViewName(viewPackage.view.name + " Imported"),
+        "View Exchange"
+    );
+
+    if (targetViewName === null || String(targetViewName) === "") {
+        logger.warn("User cancelled target view naming.", {}, "view.exchange.import.name_cancelled");
+        logger.finish("View import cancelled while choosing the target view name.");
+    } else {
+        importedView = ArchiViewExchange.importViewPackage(viewPackage, {
+            logger: logger,
+            targetViewName: targetViewName
+        });
+
+        logger.info("View package imported.", {
+            file_path: filePath,
+            target_view_name: importedView.name,
+            imported_elements: viewPackage.elements.length,
+            imported_relationships: viewPackage.relationships.length
+        }, "view.exchange.import.completed");
+
+        dialogs.showInfo(
+            "Import completed.\n\n" +
+            "View: " + importedView.name + "\n" +
+            "Elements in package: " + viewPackage.elements.length + "\n" +
+            "Relationships in package: " + viewPackage.relationships.length + "\n\n" +
+            "Existing matching concepts were reused when possible.",
+            "View Exchange"
+        );
+
+        logger.finish("View import finished successfully.");
+    }
+}

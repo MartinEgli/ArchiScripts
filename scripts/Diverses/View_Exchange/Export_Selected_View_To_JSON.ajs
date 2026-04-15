@@ -1,0 +1,54 @@
+var File = Java.type("java.io.File");
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/exchange/ViewExchange.js").getCanonicalPath());
+
+var logger = ArchiLogging.createLogger("Export_Selected_View_To_JSON", {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "View Exchange"
+});
+var selectedView = ArchiViewExchange.getSelectedView();
+var filePath;
+var viewPackage;
+
+logger.start("View export started.");
+
+if (!selectedView) {
+    logger.errorDialog("View Exchange", "Please select exactly one Archi view before exporting.");
+    logger.fail("View export aborted because no Archi view was selected.", null, {});
+    throw new Error("No Archi view selected.");
+}
+
+filePath = dialogs.chooseSaveFile({
+    title: "Export selected view to JSON",
+    filterExtensions: ["*.json", "*.*"],
+    fileName: selectedView.name + ".view-exchange.json"
+});
+
+if (!filePath) {
+    logger.warn("User cancelled the export file selection.", {}, "view.exchange.export.cancelled");
+    logger.finish("View export cancelled by user.");
+} else {
+    viewPackage = ArchiViewExchange.createViewPackage(selectedView);
+    ArchiViewExchange.writeViewPackageToFile(viewPackage, filePath);
+
+    logger.info("View package exported.", {
+        file_path: filePath,
+        view_name: selectedView.name,
+        exported_elements: viewPackage.elements.length,
+        exported_relationships: viewPackage.relationships.length
+    }, "view.exchange.export.completed");
+
+    dialogs.showInfo(
+        "Export completed.\n\n" +
+        "View: " + selectedView.name + "\n" +
+        "Elements: " + viewPackage.elements.length + "\n" +
+        "Relationships: " + viewPackage.relationships.length,
+        "View Exchange"
+    );
+
+    logger.finish("View export finished successfully.");
+}
