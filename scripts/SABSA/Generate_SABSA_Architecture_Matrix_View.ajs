@@ -36,6 +36,7 @@ var CONST = {
         CellHeaderMinReserve: 22,
         CellHeaderGap: 0,
         RowInsetX: 2,
+        RowRightInset: 12,
         RowInsetY: 6,
         RowBottomPadding: 8,
         CellWidth: 212,
@@ -516,7 +517,7 @@ function createMatrixView(matrixData) {
             rowConcept,
             CONST.Layout.StartX,
             rowY,
-            CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + (CONST.Layout.RowInsetX * 2),
+            CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + CONST.Layout.RowInsetX + CONST.Layout.RowRightInset,
             rowHeight,
             getRowFill(rowData.id)
         );
