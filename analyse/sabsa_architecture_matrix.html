@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABSA Architecture Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --header-fill: #ff9a69;
+    --header-text: #2b160d;
+    --cell-title-bg: #ffff64;
+    --cell-bg: #ffffcc;
+    --grid: #111111;
+    --page-bg: #fffaf2;
+    --page-text: #1a1a1a;
+    --surface-shadow: 0 18px 48px rgba(34, 24, 12, 0.18);
+    --surface-shadow-soft: 0 8px 20px rgba(34, 24, 12, 0.10);
+    --layer-ctx:  #ff9aff;
+    --layer-conc: #ccccff;
+    --layer-log:  #ccffff;
+    --layer-phys: #ccff9a;
+    --layer-comp: #ffff9a;
+    --layer-mgmt: #ffcc64;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(255, 233, 205, 0.75), transparent 28%),
+      linear-gradient(180deg, #fffdf9 0%, var(--page-bg) 100%);
+    color: var(--page-text);
+    padding: 32px 24px 48px;
+    min-width: 1100px;
+  }
+
+  .header {
+    margin-bottom: 28px;
+    max-width: 1200px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.02em; color: #111111; margin-bottom: 4px;
+  }
+  .header p { font-size: 12px; color: #6b6255; letter-spacing: 0.06em; text-transform: uppercase; }
+  .toolbar {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .toolbar-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #2b160d;
+  }
+  .lang-switch {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid rgba(43, 22, 13, 0.18);
+    background: rgba(255, 250, 242, 0.92);
+    box-shadow: var(--surface-shadow-soft);
+    gap: 4px;
+  }
+  .lang-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .lang-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 118px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #69452b;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  }
+  .lang-option:hover {
+    transform: translateY(-1px);
+  }
+  .lang-switch input:checked + .lang-option {
+    background: linear-gradient(180deg, #2f1b11 0%, #4a2d1b 100%);
+    color: #fffaf2;
+    box-shadow: 0 10px 18px rgba(47, 27, 17, 0.22);
+  }
+  .lang-switch input:focus-visible + .lang-option {
+    outline: 2px solid rgba(255, 154, 105, 0.95);
+    outline-offset: 2px;
+  }
+  body.hide-german .de-text,
+  body.hide-german .de-break {
+    display: none !important;
+  }
+
+  .matrix-outer {
+    overflow-x: auto;
+    border-radius: 22px;
+    border: 2px solid rgba(17, 17, 17, 0.92);
+    background: rgba(255, 252, 244, 0.96);
+    box-shadow: var(--surface-shadow);
+    backdrop-filter: blur(8px);
+  }
+
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 1050px;
+    table-layout: fixed;
+  }
+
+  thead th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        padding: 12px 12px 14px;
+        font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+        letter-spacing: 0.02em; text-transform: none; text-align: center; line-height: 1.3;
+        overflow: visible;
+        border: 2px solid var(--grid); white-space: nowrap;
+        box-shadow: inset 0 -1px 0 rgba(17, 17, 17, 0.28);
+      }
+  thead th:first-child { background: var(--page-bg); width: 120px; }
+  .ch-what, .ch-why, .ch-how, .ch-who, .ch-where, .ch-when { background: var(--header-fill); color: var(--header-text); }
+  thead th span { font-size: 10px !important; }
+
+  .rh {
+        padding: 11px 8px 13px; text-align: center; vertical-align: middle;
+        font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+        letter-spacing: 0.02em; text-transform: none; line-height: 1.4;
+        overflow: visible;
+        border: 2px solid var(--grid); width: 120px;
+        box-shadow: inset -1px 0 0 rgba(17, 17, 17, 0.16);
+      }
+  .rh-ctx   { background: var(--layer-ctx);  color: #111111; }
+  .rh-conc  { background: var(--layer-conc); color: #111111; }
+  .rh-log   { background: var(--layer-log);  color: #111111; }
+  .rh-phys  { background: var(--layer-phys); color: #111111; }
+  .rh-comp  { background: var(--layer-comp); color: #111111; }
+  .rh-mgmt  { background: var(--layer-mgmt); color: #111111; }
+  .rh span { font-size: 9px !important; }
+
+  td.cell {
+    vertical-align: top;
+    padding: 0;
+    border: 2px solid var(--grid);
+    font-size: 10.5px;
+    line-height: 1.5;
+    background: linear-gradient(180deg, #fffde2 0%, var(--cell-bg) 100%);
+    transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  }
+
+  .cell-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.03em; margin-bottom: 0; padding: 8px 10px 10px;
+      line-height: 1.35;
+      min-height: 54px;
+      overflow: visible;
+      border-bottom: 1px solid var(--grid);
+      background: linear-gradient(180deg, #fff87d 0%, var(--cell-title-bg) 100%);
+    color: #222222;
+    text-align: center;
+    box-shadow: inset 0 -1px 0 rgba(17, 17, 17, 0.18);
+  }
+
+  .cell-title span { color: #555555; }
+  ul.items { list-style: none; padding: 10px 12px 12px; }
+  ul.items li { padding: 2px 0 2px 13px; position: relative; font-size: 10px; font-weight: 500; color: #222222; }
+  ul.items li::before { content: '›'; position: absolute; left: 0; font-weight: 700; color: #444444; }
+  ul.items li span { font-size: 9.5px; color: #5f5f5f; }
+
+  tbody tr:hover td.cell {
+    background: linear-gradient(180deg, #fffef0 0%, #fff8c7 100%);
+    box-shadow: var(--surface-shadow-soft);
+  }
+
+  .footer { margin-top: 18px; font-size: 10px; color: #555555; text-align: center; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SABSA Architecture Matrix</h1>
+  <p>Architecting a Secure Digital World · Alle 6 Layer · Englisch (Deutsch)</p>
+  <div class="toolbar">
+    <div class="toolbar-label">Deutsche Darstellung</div>
+    <div class="lang-switch" role="radiogroup" aria-label="Deutsche Darstellung umschalten">
+      <input type="radio" id="lang-de-on" name="lang-de" value="on" checked>
+      <label class="lang-option" for="lang-de-on">Deutsch an</label>
+      <input type="radio" id="lang-de-off" name="lang-de" value="off">
+      <label class="lang-option" for="lang-de-off">Deutsch aus</label>
+    </div>
+  </div>
+  </div>
+
+<div class="matrix-outer">
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th class="ch-what">Assets (What)<br><span style="font-weight:400;font-size:9px;opacity:.7">Werte (Was)</span></th>
+      <th class="ch-why">Motivation (Why)<br><span style="font-weight:400;font-size:9px;opacity:.7">Motivation (Warum)</span></th>
+      <th class="ch-how">Process (How)<br><span style="font-weight:400;font-size:9px;opacity:.7">Prozess (Wie)</span></th>
+      <th class="ch-who">People (Who)<br><span style="font-weight:400;font-size:9px;opacity:.7">Personen (Wer)</span></th>
+      <th class="ch-where">Location (Where)<br><span style="font-weight:400;font-size:9px;opacity:.7">Ort (Wo)</span></th>
+      <th class="ch-when">Time (When)<br><span style="font-weight:400;font-size:9px;opacity:.7">Zeit (Wann)</span></th>
+    </tr>
+  </thead>
+  <tbody>
+
+  <!-- ══════════════════════════════════════════════════════ CONTEXTUAL -->
+  <tr class="r-ctx">
+    <td class="rh rh-ctx">Contextual<br>Architecture<br><span style="opacity:.7;font-size:8px">Kontextuelle Architektur</span><br><span style="opacity:.5;font-size:8px">Layer 1</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Business Goals &amp; Decisions<br><span>(Geschäftsziele und Entscheidungen)</span></div>
+      <ul class="items">
+        <li>Business Value<br><span>(Geschäftswert)</span></li>
+        <li>Taxonomy of Business Assets, including Goals &amp; Objectives, Success Factors, Targets<br><span>(Taxonomie der Geschäftswerte einschließlich Ziele und Vorgaben, Erfolgsfaktoren und Zielwerte)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Business Risk<br><span>(Geschäftsrisiko)</span></div>
+      <ul class="items">
+        <li>Opportunities &amp; Threats Inventory<br><span>(Chancen- und Bedrohungsinventar)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Business Meta-Processes<br><span>(Geschäftliche Metaprozesse)</span></div>
+      <ul class="items">
+        <li>Business Value Chain<br><span>(Geschäftswertschöpfungskette)</span></li>
+        <li>Business Capabilities<br><span>(Geschäftsfähigkeiten)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Business Governance<br><span>(Unternehmensführung)</span></div>
+      <ul class="items">
+        <li>Organisational Structure &amp; the Extended Enterprise<br><span>(Organisationsstruktur und erweitertes Unternehmen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Business Geography<br><span>(Geschäftsgeografie)</span></div>
+      <ul class="items">
+        <li>Inventory of Buildings, Sites, Territories, Jurisdictions<br><span>(Inventar von Gebäuden, Standorten, Territorien und Zuständigkeitsräumen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Business Time Dependence<br><span>(Zeitliche Abhängigkeiten des Geschäfts)</span></div>
+      <ul class="items">
+        <li>Time Dependencies of Business Goals and Value Creation<br><span>(Zeitliche Abhängigkeiten von Geschäftszielen und Wertschöpfung)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  <!-- ══════════════════════════════════════════════════════ CONCEPTUAL -->
+  <tr class="r-conc">
+    <td class="rh rh-conc">Conceptual<br>Architecture<br><span style="opacity:.7;font-size:8px">Konzeptuelle Architektur</span><br><span style="opacity:.5;font-size:8px">Layer 2</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Business Value &amp; Knowledge Strategy<br><span>(Geschäftswert- und Wissensstrategie)</span></div>
+      <ul class="items">
+        <li>Business Attributes Taxonomy &amp; Profile, with integrated performance targets<br><span>(Taxonomie und Profil der Geschäftsattribute mit integrierten Leistungszielen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Risk Management Strategy &amp; Objectives<br><span>(Risikomanagementstrategie und -ziele)</span></div>
+      <ul class="items">
+        <li>Enablement &amp; Control Objectives<br><span>(Befähigungs- und Kontrollziele)</span></li>
+        <li>Policy Architecture<br><span>(Richtlinienarchitektur)</span></li>
+        <li>Risk Categories<br><span>(Risikokategorien)</span></li>
+        <li>Risk Management Strategies<br><span>(Risikomanagementstrategien)</span></li>
+        <li>Risk Modelling Framework<br><span>(Rahmenwerk zur Risikomodellierung)</span></li>
+        <li>Assurance Framework<br><span>(Assurance-Rahmenwerk)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Strategies for Process Assurance<br><span>(Strategien zur Prozesssicherung)</span></div>
+      <ul class="items">
+        <li>Inventory of all Operational Processes (IT, industrial, &amp; manual)<br><span>(Inventar aller operativen Prozesse (IT, industriell und manuell))</span></li>
+        <li>Process Mapping Framework<br><span>(Rahmenwerk zur Prozessabbildung)</span></li>
+        <li>Architectural Strategies for IT used in Process Support<br><span>(Architekturstrategien für IT zur Prozessunterstützung)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Security &amp; Risk Governance; Trust Framework<br><span>(Governance für Sicherheit und Risiko; Vertrauensrahmen)</span></div>
+      <ul class="items">
+        <li>Owners, Custodians &amp; Users<br><span>(Eigentümer, Verwahrende und Nutzende)</span></li>
+        <li>Service Providers &amp; Customers<br><span>(Dienstleistende und Kundschaft)</span></li>
+        <li>Trust Modelling Framework<br><span>(Rahmenwerk zur Vertrauensmodellierung)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Domain Framework<br><span>(Domänenrahmen)</span></div>
+      <ul class="items">
+        <li>Security Domain Concepts &amp; Framework<br><span>(Konzepte und Rahmenwerk für Sicherheitsdomänen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Time Management Framework<br><span>(Zeitmanagement-Rahmenwerk)</span></div>
+      <ul class="items">
+        <li>Through-Life Risk Management Framework<br><span>(Lebenszyklusweites Risikomanagement-Rahmenwerk)</span></li>
+        <li>Attribute Performance Targets<br><span>(Leistungsziele für Attribute)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  <!-- ══════════════════════════════════════════════════════ LOGICAL -->
+  <tr class="r-log">
+    <td class="rh rh-log">Logical<br>Architecture<br><span style="opacity:.7;font-size:8px">Logische Architektur</span><br><span style="opacity:.5;font-size:8px">Layer 3</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Information Assets<br><span>(Informationswerte)</span></div>
+      <ul class="items">
+        <li>Inventory of Information Assets<br><span>(Inventar der Informationswerte)</span></li>
+        <li>Information Model of the Business<br><span>(Informationsmodell des Unternehmens)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Risk Management Policies<br><span>(Risikomanagement-Richtlinien)</span></div>
+      <ul class="items">
+        <li>Risk Models<br><span>(Risikomodelle)</span></li>
+        <li>Domain Policies<br><span>(Domänenrichtlinien)</span></li>
+        <li>Assurance Criteria (populated Assurance Framework)<br><span>(Assurance-Kriterien (ausgefülltes Assurance-Rahmenwerk))</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Process Maps &amp; Services<br><span>(Prozesslandkarten und Services)</span></div>
+      <ul class="items">
+        <li>Information Flows<br><span>(Informationsflüsse)</span></li>
+        <li>Functional Transformations<br><span>(Funktionale Transformationen)</span></li>
+        <li>Service-Oriented Architecture<br><span>(Serviceorientierte Architektur)</span></li>
+        <li>Services Catalogue<br><span>(Servicekatalog)</span></li>
+        <li>Application Functionality &amp; Services<br><span>(Anwendungsfunktionen und Services)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Trust Relationships<br><span>(Vertrauensbeziehungen)</span></div>
+      <ul class="items">
+        <li>Domain Authorities<br><span>(Domänenverantwortliche)</span></li>
+        <li>Entity Schema<br><span>(Entitätenschema)</span></li>
+        <li>Privilege Profiles<br><span>(Berechtigungsprofile)</span></li>
+        <li>Trust Relationship Models<br><span>(Modelle von Vertrauensbeziehungen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Domain Maps<br><span>(Domänenlandkarten)</span></div>
+      <ul class="items">
+        <li>Domain Definitions<br><span>(Domänendefinitionen)</span></li>
+        <li>Inter-domain Associations &amp; Interactions<br><span>(Domänenübergreifende Zuordnungen und Interaktionen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Calendar &amp; Timetable<br><span>(Kalender und Zeitplan)</span></div>
+      <ul class="items">
+        <li>Start Times, Lifetimes &amp; Deadlines<br><span>(Startzeiten, Laufzeiten und Fristen)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  <!-- ══════════════════════════════════════════════════════ PHYSICAL -->
+  <tr class="r-phys">
+    <td class="rh rh-phys">Physical<br>Architecture<br><span style="opacity:.7;font-size:8px">Physische Architektur</span><br><span style="opacity:.5;font-size:8px">Layer 4</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Data Assets<br><span>(Datenwerte)</span></div>
+      <ul class="items">
+        <li>Data Dictionary &amp; Data Storage Devices Inventory<br><span>(Datenlexikon und Inventar der Datenspeichergeräte)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Risk Management Practices<br><span>(Risikomanagement-Praktiken)</span></div>
+      <ul class="items">
+        <li>Risk Management Rules &amp; Procedures<br><span>(Risikomanagement-Regeln und -Verfahren)</span></li>
+        <li>Risk Metadata<br><span>(Risikometadaten)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Process Mechanisms<br><span>(Prozessmechanismen)</span></div>
+      <ul class="items">
+        <li>Working Procedures<br><span>(Arbeitsverfahren)</span></li>
+        <li>Application Software<br><span>(Anwendungssoftware)</span></li>
+        <li>Middleware &amp; Systems<br><span>(Middleware und Systeme)</span></li>
+        <li>Security Mechanisms<br><span>(Sicherheitsmechanismen)</span></li>
+        <li>Process Control Points<br><span>(Prozesskontrollpunkte)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Human Interface<br><span>(Mensch-Maschine-Schnittstelle)</span></div>
+      <ul class="items">
+        <li>User Interface to Business Systems<br><span>(Benutzungsschnittstelle zu Geschäftssystemen)</span></li>
+        <li>Identity &amp; Access Control Systems<br><span>(Identitäts- und Zugriffssteuerungssysteme)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Infrastructure<br><span>(Infrastruktur)</span></div>
+      <ul class="items">
+        <li>Workspaces<br><span>(Arbeitsbereiche)</span></li>
+        <li>Host Platforms, Layout of Devices &amp; Networks<br><span>(Host-Plattformen sowie Anordnung von Geräten und Netzwerken)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Processing Schedule<br><span>(Verarbeitungszeitplan)</span></div>
+      <ul class="items">
+        <li>Timing &amp; Sequencing of Processes and Sessions<br><span>(Zeitliche Abstimmung und Abfolge von Prozessen und Sitzungen)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  <!-- ══════════════════════════════════════════════════════ COMPONENT -->
+  <tr class="r-comp">
+    <td class="rh rh-comp">Component<br>Architecture<br><span style="opacity:.7;font-size:8px">Komponentenarchitektur</span><br><span style="opacity:.5;font-size:8px">Layer 5</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Component Assets<br><span>(Komponentenwerte)</span></div>
+      <ul class="items">
+        <li>Products &amp; Tools, Data Repositories and Processors<br><span>(Produkte und Werkzeuge, Datenablagen und Prozessoren)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Risk Management Components &amp; Standards<br><span>(Risikomanagement-Komponenten und -Standards)</span></div>
+      <ul class="items">
+        <li>Risk Analysis Tools<br><span>(Werkzeuge zur Risikoanalyse)</span></li>
+        <li>Risk Registers<br><span>(Risikoregister)</span></li>
+        <li>Risk Monitoring &amp; Reporting Tools<br><span>(Werkzeuge zur Risikoüberwachung und Berichterstattung)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Process Components &amp; Standards<br><span>(Prozess-Komponenten und -Standards)</span></div>
+      <ul class="items">
+        <li>Tools &amp; Protocols for Process Delivery<br><span>(Werkzeuge und Protokolle für die Prozessausführung)</span></li>
+        <li>Application Products<br><span>(Anwendungsprodukte)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Human Entities: Components &amp; Standards<br><span>(Menschliche Einheiten: Komponenten und Standards)</span></div>
+      <ul class="items">
+        <li>Identities<br><span>(Identitäten)</span></li>
+        <li>Job Descriptions<br><span>(Stellenbeschreibungen)</span></li>
+        <li>Roles &amp; Functions<br><span>(Rollen und Funktionen)</span></li>
+        <li>Actions &amp; Access Control Lists<br><span>(Aktionen und Zugriffssteuerungslisten)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Locator Components &amp; Standards<br><span>(Lokalisierungskomponenten und -standards)</span></div>
+      <ul class="items">
+        <li>Nodes, Addresses &amp; other Locators<br><span>(Knoten, Adressen und andere Lokatoren)</span></li>
+        <li>Component Configuration<br><span>(Komponentenkonfiguration)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Step Timing &amp; Sequencing Components &amp; Standards<br><span>(Komponenten und Standards für Schritt-Timing und -Sequenzierung)</span></div>
+      <ul class="items">
+        <li>Time Schedules<br><span>(Zeitpläne)</span></li>
+        <li>Clocks, Timers &amp; Interrupts<br><span>(Uhren, Timer und Interrupts)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  <!-- ══════════════════════════════════════════════════════ MANAGEMENT -->
+  <tr class="r-mgmt">
+    <td class="rh rh-mgmt">Management<br>Architecture<br><span style="opacity:.7;font-size:8px">Management-Architektur</span><br><span style="opacity:.5;font-size:8px">Layer 6</span></td>
+
+    <td class="cell c-what">
+      <div class="cell-title">Delivery &amp; Continuity Management<br><span>(Leistungsbereitstellungs- und Kontinuitätsmanagement)</span></div>
+      <ul class="items">
+        <li>Assurance of Operational Excellence &amp; Continuity<br><span>(Sicherstellung operativer Exzellenz und Kontinuität)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-why">
+      <div class="cell-title">Operational Risk Management<br><span>(Operatives Risikomanagement)</span></div>
+      <ul class="items">
+        <li>Risk Assessment<br><span>(Risikobewertung)</span></li>
+        <li>Risk Monitoring &amp; Reporting<br><span>(Risikoüberwachung und Berichterstattung)</span></li>
+        <li>Risk Treatment<br><span>(Risikobehandlung)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-how">
+      <div class="cell-title">Process Delivery Management<br><span>(Management der Prozessausführung)</span></div>
+      <ul class="items">
+        <li>Management &amp; Support of Systems, Applications &amp; Services<br><span>(Management und Unterstützung von Systemen, Anwendungen und Services)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-who">
+      <div class="cell-title">Governance, Relationship &amp; Personnel Management<br><span>(Governance-, Beziehungs- und Personalmanagement)</span></div>
+      <ul class="items">
+        <li>Management &amp; Support of Enterprise-wide and Extended Enterprise Relationships<br><span>(Management und Unterstützung unternehmensweiter sowie erweiterter Unternehmensbeziehungen)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-where">
+      <div class="cell-title">Environment Management<br><span>(Umgebungsmanagement)</span></div>
+      <ul class="items">
+        <li>Management of Buildings, Sites, Platforms &amp; Networks<br><span>(Management von Gebäuden, Standorten, Plattformen und Netzwerken)</span></li>
+      </ul>
+    </td>
+
+    <td class="cell c-when">
+      <div class="cell-title">Time &amp; Performance Management<br><span>(Zeit- und Leistungsmanagement)</span></div>
+      <ul class="items">
+        <li>Management of Calendar &amp; Timetable<br><span>(Management von Kalender und Zeitplan)</span></li>
+      </ul>
+    </td>
+  </tr>
+
+  </tbody>
+</table>
+</div>
+
+<div class="footer">© The SABSA Institute 1995–2018. All rights reserved.</div>
+
+<script>
+  function collectGermanNodes() {
+    const selectors = [
+      '.cell-title > span',
+      'ul.items li > span',
+      'thead th > span',
+      '.rh > span:first-of-type'
+    ];
+
+    return Array.from(document.querySelectorAll(selectors.join(', '))).map((span) => {
+      span.classList.add('de-text');
+      let previous = span.previousSibling;
+
+      while (previous && previous.nodeType === Node.TEXT_NODE && !previous.textContent.trim()) {
+        previous = previous.previousSibling;
+      }
+
+      if (previous && previous.nodeName === 'BR') {
+        previous.classList.add('de-break');
+      }
+
+      return {
+        span,
+        br: previous && previous.nodeName === 'BR' ? previous : null
+      };
+    });
+  }
+
+  function normalizeRowHeaderHeights() {
+    const rows = document.querySelectorAll('tbody tr');
+
+    rows.forEach((row) => {
+      const titles = row.querySelectorAll('.cell-title');
+      if (!titles.length) return;
+
+      let maxHeight = 0;
+      titles.forEach((title) => {
+        title.style.height = 'auto';
+        title.style.minHeight = '54px';
+      });
+
+      titles.forEach((title) => {
+        maxHeight = Math.max(maxHeight, title.offsetHeight);
+      });
+
+      titles.forEach((title) => {
+        title.style.height = 'auto';
+        title.style.minHeight = `${maxHeight + 6}px`;
+      });
+    });
+  }
+
+  function setGermanVisibility(showGerman, germanNodes) {
+    document.body.classList.toggle('hide-german', !showGerman);
+
+    normalizeRowHeaderHeights();
+  }
+
+  function setupLanguageToggle() {
+    const germanNodes = collectGermanNodes();
+    const radios = document.querySelectorAll('input[name="lang-de"]');
+    const labels = document.querySelectorAll('.lang-option');
+
+    labels.forEach((label) => {
+      label.addEventListener('click', () => {
+        const targetId = label.getAttribute('for');
+        const radio = targetId ? document.getElementById(targetId) : null;
+        if (!radio) return;
+        radio.checked = true;
+        setGermanVisibility(radio.value === 'on', germanNodes);
+      });
+    });
+
+    radios.forEach((radio) => {
+      radio.addEventListener('change', () => {
+        setGermanVisibility(radio.value === 'on', germanNodes);
+      });
+    });
+
+    const selected = document.querySelector('input[name="lang-de"]:checked');
+    setGermanVisibility(!selected || selected.value === 'on', germanNodes);
+  }
+
+  let resizeTimer = null;
+  window.addEventListener('load', () => {
+    setupLanguageToggle();
+    normalizeRowHeaderHeights();
+  });
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(normalizeRowHeaderHeights, 80);
+  });
+</script>
+</body>
+</html>

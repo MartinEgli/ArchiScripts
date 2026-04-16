@@ -1,0 +1,2419 @@
+{
+  "schema": "archiscripts.view-exchange/1",
+  "exported_at": "2026-04-16T13:27:50.727Z",
+  "model": {
+    "name": "ArchiMate_SABSA"
+  },
+  "view": {
+    "id": "id-35ed7a0610b84b7aa983b2d8989233a1",
+    "name": "Figure29_Developing-and-Maintaining-Contextual-Security-Architecture",
+    "documentation": ""
+  },
+  "elements": [
+    {
+      "source_view_object_id": "id-d2e111791adc41e1a8032c3c46d9e34b",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-fdd2139e2c17479b9a7ef5aeda4c1dd8",
+        "type": "representation",
+        "name": "Business Goals & Drivers",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": -60,
+          "y": 284,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": -60,
+          "y": 284,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-f61a79630e714c63969ec05694c5c20c",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-8e77bfa626d34e07ad8bad9a32c641d9",
+        "type": "representation",
+        "name": "Business Strategy",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": -60,
+          "y": 200,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": -60,
+          "y": 200,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-16e245471c1d495db9b9aa2a455eef0b",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-8fdc0613d2f74b9eb4e17c057ad1ac9a",
+        "type": "representation",
+        "name": "Enterprise Structure",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": -60,
+          "y": 116,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": -60,
+          "y": 116,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-0694381ab31c40ecaa159e2f87c699f3",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-3285c1bb13c448278633d208cd8be5b8",
+        "type": "representation",
+        "name": "SABSA Business Attributes",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": -60,
+          "y": 468,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": -60,
+          "y": 468,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-1cd3f6569b5148559662f6669f27f5bb",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-af0e9f19fea946ed95410ed7c7f39194",
+        "type": "representation",
+        "name": "Threat Catalog",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": -60,
+          "y": 732,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": -60,
+          "y": 732,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-6aea6bf4806a48869db5823983fa3017",
+        "type": "business-process",
+        "name": "Develop Contextual Security Architecture",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 96,
+          "y": 84,
+          "width": 209,
+          "height": 780
+        },
+        "absolute_bounds": {
+          "x": 96,
+          "y": 84,
+          "width": 209,
+          "height": 780
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "parent_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "concept": {
+        "source_concept_id": "id-1dbc302489014969b1851c4bb4532909",
+        "type": "business-process",
+        "name": "Gather, Assess & Analyze Business Mission",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 48,
+          "width": 143,
+          "height": 205
+        },
+        "absolute_bounds": {
+          "x": 132,
+          "y": 132,
+          "width": 143,
+          "height": 205
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-3db4e1dd3bad44209ee7373c4dd43b30",
+      "parent_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "concept": {
+        "source_concept_id": "id-230d55f008ab4a6bbb6a9ba92d46a63c",
+        "type": "business-process",
+        "name": "Business SWOT Analysis",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 48,
+          "y": 648,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 144,
+          "y": 732,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "parent_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "concept": {
+        "source_concept_id": "id-c1d6157fcf36486f8bbf92f940dd0cf2",
+        "type": "business-process",
+        "name": "Describe the Business",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 336,
+          "width": 143,
+          "height": 135
+        },
+        "absolute_bounds": {
+          "x": 132,
+          "y": 420,
+          "width": 143,
+          "height": 135
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-86c9e1ede31f49a39bca4f2680597c78",
+      "parent_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "concept": {
+        "source_concept_id": "id-e552e8bf982441c89c6dbd4c06ebb0cd",
+        "type": "business-process",
+        "name": "Identify Additional Requirements",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 48,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 144,
+          "y": 468,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-48df0bf611c2407999c111f65d5b6277",
+        "type": "grouping",
+        "name": "Contextual Security Architecture",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 373,
+          "y": 84,
+          "width": 372,
+          "height": 780
+        },
+        "absolute_bounds": {
+          "x": 373,
+          "y": 84,
+          "width": 372,
+          "height": 780
+        },
+        "fill_color": "#ffffff",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-99e0428ba9d64ad8a7f2fb97719008fc",
+        "type": "work-package",
+        "name": "Business Meta-Process Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 156,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 240,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-833433518eec4f6ebcf885504fea71bd",
+      "parent_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "concept": {
+        "source_concept_id": "id-26aeae3e061c42d7acc1528c0be3a7d0",
+        "type": "deliverable",
+        "name": "Business Capabilities",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 182,
+          "y": 36,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 567,
+          "y": 276,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-b62719b4cbfb487a90c1df5d197a7621",
+      "parent_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "concept": {
+        "source_concept_id": "id-fb9d7b98741c47dba15063098398a40f",
+        "type": "deliverable",
+        "name": "Business Value Chain",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 36,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 421,
+          "y": 276,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-03cfd906e8234c1a8a5012f50648161c",
+        "type": "work-package",
+        "name": "Business Governance Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 276,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 360,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-3d1c0c76d62c450fb217ad277bad58d6",
+      "parent_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "concept": {
+        "source_concept_id": "id-9a33046482694ddba3847dee352e6c15",
+        "type": "deliverable",
+        "name": "Organisational Structure & the Extended Enterprise",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 48,
+          "y": 24,
+          "width": 252,
+          "height": 63
+        },
+        "absolute_bounds": {
+          "x": 433,
+          "y": 384,
+          "width": 252,
+          "height": 63
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-811845fd1bb04639ac2e0c1ef9d95e78",
+        "type": "work-package",
+        "name": "Business Goals Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 36,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 120,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-74414750e8db45a597dd3e57e1796298",
+      "parent_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "concept": {
+        "source_concept_id": "id-a9add7f27e0045c282b9ef6cd3ddb0cf",
+        "type": "deliverable",
+        "name": "Taxonomy of Business Assets",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 186,
+          "y": 36,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 571,
+          "y": 156,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-76ee7d1aa8d94b92b18ec5cba94ca478",
+      "parent_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "concept": {
+        "source_concept_id": "id-35c5242703bc4d61ab1e7d7ac9e8e550",
+        "type": "deliverable",
+        "name": "Business Value",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 36,
+          "width": 120,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 421,
+          "y": 156,
+          "width": 120,
+          "height": 55
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-c2f3af0eb6a346d7bb255b5f44f6855d",
+        "type": "work-package",
+        "name": "Business Time Dependency Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 516,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 600,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-16dd6382fce34856889eb0fbd3e22951",
+      "parent_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "concept": {
+        "source_concept_id": "id-d8d0e50d8be44a97bb00ff2d0684d8ab",
+        "type": "deliverable",
+        "name": "Time Dependencies of Business Goals & Value Creation",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 48,
+          "y": 24,
+          "width": 252,
+          "height": 63
+        },
+        "absolute_bounds": {
+          "x": 433,
+          "y": 624,
+          "width": 252,
+          "height": 63
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-854ac1fc488a4eae928da51730747457",
+        "type": "work-package",
+        "name": "Business Geography Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 396,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 480,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-ff56916efc0040daaa7a6cdfd8291e54",
+      "parent_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "concept": {
+        "source_concept_id": "id-09d9e7b129b742448be617b2c146acdb",
+        "type": "deliverable",
+        "name": "Inventory of Buildings, Sites, Territories & Jurisdictions",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 48,
+          "y": 24,
+          "width": 252,
+          "height": 63
+        },
+        "absolute_bounds": {
+          "x": 433,
+          "y": 504,
+          "width": 252,
+          "height": 63
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "parent_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "concept": {
+        "source_concept_id": "id-162f859e32b14e278a327c20bce82086",
+        "type": "work-package",
+        "name": "Business Risk Model",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 12,
+          "y": 636,
+          "width": 348,
+          "height": 109
+        },
+        "absolute_bounds": {
+          "x": 385,
+          "y": 720,
+          "width": 348,
+          "height": 109
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-74fe3d588fdc423abc2f8d9a82447c4b",
+      "parent_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "concept": {
+        "source_concept_id": "id-a1ebdbbb64a04a4e95de1b46621b1ecc",
+        "type": "deliverable",
+        "name": "Opportunities & Threats Inventory",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 48,
+          "y": 24,
+          "width": 252,
+          "height": 63
+        },
+        "absolute_bounds": {
+          "x": 433,
+          "y": 744,
+          "width": 252,
+          "height": 63
+        },
+        "fill_color": "#ffe0e0",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "parent_view_object_id": null,
+      "concept": {
+        "source_concept_id": "id-bdd53e06d3aa4a6ca75a7fea1c869eb7",
+        "type": "business-process",
+        "name": "Maintain Contextual Security Architecture",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 804,
+          "y": 84,
+          "width": 209,
+          "height": 780
+        },
+        "absolute_bounds": {
+          "x": 804,
+          "y": 84,
+          "width": 209,
+          "height": 780
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-83da5d74dee04cc783ad66a9e39d05f9",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-ce8152f62b1647c7865b3f5292f0a44b",
+        "type": "business-function",
+        "name": "Monitoring of KPIs vs. Performance Targets",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 540,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 624,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-446b007c51b5408fa6eade48947874f6",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-37d5930467e8475984cac13b0a497253",
+        "type": "business-function",
+        "name": "Identification of Business Drivers",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 132,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 216,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-95d860a02c524430ad10e42f74f95e45",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-9c42807c09e94ac2a15bf59012dcf647",
+        "type": "business-function",
+        "name": "Business Benchmarking",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 60,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 144,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-e6b51f04c55b41cca45daba3a5ebd344",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-45543fcf6e8549939e64073d487655b0",
+        "type": "business-function",
+        "name": "Capability & Functional Deployment",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 372,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 456,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-8142cc4a85bd4b67bee92a73927f99d8",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-2a07a25c254f4767af54971a12ce35fa",
+        "type": "business-function",
+        "name": "Identification & Monitoring of Key Risk Indicators",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 660,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 744,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-085de0975b374e6fa76716a0a2941a01",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-61718d979593484fb25631326019a2c4",
+        "type": "business-function",
+        "name": "Managing & Optimizing Stakeholder Value",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 204,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 288,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-d9663a931b064975824aa919d155b8bb",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-fb346a56ccd749d6a095fca0eedbca96",
+        "type": "business-function",
+        "name": "Managing Contracts & Stakeholders Relationships",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 300,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 384,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-47a8418355584a85997eeeca12776051",
+      "parent_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "concept": {
+        "source_concept_id": "id-c0e1da91b6714c97a7dd57c8d0599042",
+        "type": "business-function",
+        "name": "Supply Chain Management",
+        "documentation": "",
+        "specialization": "",
+        "properties": {}
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 24,
+          "y": 444,
+          "width": 168,
+          "height": 55
+        },
+        "absolute_bounds": {
+          "x": 828,
+          "y": 528,
+          "width": 168,
+          "height": 55
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 9,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-77ed406eb1834bc78bba76af52a0c312",
+      "parent_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "concept": {
+        "source_concept_id": "id-524828aff22345b6aeb9deaf7625dd25",
+        "type": "representation",
+        "name": "Goals & Objectives",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Assets (What)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 18,
+          "y": 76,
+          "width": 94,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 403,
+          "y": 196,
+          "width": 94,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-43cd99f5b29c40159278e5aa9d8e3e2d",
+      "parent_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "concept": {
+        "source_concept_id": "id-fe7d5672e7254774bba9174294c9fe9d",
+        "type": "representation",
+        "name": "Success Factors",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Assets (What)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 127,
+          "y": 76,
+          "width": 94,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 512,
+          "y": 196,
+          "width": 94,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-65624e57f98e4013920842771270c433",
+      "parent_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "concept": {
+        "source_concept_id": "id-21928a51f5614501a6b7c8d2bd970037",
+        "type": "representation",
+        "name": "Targets",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Assets (What)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 236,
+          "y": 76,
+          "width": 94,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 621,
+          "y": 196,
+          "width": 94,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-f388dd6502e743e0a165330d66fb67ca",
+      "parent_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "concept": {
+        "source_concept_id": "id-2d8c804527364d8eb1582f8ba87cb302",
+        "type": "representation",
+        "name": "Inventory of Buildings",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Location (Where)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 10,
+          "y": 76,
+          "width": 80,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 395,
+          "y": 556,
+          "width": 80,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-017fc3efa1dc47889cd86e133c43ad2b",
+      "parent_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "concept": {
+        "source_concept_id": "id-b2753d18b1f6465e9cf62fe80ecbd33e",
+        "type": "representation",
+        "name": "Sites",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Location (Where)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 92,
+          "y": 76,
+          "width": 80,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 477,
+          "y": 556,
+          "width": 80,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-cc26023ece1c4a56a08013b6a762c8ab",
+      "parent_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "concept": {
+        "source_concept_id": "id-a6e739e4909f4df7a60f8e25bdd6ab1c",
+        "type": "representation",
+        "name": "Territories",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Location (Where)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 174,
+          "y": 76,
+          "width": 80,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 559,
+          "y": 556,
+          "width": 80,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-956852d3d42c47f595fb4a6a6ee63ff2",
+      "parent_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "concept": {
+        "source_concept_id": "id-90002462331a40de929674f4db29d08b",
+        "type": "representation",
+        "name": "Jurisdictions",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Location (Where)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 256,
+          "y": 76,
+          "width": 80,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 641,
+          "y": 556,
+          "width": 80,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-ea945ed200a448628b99e5b5528b0df3",
+      "parent_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "concept": {
+        "source_concept_id": "id-6925220e7cbe4d798ddf83e579eaa0a1",
+        "type": "representation",
+        "name": "Time Dependencies of Business Goals",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Time (When)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 36,
+          "y": 76,
+          "width": 120,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 421,
+          "y": 676,
+          "width": 120,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    },
+    {
+      "source_view_object_id": "id-dd039f0de0064316b10dcf15399a4132",
+      "parent_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "concept": {
+        "source_concept_id": "id-3042435e2988430abcf8812db4dcee72",
+        "type": "representation",
+        "name": "Value Creation",
+        "documentation": "Aligned with SABSA contextual architecture matrix.",
+        "specialization": "",
+        "properties": {
+          "SABSA Layer": "Contextual Architecture",
+          "SABSA Cell": "Time (When)",
+          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+        }
+      },
+      "visual": {
+        "relative_bounds": {
+          "x": 186,
+          "y": 76,
+          "width": 120,
+          "height": 24
+        },
+        "absolute_bounds": {
+          "x": 571,
+          "y": 676,
+          "width": 120,
+          "height": 24
+        },
+        "fill_color": "#ffffb5",
+        "font_color": "#000000",
+        "line_color": "#5c5c5c",
+        "font_size": 8,
+        "text_position": 0
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source_view_connection_id": "id-d8b581c7d9fa4959886ba039a81241f4",
+      "source_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "target_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "relationship": {
+        "source_relationship_id": "id-bbcb35ffae164814b992f4d1c3754df9",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-f99d4ade605f428799d3d1a4d8cdd3eb",
+      "source_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "target_view_object_id": "id-3db4e1dd3bad44209ee7373c4dd43b30",
+      "relationship": {
+        "source_relationship_id": "id-0bbbe74168ba4cf2a723d8b73bd126ce",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-9f1cb1f780644d338d4582e4e277ddd3",
+      "source_view_object_id": "id-fcd8a63ed35a4ff5bff58c44b74024c9",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-e57d6f7b07124060be71329b0fe02a7b",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-26ac6c77999e47bcb02d1f20424272c8",
+      "source_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "target_view_object_id": "id-16e245471c1d495db9b9aa2a455eef0b",
+      "relationship": {
+        "source_relationship_id": "id-30f1f5b86c214aab8f13a136d3d929f0",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "read",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-9ab2d1a7da814fe29e77c3e63a54ff8b",
+      "source_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "target_view_object_id": "id-f61a79630e714c63969ec05694c5c20c",
+      "relationship": {
+        "source_relationship_id": "id-1c03baeb504a4946ab6a5a3092ab5177",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "read",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-b264a3cc89d64ca9bb477dbdca1eae03",
+      "source_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "target_view_object_id": "id-d2e111791adc41e1a8032c3c46d9e34b",
+      "relationship": {
+        "source_relationship_id": "id-f4dbeac129694ba1b5fe2f45d5685987",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "read",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-95ae4fedde60498db6c9fbbd06e86977",
+      "source_view_object_id": "id-08d84eacb97946e1ba79a09dd285dca5",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-6274a90ca03147ecb116498885540228",
+        "type": "flow-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-6599c5b5b9d44649848d2892d2e6b067",
+      "source_view_object_id": "id-3db4e1dd3bad44209ee7373c4dd43b30",
+      "target_view_object_id": "id-1cd3f6569b5148559662f6669f27f5bb",
+      "relationship": {
+        "source_relationship_id": "id-60ee6dccfb7c43e790f32cae008784cb",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "read",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-0892b5a79df14639be8aa89b0b20cc3c",
+      "source_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "target_view_object_id": "id-86c9e1ede31f49a39bca4f2680597c78",
+      "relationship": {
+        "source_relationship_id": "id-59880a1992e24aa99adbfcf14b34da6b",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-9966ac0aa51e44ddb0be1314f6977e25",
+      "source_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "target_view_object_id": "id-0694381ab31c40ecaa159e2f87c699f3",
+      "relationship": {
+        "source_relationship_id": "id-a32bba96f9184858b132431a15f4c2a3",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "read",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-e34087222af3416588d93dd05d097fd5",
+      "source_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "target_view_object_id": "id-3db4e1dd3bad44209ee7373c4dd43b30",
+      "relationship": {
+        "source_relationship_id": "id-8e1d2e30db764fb79c98ed910d621dfb",
+        "type": "flow-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-5442e1523b8c4065946fe33d71f9517a",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "relationship": {
+        "source_relationship_id": "id-59b727d9f1f84943bfa875f3b63c2b7c",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-22d3ab5ac9954dce9aff7b307ad1a52c",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "relationship": {
+        "source_relationship_id": "id-cf593a9d4d1146bab92aad871c80e9ba",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-f132585dc8f145fbba7a9352d21e96ba",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "relationship": {
+        "source_relationship_id": "id-05d0431b09684c4580995e68b374daae",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-58a976be14c1489c9a5c8823228656fa",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "relationship": {
+        "source_relationship_id": "id-7d262e9431aa416f8791bd5c5bfde7f8",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-4256977fbbc1447ba7be1191ccf78499",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "relationship": {
+        "source_relationship_id": "id-4a907b7eb70841fab081ed73e8485cdc",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-69cc2bcc0e05479e9651c093a48c2561",
+      "source_view_object_id": "id-0193e69aeda74e65b8260bde77864f70",
+      "target_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "relationship": {
+        "source_relationship_id": "id-9a31ab3c86a8450faf41b883b5c18cf7",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-480a17e3d06747589bb266fb8719d179",
+      "source_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "target_view_object_id": "id-833433518eec4f6ebcf885504fea71bd",
+      "relationship": {
+        "source_relationship_id": "id-a6d9c67e84f54a289954af2d4f2b77e6",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-cc8a3d3c50604b5d96f1cbd0d21c7614",
+      "source_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "target_view_object_id": "id-b62719b4cbfb487a90c1df5d197a7621",
+      "relationship": {
+        "source_relationship_id": "id-457b1d03c4e345618b792b5d46c1d1b6",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-91d2bce5269149ed8531c2d215c539dd",
+      "source_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-c7eb5d790ac545edb7a1aa49b1c55a41",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-8d5c5e254ec24235bfa107b1591928b4",
+      "source_view_object_id": "id-14c0bc7b5c6c424fbff5fc15aef45241",
+      "target_view_object_id": "id-085de0975b374e6fa76716a0a2941a01",
+      "relationship": {
+        "source_relationship_id": "id-f444db7ce1514cb5ace8ac61fa909de6",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-48fcf05764ec41549957ceb6d3a8a13c",
+      "source_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "target_view_object_id": "id-3d1c0c76d62c450fb217ad277bad58d6",
+      "relationship": {
+        "source_relationship_id": "id-707b3500c6dd4c3b8e2e9043162d8cda",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-7d5acb77a8264787901deefc3094cf8d",
+      "source_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-7a1f40324356409f8d7c3b6e1a287f96",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-371ecad6c12a45b4a5f79812c01f0ff9",
+      "source_view_object_id": "id-781a36f8e9e34d0d9099a669d5195581",
+      "target_view_object_id": "id-d9663a931b064975824aa919d155b8bb",
+      "relationship": {
+        "source_relationship_id": "id-a5d6c730ff6944f5bf07cd4fb99c1f9a",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-7c327ddf16e24c98a069a6bd402aa45a",
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "target_view_object_id": "id-74414750e8db45a597dd3e57e1796298",
+      "relationship": {
+        "source_relationship_id": "id-2656fb48f4384094a5a8a9b21d4f9ce9",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-a223cee4a56b4850aaf3063d46f3f90a",
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "target_view_object_id": "id-76ee7d1aa8d94b92b18ec5cba94ca478",
+      "relationship": {
+        "source_relationship_id": "id-f6559b184e0149e5971d505b7c6e36e5",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-4e54dd6c8feb4626b3e97337c00ab5a9",
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-c1966fa4018449a9a4584327a70b6449",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-73583a56685f450a88a71010a869d8b9",
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "target_view_object_id": "id-95d860a02c524430ad10e42f74f95e45",
+      "relationship": {
+        "source_relationship_id": "id-5815af0d047a49deb61962f4692dff46",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-a57ccc5051914b7fb3f69190e27a30ff",
+      "source_view_object_id": "id-b760031b7400466697476847d15a1bcd",
+      "target_view_object_id": "id-446b007c51b5408fa6eade48947874f6",
+      "relationship": {
+        "source_relationship_id": "id-c1cc50c627fc4e518258136248c16641",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-863dd4bf27a640d3991f2b6c09cbd34c",
+      "source_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "target_view_object_id": "id-16dd6382fce34856889eb0fbd3e22951",
+      "relationship": {
+        "source_relationship_id": "id-449bfdb4b2bd47dbb3f89edd66ef8d84",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-52bd144c9954465cb177db2b96057165",
+      "source_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-1b620ff90a12496180db6eaea93bd762",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-1ccb3a186d9a4f55ba52054d243d07ea",
+      "source_view_object_id": "id-6ede009dfd56424593d638913f4aa736",
+      "target_view_object_id": "id-83da5d74dee04cc783ad66a9e39d05f9",
+      "relationship": {
+        "source_relationship_id": "id-bfa656a5a1304ad0adddf14310bee226",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-0980031b767d47729f539f5198d2da25",
+      "source_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "target_view_object_id": "id-ff56916efc0040daaa7a6cdfd8291e54",
+      "relationship": {
+        "source_relationship_id": "id-b0188750e9134c6e81fd1d46e7778915",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-77066a646b454ab0b355a22bb81255ae",
+      "source_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "target_view_object_id": "id-e362aa41aaf04d51ab369caedd9a76eb",
+      "relationship": {
+        "source_relationship_id": "id-03efe2fe075546798e88d4b92f49beb7",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-832abceb5c14494c8802311b3401b7e8",
+      "source_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "target_view_object_id": "id-e6b51f04c55b41cca45daba3a5ebd344",
+      "relationship": {
+        "source_relationship_id": "id-611f90b112e8423986b2bb8a19515b07",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-7fd7fddbd1324cb386c09632ce7755a5",
+      "source_view_object_id": "id-359b77127f3a4cbb8119e176d6bc105e",
+      "target_view_object_id": "id-47a8418355584a85997eeeca12776051",
+      "relationship": {
+        "source_relationship_id": "id-ca4ce7cf5a4f4b2495038a858c91610a",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-f17c81974b414754ae6ed02093fde377",
+      "source_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "target_view_object_id": "id-74fe3d588fdc423abc2f8d9a82447c4b",
+      "relationship": {
+        "source_relationship_id": "id-be21d58fb9fa48e98b20ad2fa57e951d",
+        "type": "access-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": "write",
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-bc5502febbf84962b5c2f70d7cdea593",
+      "source_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "target_view_object_id": "id-3db4e1dd3bad44209ee7373c4dd43b30",
+      "relationship": {
+        "source_relationship_id": "id-666a1a827d614f37989a14aca11a5786",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-a30ebf04d85343cd97ac5e371e6afffe",
+      "source_view_object_id": "id-f4741fd1684145c08d46b5f6b3e09dc5",
+      "target_view_object_id": "id-8142cc4a85bd4b67bee92a73927f99d8",
+      "relationship": {
+        "source_relationship_id": "id-65b03b0b055544b4bd900e8f800763f0",
+        "type": "realization-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-ccd4093e40ea4a98a1640ab4663514c9",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-83da5d74dee04cc783ad66a9e39d05f9",
+      "relationship": {
+        "source_relationship_id": "id-c908fb8cf008424390d9d78e718c998e",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-86e324dd71b447f2bf9b5deec88ec22b",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-446b007c51b5408fa6eade48947874f6",
+      "relationship": {
+        "source_relationship_id": "id-492f5bb908d54d85a1e48bb879c75aef",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-ca6736ffbd8940b38bbc51fb5f4306f7",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-95d860a02c524430ad10e42f74f95e45",
+      "relationship": {
+        "source_relationship_id": "id-cbb6768c789f4f91bed8afae372c4280",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-af6d8bbff5954746b4a2d38a00b68887",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-e6b51f04c55b41cca45daba3a5ebd344",
+      "relationship": {
+        "source_relationship_id": "id-417dd180cb304cb7aa4f58d9f322ee57",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-72330b6ed1a64a55a38d34c82f72e6db",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-8142cc4a85bd4b67bee92a73927f99d8",
+      "relationship": {
+        "source_relationship_id": "id-b483a6f1aa8e4444ac817f826205de4b",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-400ec9f015954e498292275b9a42eb2b",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-085de0975b374e6fa76716a0a2941a01",
+      "relationship": {
+        "source_relationship_id": "id-8643a05a2c3248c8849aeac323104c82",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-6a19c976bcb94993b4bb7628150cb1e2",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-d9663a931b064975824aa919d155b8bb",
+      "relationship": {
+        "source_relationship_id": "id-84ee573a21834037817314d521a937e7",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    },
+    {
+      "source_view_connection_id": "id-4962adcfb3be4c74951ecd696b064a71",
+      "source_view_object_id": "id-0a5a062239c54ea297f2fd1d91b77132",
+      "target_view_object_id": "id-47a8418355584a85997eeeca12776051",
+      "relationship": {
+        "source_relationship_id": "id-f06a633a2e564bb2b3ce426ceb337915",
+        "type": "composition-relationship",
+        "name": "",
+        "documentation": "",
+        "specialization": "",
+        "access_type": null,
+        "association_directed": null,
+        "influence_strength": null,
+        "properties": {}
+      },
+      "visual": {
+        "line_color": "#000000",
+        "font_color": "#000000",
+        "line_width": 1,
+        "text_position": 1
+      }
+    }
+  ]
+}
