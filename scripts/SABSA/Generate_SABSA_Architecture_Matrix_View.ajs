@@ -1,0 +1,641 @@
+var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+var BufferedImage = Java.type("java.awt.image.BufferedImage");
+var Font = Java.type("java.awt.Font");
+
+load(new File(__DIR__ + "../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_Architecture_Matrix_View";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "DEBUG"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA Architecture Matrix View"
+});
+
+var CONST = {
+    SourceJsonPath: new File(__DIR__ + "../../analyse/sabsa_architecture_matrix.json").getCanonicalPath(),
+    ViewName: "SABSA Architecture Matrix",
+    Layout: {
+        StartX: 54,
+        StartY: 42,
+        ColumnY: 42,
+        ColumnHeight: 42,
+        ColumnWidth: 212,
+        ColumnGap: 12,
+        RowStartY: 90,
+        RowGap: 0,
+        RowHeaderWidth: 38,
+        RowHeaderGap: 4,
+        RowHeaderReserve: 22,
+        CellHeaderReserve: 22,
+        RowInsetX: 6,
+        RowInsetY: 6,
+        RowBottomPadding: 8,
+        CellWidth: 212,
+        CellMinHeight: 90,
+        CellInnerX: 8,
+        CellInnerY: 6,
+        CellInnerRight: 8,
+        CellInnerBottom: 8,
+        RepresentationMinHeight: 26,
+        RepresentationGap: 6,
+        RepresentationBottomReserve: 4
+    },
+    Style: {
+        ColumnFill: "#ff9a69",
+        CellFill: "#ffff64",
+        RepresentationFill: "#ffffcc",
+        RowFillById: {
+            "contextual-architecture": "#ff9aff",
+            "conceptual-architecture": "#ccccff",
+            "logical-architecture": "#ccffff",
+            "physical-architecture": "#ccff9a",
+            "component-architecture": "#ffff9a",
+            "management-architecture": "#ffcc64"
+        },
+        LineColor: "#111111",
+        FontColor: "#111111"
+    }
+};
+
+var stats = {
+    rows: 0,
+    columns: 0,
+    cells: 0,
+    representations: 0,
+    relationships: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+var measurementGraphics = (function () {
+    var image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    return image.createGraphics();
+})();
+
+var measurementFont = new Font("SansSerif", Font.PLAIN, 11);
+measurementGraphics.setFont(measurementFont);
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function slugify(value) {
+    return trim(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function decodeEntities(value) {
+    return safeString(value)
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&nbsp;/g, " ");
+}
+
+function readUtf8Text(absolutePath) {
+    return String(new java.lang.String(
+        Files.readAllBytes(Paths.get(absolutePath)),
+        StandardCharsets.UTF_8
+    ));
+}
+
+function parseMatrixFromJson(jsonText) {
+    var data = JSON.parse(jsonText);
+    logger.info("Parsed SABSA matrix JSON source.", {
+        columns: (data.columns || []).length,
+        rows: (data.rows || []).length
+    }, "sabsa.matrix.source.parsed");
+
+    return {
+        columns: (data.columns || []).map(function (column) {
+            return {
+                id: safeString(column.id),
+                title: safeString(column.english_title || column.title)
+            };
+        }),
+        rows: (data.rows || []).map(function (row) {
+            return {
+                id: safeString(row.id || slugify(row.english_title || row.title)),
+                title: safeString(row.english_title || row.title),
+                cells: (row.cells || []).map(function (cell) {
+                    return {
+                        key: safeString(cell.key || slugify((row.english_title || row.title) + "-" + (cell.english_title || cell.title))),
+                        columnId: safeString(cell.column_id || cell.columnId),
+                        columnTitle: "",
+                        title: safeString(cell.english_title || cell.title),
+                        items: (cell.items || []).map(function (item) {
+                            if (typeof item === "string") {
+                                return safeString(item);
+                            }
+
+                            return safeString(item.english_text || item.text || item.name);
+                        })
+                    };
+                })
+            };
+        })
+    };
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByTypeAndKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaMatrixKey")) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation, fallbackFinder) {
+    var concept = findConceptByTypeAndKey(conceptType, key);
+    var reuseReason = "key";
+
+    if (!concept && typeof fallbackFinder === "function") {
+        concept = fallbackFinder();
+        reuseReason = concept ? "fallback" : reuseReason;
+    }
+
+    if (!concept) {
+        concept = model.createElement(conceptType, name);
+        stats.conceptsCreated++;
+        logger.debug("Created concept.", {
+            concept_type: conceptType,
+            key: key,
+            name: name
+        }, "sabsa.matrix.concept.created");
+    } else {
+        stats.conceptsReused++;
+        logger.debug("Reused concept.", {
+            concept_type: conceptType,
+            key: key,
+            name: safeString(concept.name),
+            reason: reuseReason
+        }, "sabsa.matrix.concept.reused");
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaMatrixKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        concept.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    return concept;
+}
+
+function findRepresentationConcept(rowData, cellData, itemText, index) {
+    var itemOrder = String(index + 1);
+
+    return $("representation").filter(function (concept) {
+        var sameKeyData =
+            safeString(concept.prop("SabsaMatrixKind")) === "Representation" &&
+            safeString(concept.prop("RowId")) === safeString(rowData.id) &&
+            safeString(concept.prop("ColumnId")) === safeString(cellData.columnId) &&
+            safeString(concept.prop("CellTitle")) === safeString(cellData.title) &&
+            safeString(concept.prop("ItemOrder")) === itemOrder;
+
+        if (sameKeyData) {
+            return true;
+        }
+
+        return safeString(concept.name) === safeString(itemText) &&
+            safeString(concept.prop("RowId")) === safeString(rowData.id) &&
+            safeString(concept.prop("ColumnId")) === safeString(cellData.columnId);
+    }).first();
+}
+
+function ensureRelationship(preferredType, source, target, key, properties) {
+    var relationship = $("relationship").filter(function (candidate) {
+        return safeString(candidate.prop("SabsaMatrixKey")) === safeString(key);
+    }).first();
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(preferredType, "", source, target);
+            stats.relationshipsCreated++;
+            logger.debug("Created relationship.", {
+                relationship_type: preferredType,
+                key: key,
+                source_name: safeString(source && source.name),
+                target_name: safeString(target && target.name)
+            }, "sabsa.matrix.relationship.created");
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", "", source, target);
+            stats.relationshipsCreated++;
+            logger.debug("Preferred relationship type is not valid. Falling back.", {
+                preferred_type: preferredType,
+                fallback_type: "association-relationship",
+                key: key,
+                error: String(error)
+            }, "sabsa.matrix.relationship.fallback");
+        }
+    } else {
+        stats.relationshipsReused++;
+        logger.debug("Reused relationship.", {
+            key: key,
+            source_name: safeString(source && source.name),
+            target_name: safeString(target && target.name)
+        }, "sabsa.matrix.relationship.reused");
+    }
+
+    relationship.name = "";
+    relationship.prop("SabsaMatrixKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        relationship.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    return relationship;
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.matrix.label_expression.skipped");
+    }
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    return visual;
+}
+
+function getRowFill(rowId) {
+    return CONST.Style.RowFillById[rowId] || "#f0f0f0";
+}
+
+function estimateTextHeight(text, width, minHeight, charactersPerLine, lineHeight, verticalPadding) {
+    var rawText = trim(text);
+    var usableWidth = Math.max(24, width - 6);
+    var logicalLines = 0;
+    var fontMetrics = measurementGraphics.getFontMetrics(measurementFont);
+    var computedLineHeight = Math.max(lineHeight, fontMetrics.getHeight());
+    var paragraphs;
+
+    if (!rawText) {
+        return Math.max(minHeight, verticalPadding + computedLineHeight);
+    }
+
+    paragraphs = rawText.split(/\r?\n/);
+
+    paragraphs.forEach(function (paragraph) {
+        var words = trim(paragraph).split(/\s+/).filter(function (word) {
+            return !!word;
+        });
+        var currentLine = "";
+
+        if (!words.length) {
+            logicalLines += 1;
+            return;
+        }
+
+        words.forEach(function (word) {
+            var candidateLine = currentLine ? currentLine + " " + word : word;
+            var candidateWidth = fontMetrics.stringWidth(candidateLine);
+
+            if (candidateWidth <= usableWidth) {
+                currentLine = candidateLine;
+                return;
+            }
+
+            if (currentLine) {
+                logicalLines += 1;
+                currentLine = word;
+                return;
+            }
+
+            logicalLines += Math.max(1, Math.ceil(fontMetrics.stringWidth(word) / usableWidth));
+            currentLine = "";
+        });
+
+        if (currentLine) {
+            logicalLines += 1;
+        }
+    });
+
+    return Math.max(minHeight, verticalPadding + (logicalLines * computedLineHeight));
+}
+
+function estimateRepresentationHeight(text, width) {
+    return estimateTextHeight(text, width, 36, 5.4, 18, 18);
+}
+
+function getCellHeight(cellData) {
+    var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
+    var contentHeight = CONST.Layout.CellHeaderReserve + CONST.Layout.CellInnerY;
+
+    cellData.items.forEach(function (itemText, index) {
+        contentHeight += estimateRepresentationHeight(itemText, availableWidth);
+
+        if (index < cellData.items.length - 1) {
+            contentHeight += CONST.Layout.RepresentationGap;
+        }
+    });
+
+    contentHeight += CONST.Layout.CellInnerBottom + CONST.Layout.RepresentationBottomReserve;
+
+    return Math.max(CONST.Layout.CellMinHeight, contentHeight);
+}
+
+function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
+    var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
+    var currentY = startY;
+
+    cellData.items.forEach(function (itemText, index) {
+        var representationKey = [
+            "representation",
+            rowData.id,
+            cellData.columnId,
+            index + 1
+        ].join(":");
+        var representationConcept = ensureConcept("representation", itemText, representationKey, {
+            SabsaMatrixKind: "Representation",
+            RowId: rowData.id,
+            RowTitle: rowData.title,
+            ColumnId: cellData.columnId,
+            ColumnTitle: cellData.columnTitle,
+            CellTitle: cellData.title,
+            ItemOrder: String(index + 1)
+        }, itemText, function () {
+            return findRepresentationConcept(rowData, cellData, itemText, index);
+        });
+        var representationHeight = estimateRepresentationHeight(itemText, availableWidth);
+
+        ensureRelationship("aggregation-relationship", cellData.concept, representationConcept, [
+            "aggregation",
+            cellData.key,
+            representationKey
+        ].join(":"), {
+            SabsaMatrixKind: "CellToRepresentation"
+        });
+
+        var representationVisual = addStyledVisual(
+            cellVisual,
+            representationConcept,
+            CONST.Layout.CellInnerX,
+            currentY,
+            availableWidth,
+            representationHeight,
+            CONST.Style.RepresentationFill
+        );
+        tryApplyLabelExpression(representationVisual, "${name}");
+
+        representationConcept.documentation = itemText;
+        currentY += representationHeight + CONST.Layout.RepresentationGap;
+        stats.representations++;
+        stats.relationships++;
+    });
+
+    logger.debug("Prepared cell representations.", {
+        row_id: rowData.id,
+        column_id: cellData.columnId,
+        cell_title: cellData.title,
+        representation_count: cellData.items.length
+    }, "sabsa.matrix.cell.representations");
+}
+
+function createMatrixView(matrixData) {
+    var totalColumnsWidth = (matrixData.columns.length * CONST.Layout.ColumnWidth) +
+        ((matrixData.columns.length - 1) * CONST.Layout.ColumnGap);
+    var cellAreaStartX = CONST.Layout.StartX + CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap;
+    var viewName = buildUniqueViewName(CONST.ViewName);
+    var view = model.createArchimateView(viewName);
+    var rowY = CONST.Layout.RowStartY;
+
+    view.documentation = "Generated from sabsa_architecture_matrix.json. English labels only. Cell groups contain representation elements for each bullet item.";
+
+    matrixData.columns.forEach(function (column, index) {
+        var columnKey = "column:" + column.id;
+        var columnConcept = ensureConcept("grouping", column.title, columnKey, {
+            SabsaMatrixKind: "Column",
+            ColumnId: column.id,
+            ColumnTitle: column.title
+        }, column.title);
+        var x = cellAreaStartX + (index * (CONST.Layout.ColumnWidth + CONST.Layout.ColumnGap));
+
+        var columnVisual = addStyledVisual(
+            view,
+            columnConcept,
+            x,
+            CONST.Layout.ColumnY,
+            CONST.Layout.ColumnWidth,
+            CONST.Layout.ColumnHeight,
+            CONST.Style.ColumnFill
+        );
+        tryApplyLabelExpression(columnVisual, "${name}");
+
+        stats.columns++;
+    });
+
+    matrixData.rows.forEach(function (rowData) {
+        var rowKey = "row:" + rowData.id;
+        var rowConcept = ensureConcept("grouping", rowData.title, rowKey, {
+            SabsaMatrixKind: "Row",
+            RowId: rowData.id,
+            RowTitle: rowData.title
+        }, rowData.title);
+        var rowCellHeight = Math.max.apply(null, rowData.cells.map(getCellHeight));
+        var rowHeight = CONST.Layout.RowHeaderReserve +
+            CONST.Layout.RowInsetY +
+            rowCellHeight +
+            CONST.Layout.RowBottomPadding;
+        var rowVisual = addStyledVisual(
+            view,
+            rowConcept,
+            CONST.Layout.StartX,
+            rowY,
+            CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + (CONST.Layout.RowInsetX * 2),
+            rowHeight,
+            getRowFill(rowData.id)
+        );
+        tryApplyLabelExpression(rowVisual, "${name}");
+
+        stats.rows++;
+        logger.info("Rendering row.", {
+            row_id: rowData.id,
+            row_title: rowData.title,
+            row_height: rowHeight,
+            cell_count: rowData.cells.length
+        }, "sabsa.matrix.row.render");
+
+        rowData.cells.forEach(function (cellData, columnIndex) {
+            var cellKey = "cell:" + rowData.id + ":" + cellData.columnId;
+            var columnKey = "column:" + cellData.columnId;
+            var columnConcept = findConceptByTypeAndKey("grouping", columnKey);
+            var cellConcept = ensureConcept("grouping", cellData.title, cellKey, {
+                SabsaMatrixKind: "Cell",
+                RowId: rowData.id,
+                RowTitle: rowData.title,
+                ColumnId: cellData.columnId,
+                ColumnTitle: cellData.columnTitle,
+                CellTitle: cellData.title
+            }, cellData.title);
+            var cellVisual = addStyledVisual(
+                rowVisual,
+                cellConcept,
+                CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + CONST.Layout.RowInsetX + (columnIndex * (CONST.Layout.CellWidth + CONST.Layout.ColumnGap)),
+                CONST.Layout.RowHeaderReserve + CONST.Layout.RowInsetY,
+                CONST.Layout.CellWidth,
+                rowCellHeight,
+                CONST.Style.CellFill
+            );
+            tryApplyLabelExpression(cellVisual, "${name}");
+
+            cellData.concept = cellConcept;
+
+            ensureRelationship("aggregation-relationship", rowConcept, cellConcept, [
+                "aggregation",
+                rowKey,
+                cellKey
+            ].join(":"), {
+                SabsaMatrixKind: "RowToCell"
+            });
+            stats.relationships++;
+
+            if (columnConcept) {
+                ensureRelationship("aggregation-relationship", columnConcept, cellConcept, [
+                    "aggregation",
+                    columnKey,
+                    cellKey
+                ].join(":"), {
+                    SabsaMatrixKind: "ColumnToCell"
+                });
+                stats.relationships++;
+            }
+
+            createRepresentationVisuals(
+                cellVisual,
+                rowData,
+                cellData,
+                CONST.Layout.CellHeaderReserve + CONST.Layout.CellInnerY
+            );
+            stats.cells++;
+            logger.debug("Rendered cell.", {
+                row_id: rowData.id,
+                column_id: cellData.columnId,
+                cell_key: cellKey,
+                cell_title: cellData.title,
+                cell_height: rowCellHeight
+            }, "sabsa.matrix.cell.render");
+        });
+
+        rowY += rowHeight + CONST.Layout.RowGap;
+    });
+
+    return view;
+}
+
+function validateMatrixData(matrixData) {
+    if (!matrixData.columns.length || !matrixData.rows.length) {
+        throw new Error("The SABSA matrix source did not yield any rows or columns.");
+    }
+
+    matrixData.rows.forEach(function (rowData) {
+        if (rowData.cells.length !== matrixData.columns.length) {
+            throw new Error("Row '" + rowData.title + "' has " + rowData.cells.length +
+                " cells, but " + matrixData.columns.length + " columns were expected.");
+        }
+    });
+
+    matrixData.rows.forEach(function (rowData) {
+        rowData.cells.forEach(function (cellData) {
+            var matchingColumn = matrixData.columns.filter(function (column) {
+                return safeString(column.id) === safeString(cellData.columnId);
+            })[0];
+
+            if (!matchingColumn) {
+                throw new Error("Cell '" + cellData.key + "' references unknown column id '" + cellData.columnId + "'.");
+            }
+
+            cellData.columnTitle = matchingColumn.title;
+        });
+    });
+
+    logger.info("Validated SABSA matrix data.", {
+        columns: matrixData.columns.length,
+        rows: matrixData.rows.length
+    }, "sabsa.matrix.source.validated");
+}
+
+function main() {
+    var sourceText;
+    var matrixData;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    logger.start("SABSA architecture matrix view generation started.", {
+        source_json: CONST.SourceJsonPath
+    });
+
+    sourceText = readUtf8Text(CONST.SourceJsonPath);
+    matrixData = parseMatrixFromJson(sourceText);
+    validateMatrixData(matrixData);
+    view = createMatrixView(matrixData);
+
+    logger.finish("SABSA architecture matrix view generation finished.", {
+        view_name: view.name,
+        rows_created_or_reused: stats.rows,
+        columns_created_or_reused: stats.columns,
+        cells_created_or_reused: stats.cells,
+        representations_created_or_reused: stats.representations,
+        relationships_created_or_reused: stats.relationships,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(
+        "Generated view: " + view.name +
+        "\nRows: " + stats.rows +
+        "\nColumns: " + stats.columns +
+        "\nCells: " + stats.cells +
+        "\nRepresentations: " + stats.representations,
+        "SABSA Architecture Matrix View"
+    );
+}
+
+main();
