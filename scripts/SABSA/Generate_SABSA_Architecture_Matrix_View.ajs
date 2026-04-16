@@ -9,9 +9,10 @@ load(new File(__DIR__ + "../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_Architecture_Matrix_View";
+var LOG_LEVEL = "WARN";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
     clearConsole: true,
-    minimumLevel: "DEBUG"
+    minimumLevel: LOG_LEVEL
 });
 var dialogs = ArchiDialogs.createDialogService(logger, {
     title: "SABSA Architecture Matrix View"
@@ -28,18 +29,19 @@ var CONST = {
         ColumnWidth: 212,
         ColumnGap: 12,
         RowStartY: 90,
-        RowGap: 0,
-        RowHeaderWidth: 38,
-        RowHeaderGap: 4,
+        RowGap: 12,
+        RowHeaderWidth: 0,
+        RowHeaderGap: 10,
         RowHeaderReserve: 22,
-        CellHeaderReserve: 22,
-        RowInsetX: 6,
+        CellHeaderMinReserve: 22,
+        CellHeaderGap: 0,
+        RowInsetX: 2,
         RowInsetY: 6,
         RowBottomPadding: 8,
         CellWidth: 212,
         CellMinHeight: 90,
         CellInnerX: 8,
-        CellInnerY: 6,
+        CellInnerY: 2,
         CellInnerRight: 8,
         CellInnerBottom: 8,
         RepresentationMinHeight: 26,
@@ -294,6 +296,17 @@ function tryApplyLabelExpression(visual, expression) {
     }
 }
 
+function tryApplyTextPosition(visual, position) {
+    try {
+        visual.textPosition = position;
+    } catch (error) {
+        logger.debug("Could not apply text position.", {
+            position: position,
+            error: String(error)
+        }, "sabsa.matrix.text_position.skipped");
+    }
+}
+
 function addStyledVisual(container, concept, x, y, width, height, fillColor) {
     var visual = container.add(concept, x, y, width, height);
     styleVisual(visual, fillColor);
@@ -360,9 +373,26 @@ function estimateRepresentationHeight(text, width) {
     return estimateTextHeight(text, width, 36, 5.4, 18, 18);
 }
 
+function estimateCellHeaderHeight(text) {
+    var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
+
+    return estimateTextHeight(
+        text,
+        availableWidth,
+        CONST.Layout.CellHeaderMinReserve,
+        6.5,
+        16,
+        10
+    );
+}
+
+function getCellContentStartY(cellData) {
+    return estimateCellHeaderHeight(cellData.title) + CONST.Layout.CellHeaderGap;
+}
+
 function getCellHeight(cellData) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
-    var contentHeight = CONST.Layout.CellHeaderReserve + CONST.Layout.CellInnerY;
+    var contentHeight = getCellContentStartY(cellData) + CONST.Layout.CellInnerY;
 
     cellData.items.forEach(function (itemText, index) {
         contentHeight += estimateRepresentationHeight(itemText, availableWidth);
@@ -419,6 +449,7 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
             CONST.Style.RepresentationFill
         );
         tryApplyLabelExpression(representationVisual, "${name}");
+        tryApplyTextPosition(representationVisual, 1);
 
         representationConcept.documentation = itemText;
         currentY += representationHeight + CONST.Layout.RepresentationGap;
@@ -463,6 +494,7 @@ function createMatrixView(matrixData) {
             CONST.Style.ColumnFill
         );
         tryApplyLabelExpression(columnVisual, "${name}");
+        tryApplyTextPosition(columnVisual, 1);
 
         stats.columns++;
     });
@@ -489,6 +521,7 @@ function createMatrixView(matrixData) {
             getRowFill(rowData.id)
         );
         tryApplyLabelExpression(rowVisual, "${name}");
+        tryApplyTextPosition(rowVisual, 0);
 
         stats.rows++;
         logger.info("Rendering row.", {
@@ -520,6 +553,7 @@ function createMatrixView(matrixData) {
                 CONST.Style.CellFill
             );
             tryApplyLabelExpression(cellVisual, "${name}");
+            tryApplyTextPosition(cellVisual, 0);
 
             cellData.concept = cellConcept;
 
@@ -547,7 +581,7 @@ function createMatrixView(matrixData) {
                 cellVisual,
                 rowData,
                 cellData,
-                CONST.Layout.CellHeaderReserve + CONST.Layout.CellInnerY
+                getCellContentStartY(cellData) + CONST.Layout.CellInnerY
             );
             stats.cells++;
             logger.debug("Rendered cell.", {
