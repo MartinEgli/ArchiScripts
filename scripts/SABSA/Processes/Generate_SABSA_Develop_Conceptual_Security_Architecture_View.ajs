@@ -626,6 +626,53 @@ function buildWorkPackageDocumentation(workPackageData) {
         "\nMatrix column: " + safeString(workPackageData && workPackageData.column_id);
 }
 
+function buildWorkPackageReferenceIndex(data) {
+    var inputRefs = {};
+    var outputRefs = {};
+
+    function mark(entries, bucket) {
+        (entries || []).forEach(function (entry) {
+            var workPackageId = safeString(entry && entry.work_package && entry.work_package.id);
+
+            if (workPackageId) {
+                bucket[workPackageId] = true;
+            }
+        });
+    }
+
+    mark(data && data.inputs, inputRefs);
+    mark(data && data.outputs, outputRefs);
+
+    (data && data.steps || []).forEach(function (stepData) {
+        mark(stepData.inputs, inputRefs);
+        mark(stepData.outputs, outputRefs);
+
+        (stepData.subprocesses || []).forEach(function (subprocessData) {
+            mark(subprocessData.inputs, inputRefs);
+            mark(subprocessData.outputs, outputRefs);
+        });
+    });
+
+    return {
+        inputRefs: inputRefs,
+        outputRefs: outputRefs
+    };
+}
+
+function shouldRenderOutputWorkPackage(outputData, workPackageIndex) {
+    var outputId = safeString(outputData && outputData.id);
+
+    if (!outputId) {
+        return true;
+    }
+
+    if (workPackageIndex && workPackageIndex.inputRefs[outputId] && !workPackageIndex.outputRefs[outputId]) {
+        return false;
+    }
+
+    return true;
+}
+
 function findConceptByPropertyId(propertyId) {
     var wantedId = safeString(propertyId);
 
@@ -653,6 +700,8 @@ function ensureProcessArtifactConcept(artifactData) {
         MoSCoW: safeString(artifactData && artifactData.moscow),
         ArtifactOrigin: safeString(artifactData && artifactData.origin),
         OriginFrameworks: safeString(((artifactData && artifactData.origin_frameworks) || []).join("; ")),
+        ArtifactWorkPackageId: safeString(artifactData && artifactData.work_package && artifactData.work_package.id),
+        ArtifactWorkPackageName: safeString(artifactData && artifactData.work_package && artifactData.work_package.name),
         SourceDocument: CONST.SourceMarkdownPath
     };
 
@@ -1030,6 +1079,7 @@ function buildResultMessage(view) {
 
 function createView() {
     var carryOverByStepId = buildStepCarryOverIndex(DATA.steps);
+    var workPackageReferenceIndex = buildWorkPackageReferenceIndex(DATA);
     var inputVisuals = [];
     var outputVisuals = [];
     var stepVisuals = [];
@@ -1066,6 +1116,8 @@ function createView() {
                 ProcessViewRole: "InputArtifact",
                 InputOrigin: inputData.origin,
                 OriginFrameworks: safeString((inputData.origin_frameworks || []).join("; ")),
+                InputWorkPackageId: safeString(inputData.work_package && inputData.work_package.id),
+                InputWorkPackageName: safeString(inputData.work_package && inputData.work_package.name),
                 MoSCoW: inputData.moscow,
                 SourceDocument: CONST.SourceMarkdownPath
             },
@@ -1090,6 +1142,10 @@ function createView() {
     });
 
     DATA.outputs.forEach(function (outputData, index) {
+        if (!shouldRenderOutputWorkPackage(outputData, workPackageReferenceIndex)) {
+            return;
+        }
+
         var concept = ensureConcept(
             "work-package",
             outputData.name,
