@@ -22,4 +22,4 @@ Beispiel- und Hilfsskripte fuer NIST-bezogene View-Generierung.
 ## Hinweis
 
 Das Skript kann bei leerem Modell zusaetzlich den lokalen Datensatz `data/nist/nist-sp-800-53r5-controls.json` verwenden.
-Dieser Datensatz ist aus [NIST.SP.800-53r5.pdf](/c:/Reops/Archi/docs/Standards/NIST.SP.800-53r5.pdf) abgeleitet und wird genutzt, um echte Control Objectives und Child-Elemente zu erzeugen.
+Dieser Datensatz ist aus [NIST.SP.800-53r5.pdf](/c:/Reops/Archi/reference/Standards/NIST.SP.800-53r5.pdf) abgeleitet und wird genutzt, um echte Control Objectives und Child-Elemente zu erzeugen.

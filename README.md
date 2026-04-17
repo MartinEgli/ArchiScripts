@@ -16,7 +16,8 @@ Dieses Repository soll nur die wirklich ausgelieferten Artefakte enthalten, zum 
 Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht mehr hier, sondern im Superrepo:
 
 - `../sources/` fuer externe jArchi-Quellen
-- `../docs/jarchi/` fuer Notizen, Referenzen und Arbeitsdokumentation
+- `../docs/jarchi/` fuer Konzepte und Arbeitsdokumentation
+- `../reference/` fuer PDFs, Whitepaper, Standards und weitere Referenzunterlagen
 
 ## Struktur
 
@@ -32,6 +33,8 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
   gemeinsame Dialog-Helfer fuer Confirm-, Prompt-, Auswahl- und Datei-Dialoge
 - `data/nist/`
   aus dem NIST-PDF abgeleitete Datensaetze fuer die automatische Generierung detaillierter NIST-Control-Strukturen
+- `data/sabsa/`
+  gespiegelte JSON-Daten aus `../analyse/sabsa/architecture-matrix/` fuer die Weiterverarbeitung in Deliverables
 - `scripts/Diverses/`
   Kleine allgemeine Hilfs- und Beispielskripte
 - `scripts/Diverses/NIST/`
@@ -42,4 +45,10 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
   Basisbeispiele fuer Dialoge und Benutzerinteraktion
 - `scripts/Diverses/View_Exchange/`
   Export- und Import-Beispiele fuer Archi-Views mit Wiederverwendung bestehender Elemente
+
+## Datenabgleich
+
+Der vollstaendige Analyse-Ordner liegt bewusst im Superrepo unter `../analyse/`, aktuell mit SABSA-Daten unter `../analyse/sabsa/architecture-matrix/` und einer vorbereiteten Struktur unter `../analyse/sabsa/management-matrix/`.
+
+Nur JSON-Dateien werden nach `data/sabsa/` gespiegelt. Fuer den Abgleich steht im Superrepo das Skript `../scripts/update-archiscripts-data.ps1` bereit. Wenn beim Kopieren bereits eine Zieldatei vorhanden ist, wird sie zuerst mit Zeitstempel nach `data/sabsa/archive/` verschoben.
 

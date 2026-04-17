@@ -5,7 +5,7 @@ Dieser Ordner enthaelt lokal abgeleitete Datensaetze fuer die NIST-View-Generier
 ## Quelle
 
 - `nist-sp-800-53r5-controls.json`
-  Abgeleitet aus [NIST.SP.800-53r5.pdf](/c:/Reops/Archi/docs/Standards/NIST.SP.800-53r5.pdf)
+  Abgeleitet aus [NIST.SP.800-53r5.pdf](/c:/Reops/Archi/reference/Standards/NIST.SP.800-53r5.pdf)
 
 ## Zweck
 

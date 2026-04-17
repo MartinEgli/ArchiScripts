@@ -1621,7 +1621,7 @@ function syncSeededObjectiveMetadata(objective, controlData) {
     objective.prop("ControlId", controlData.id);
     objective.prop("FamilyCode", controlData.family_code);
     objective.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
-    objective.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+    objective.prop("SourcePath", "reference/Standards/NIST.SP.800-53r5.pdf");
 }
 
 function createSeededObjective(controlData) {
@@ -1646,7 +1646,7 @@ function createSeededChild(controlData, childData) {
     child.prop("ControlItemLetter", childData.letter);
     child.prop("FamilyCode", controlData.family_code);
     child.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
-    child.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+    child.prop("SourcePath", "reference/Standards/NIST.SP.800-53r5.pdf");
     moveConceptToStandardTree(
         child,
         "Motivation",
@@ -1715,7 +1715,7 @@ function seedDetailedControlsFromDataset(activeLogger, familyConcepts) {
                 childConcept.prop("ControlItemLetter", childData.letter);
                 childConcept.prop("FamilyCode", controlData.family_code);
                 childConcept.prop("SourceStandard", "NIST SP 800-53 Rev. 5");
-                childConcept.prop("SourcePath", "docs/Standards/NIST.SP.800-53r5.pdf");
+                childConcept.prop("SourcePath", "reference/Standards/NIST.SP.800-53r5.pdf");
             }
         });
     });

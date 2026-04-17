@@ -19,7 +19,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../analyse/sabsa_architecture_matrix.json").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../data/sabsa/sabsa_architecture_matrix.json").getCanonicalPath(),
     ViewName: "SABSA Architecture Matrix",
     Layout: {
         StartX: 54,
