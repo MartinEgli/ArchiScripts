@@ -21,6 +21,15 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 var CONST = {
     SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-architecture-matrix-data.json").getCanonicalPath(),
     ViewName: "SABSA Architecture Matrix",
+    Folder: {
+        Root: "SABSA",
+        Matrices: "Matrices",
+        MatrixName: "Architecture Matrix",
+        Columns: "Columns",
+        Rows: "Rows",
+        Cells: "Cells",
+        Representations: "Representations"
+    },
     Layout: {
         StartX: 54,
         StartY: 42,
@@ -108,6 +117,108 @@ function decodeEntities(value) {
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">")
         .replace(/&nbsp;/g, " ");
+}
+
+function getTopLevelFolder(rootName) {
+    return $("folder." + rootName).first();
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
+    if (!objectToMove) {
+        return null;
+    }
+
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    targetFolder.add(objectToMove);
+    return targetFolder;
+}
+
+function getMatrixFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.Matrices, CONST.Folder.MatrixName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptFolderPlacement(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaMatrixKind);
+
+    if (conceptType === "representation") {
+        return {
+            rootName: "Business",
+            pathSegments: getMatrixFolderSegments([CONST.Folder.Representations])
+        };
+    }
+
+    if (conceptType === "grouping") {
+        if (kind === "Column") {
+            return {
+                rootName: "Other",
+                pathSegments: getMatrixFolderSegments([CONST.Folder.Columns])
+            };
+        }
+
+        if (kind === "Row") {
+            return {
+                rootName: "Other",
+                pathSegments: getMatrixFolderSegments([CONST.Folder.Rows])
+            };
+        }
+
+        if (kind === "Cell") {
+            return {
+                rootName: "Other",
+                pathSegments: getMatrixFolderSegments([CONST.Folder.Cells])
+            };
+        }
+    }
+
+    return null;
+}
+
+function moveConceptToSabsaFolder(concept, conceptType, properties) {
+    var placement = resolveConceptFolderPlacement(conceptType, properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveViewToSabsaFolder(viewObject) {
+    return moveObjectToFolder("Views", getMatrixFolderSegments(), viewObject);
 }
 
 function readUtf8Text(absolutePath) {
@@ -240,6 +351,7 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     var extraLegacyPropertyIds = properties && properties.__legacyPropertyIds;
     var concept = findConceptByTypeAndKey(conceptType, key);
     var reuseReason = "key";
+    var placement = resolveConceptFolderPlacement(conceptType, properties);
 
     if (!concept && conceptId) {
         concept = findConceptByTypeAndPropertyId(conceptType, conceptId);
@@ -262,7 +374,11 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     }
 
     if (!concept) {
-        concept = model.createElement(conceptType, name);
+        if (placement) {
+            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        } else {
+            concept = model.createElement(conceptType, name);
+        }
         stats.conceptsCreated++;
         logger.debug("Created concept.", {
             concept_type: conceptType,
@@ -292,6 +408,8 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
         }
         concept.prop(propertyName, safeString(properties[propertyName]));
     });
+
+    moveConceptToSabsaFolder(concept, conceptType, properties);
 
     return concept;
 }
@@ -590,6 +708,7 @@ function createMatrixView(matrixData) {
     var rowY = CONST.Layout.RowStartY;
 
     view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell groups contain representation elements for each bullet item.";
+    moveViewToSabsaFolder(view);
 
     matrixData.columns.forEach(function (column, index) {
         var columnKey = safeString(column.conceptKey) || ("column:" + column.id);
