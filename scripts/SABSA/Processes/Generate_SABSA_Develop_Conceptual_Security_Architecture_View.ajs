@@ -564,6 +564,141 @@ function buildInputDocumentation(inputData) {
         "\nMoSCoW: " + safeString(inputData.moscow);
 }
 
+function buildArtifactDocumentation(artifactData) {
+    var lines = [];
+
+    if (safeString(artifactData && artifactData.description)) {
+        lines.push(safeString(artifactData.description));
+    }
+
+    if (safeString(artifactData && artifactData.origin)) {
+        lines.push("");
+        lines.push("Origin: " + safeString(artifactData.origin));
+    }
+
+    if (safeString(artifactData && artifactData.moscow)) {
+        lines.push("MoSCoW: " + safeString(artifactData.moscow));
+    }
+
+    if (artifactData && artifactData.references && artifactData.references.length) {
+        lines.push("References: " + artifactData.references.join("; "));
+    }
+
+    return lines.join("\n");
+}
+
+function findConceptByPropertyId(propertyId) {
+    var wantedId = safeString(propertyId);
+
+    if (!wantedId) {
+        return null;
+    }
+
+    return $("element").filter(function (candidate) {
+        return safeString(candidate.prop("id")) === wantedId;
+    }).first();
+}
+
+function applyProperties(target, properties) {
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        target.prop(propertyName, safeString(properties[propertyName]));
+    });
+}
+
+function ensureProcessArtifactConcept(artifactData) {
+    var artifactId = safeString(artifactData && artifactData.id);
+    var existingConcept = findConceptByPropertyId(artifactId);
+    var properties = {
+        id: artifactId,
+        ProcessViewRole: "Artifact",
+        MoSCoW: safeString(artifactData && artifactData.moscow),
+        ArtifactOrigin: safeString(artifactData && artifactData.origin),
+        SourceDocument: CONST.SourceMarkdownPath
+    };
+
+    if (existingConcept) {
+        stats.conceptsReused++;
+        applyProperties(existingConcept, properties);
+        return existingConcept;
+    }
+
+    return ensureConcept(
+        "business-object",
+        safeString(artifactData && artifactData.name),
+        "artifact:" + artifactId,
+        properties,
+        buildArtifactDocumentation(artifactData)
+    );
+}
+
+function findVisualForConcept(visualEntries, concept) {
+    var conceptInternalId = safeString(concept && concept.id);
+    var match = null;
+
+    (visualEntries || []).some(function (entry) {
+        if (safeString(entry.concept && entry.concept.id) === conceptInternalId) {
+            match = entry.visual;
+            return true;
+        }
+
+        return false;
+    });
+
+    return match;
+}
+
+function connectSubprocessArtifacts(view, subprocessConcept, subprocessVisual, subprocessData, inputVisuals, outputVisuals) {
+    var inputEntries = subprocessData && subprocessData.inputs ? subprocessData.inputs : [];
+    var outputEntries = subprocessData && subprocessData.outputs ? subprocessData.outputs : [];
+
+    inputEntries.forEach(function (artifactData) {
+        var artifactConcept = ensureProcessArtifactConcept(artifactData);
+        var relationship = ensureRelationship(
+            "access-relationship",
+            subprocessConcept,
+            artifactConcept,
+            "subprocess-input-access:" + safeString(subprocessData.id) + ":" + safeString(artifactData.id),
+            {
+                ProcessViewRelationRole: "InputAccess",
+                AccessMode: "Read",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+        var targetVisual = findVisualForConcept(inputVisuals, artifactConcept) || findVisualForConcept(outputVisuals, artifactConcept);
+
+        if (targetVisual) {
+            addConnection(view, relationship, subprocessVisual, targetVisual);
+        }
+
+        stats.relationships++;
+    });
+
+    outputEntries.forEach(function (artifactData) {
+        var artifactConcept = ensureProcessArtifactConcept(artifactData);
+        var relationshipType = safeString(artifactConcept && artifactConcept.type) === "work-package"
+            ? "association-relationship"
+            : "access-relationship";
+        var relationship = ensureRelationship(
+            relationshipType,
+            subprocessConcept,
+            artifactConcept,
+            "subprocess-output-access:" + safeString(subprocessData.id) + ":" + safeString(artifactData.id),
+            {
+                ProcessViewRelationRole: "OutputAccess",
+                AccessMode: "Write",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+        var targetVisual = findVisualForConcept(outputVisuals, artifactConcept) || findVisualForConcept(inputVisuals, artifactConcept);
+
+        if (targetVisual) {
+            addConnection(view, relationship, subprocessVisual, targetVisual);
+        }
+
+        stats.relationships++;
+    });
+}
+
 function optimizeGeneratedLayout(layout) {
     var stepX = getStepXInMain();
     var subprocessWidth = getSubprocessWidth();
@@ -902,6 +1037,14 @@ function createView() {
                 },
                 order: subprocessIndex + 1
             });
+            connectSubprocessArtifacts(
+                view,
+                subprocessConcept,
+                subVisual,
+                subprocessData,
+                inputVisuals,
+                outputVisuals
+            );
             allSubprocessVisuals.push({
                 concept: subprocessConcept,
                 visual: subVisual,
