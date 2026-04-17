@@ -3,38 +3,45 @@
     "markdown_path": "analyse/sabsa/management-matrix/sabsa-management-matrix-analysis.de.md",
     "generated_at": "2026-04-17T00:00:00Z",
     "language": "bilingual",
-    "view_default_language": "english"
+    "view_default_language": "english",
+    "generation_namespace": "sabsa-management-matrix"
   },
   "columns": [
     {
       "id": "assets-what",
       "english_title": "Assets (What)",
-      "german_title": "Werte (Was)"
+      "german_title": "Werte (Was)",
+      "archimate_key": "sabsa-management-matrix:column:assets-what"
     },
     {
       "id": "motivation-why",
       "english_title": "Motivation (Why)",
-      "german_title": "Motivation (Warum)"
+      "german_title": "Motivation (Warum)",
+      "archimate_key": "sabsa-management-matrix:column:motivation-why"
     },
     {
       "id": "process-how",
       "english_title": "Process (How)",
-      "german_title": "Prozess (Wie)"
+      "german_title": "Prozess (Wie)",
+      "archimate_key": "sabsa-management-matrix:column:process-how"
     },
     {
       "id": "people-who",
       "english_title": "People (Who)",
-      "german_title": "Personen (Wer)"
+      "german_title": "Personen (Wer)",
+      "archimate_key": "sabsa-management-matrix:column:people-who"
     },
     {
       "id": "location-where",
       "english_title": "Location (Where)",
-      "german_title": "Ort (Wo)"
+      "german_title": "Ort (Wo)",
+      "archimate_key": "sabsa-management-matrix:column:location-where"
     },
     {
       "id": "time-when",
       "english_title": "Time (When)",
-      "german_title": "Zeit (Wann)"
+      "german_title": "Zeit (Wann)",
+      "archimate_key": "sabsa-management-matrix:column:time-when"
     }
   ],
   "rows": [
@@ -51,9 +58,11 @@
           "items": [
             {
               "english_text": "Assurance of Operational Excellence & Continuity",
-              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität"
+              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:assets-what:assurance-of-operational-excellence-and-continuity"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:assets-what"
         },
         {
           "key": "management-architecture-motivation-why",
@@ -63,17 +72,21 @@
           "items": [
             {
               "english_text": "Risk Assessment",
-              "german_text": "Risikobewertung"
+              "german_text": "Risikobewertung",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-assessment"
             },
             {
               "english_text": "Risk Monitoring & Reporting",
-              "german_text": "Risikoüberwachung und Berichterstattung"
+              "german_text": "Risikoüberwachung und Berichterstattung",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-monitoring-and-reporting"
             },
             {
               "english_text": "Risk Treatment",
-              "german_text": "Risikobehandlung"
+              "german_text": "Risikobehandlung",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-treatment"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:motivation-why"
         },
         {
           "key": "management-architecture-process-how",
@@ -83,9 +96,11 @@
           "items": [
             {
               "english_text": "Management & Support of Systems, Applications & Services",
-              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services"
+              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:process-how:management-and-support-of-systems-applications-and-services"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:process-how"
         },
         {
           "key": "management-architecture-people-who",
@@ -95,9 +110,11 @@
           "items": [
             {
               "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
-              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen"
+              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:people-who:management-and-support-of-enterprise-wide-and-extended-enterprise-relationships"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:people-who"
         },
         {
           "key": "management-architecture-location-where",
@@ -107,9 +124,11 @@
           "items": [
             {
               "english_text": "Management of Buildings, Sites, Platforms & Networks",
-              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken"
+              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:location-where:management-of-buildings-sites-platforms-and-networks"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:location-where"
         },
         {
           "key": "management-architecture-time-when",
@@ -119,11 +138,14 @@
           "items": [
             {
               "english_text": "Management of Calendar and Timetable",
-              "german_text": "Steuerung von Kalendern und Zeitplänen"
+              "german_text": "Steuerung von Kalendern und Zeitplänen",
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:time-when:management-of-calendar-and-timetable"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:management-architecture"
     },
     {
       "id": "contextual-overlay",
@@ -138,9 +160,11 @@
           "items": [
             {
               "english_text": "Business Benchmarking & Identification of Business Drivers",
-              "german_text": "Benchmarking des Geschäfts und Identifikation geschäftlicher Treiber"
+              "german_text": "Benchmarking des Geschäfts und Identifikation geschäftlicher Treiber",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:assets-what:business-benchmarking-and-identification-of-business-drivers"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:assets-what"
         },
         {
           "key": "contextual-overlay-motivation-why",
@@ -150,9 +174,11 @@
           "items": [
             {
               "english_text": "Analysis of Internal & External Risk Factors",
-              "german_text": "Analyse interner und externer Risikofaktoren"
+              "german_text": "Analyse interner und externer Risikofaktoren",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:motivation-why:analysis-of-internal-and-external-risk-factors"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:motivation-why"
         },
         {
           "key": "contextual-overlay-process-how",
@@ -162,9 +188,11 @@
           "items": [
             {
               "english_text": "Managing Processes and Capabilities for Providing Value to Stakeholders",
-              "german_text": "Steuerung von Prozessen und Fähigkeiten zur Wertschöpfung für Anspruchsgruppen"
+              "german_text": "Steuerung von Prozessen und Fähigkeiten zur Wertschöpfung für Anspruchsgruppen",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:process-how:managing-processes-and-capabilities-for-providing-value-to-stakeholders"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:process-how"
         },
         {
           "key": "contextual-overlay-people-who",
@@ -174,13 +202,16 @@
           "items": [
             {
               "english_text": "Managing Suppliers, Service Providers, Customers; Business Partners & Employees",
-              "german_text": "Steuerung von Lieferanten, Dienstleistern, Kunden sowie Geschäftspartnern und Mitarbeitenden"
+              "german_text": "Steuerung von Lieferanten, Dienstleistern, Kunden sowie Geschäftspartnern und Mitarbeitenden",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:people-who:managing-suppliers-service-providers-customers-business-partners-and-employees"
             },
             {
               "english_text": "Contract Management",
-              "german_text": "Vertragsmanagement"
+              "german_text": "Vertragsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:people-who:contract-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:people-who"
         },
         {
           "key": "contextual-overlay-location-where",
@@ -190,13 +221,16 @@
           "items": [
             {
               "english_text": "Demand & Supply Management (upstream and downstream)",
-              "german_text": "Steuerung von Nachfrage und Versorgung entlang vor- und nachgelagerter Stufen"
+              "german_text": "Steuerung von Nachfrage und Versorgung entlang vor- und nachgelagerter Stufen",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:location-where:demand-and-supply-management-upstream-and-downstream"
             },
             {
               "english_text": "Deployment & Consumption",
-              "german_text": "Bereitstellung und Nutzung"
+              "german_text": "Bereitstellung und Nutzung",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:location-where:deployment-and-consumption"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:location-where"
         },
         {
           "key": "contextual-overlay-time-when",
@@ -206,11 +240,14 @@
           "items": [
             {
               "english_text": "Defining Business-Driven Performance Targets",
-              "german_text": "Festlegung geschäftsgetriebener Leistungsziele"
+              "german_text": "Festlegung geschäftsgetriebener Leistungsziele",
+              "archimate_key": "sabsa-management-matrix:item:contextual-overlay:time-when:defining-business-driven-performance-targets"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:contextual-overlay:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:contextual-overlay"
     },
     {
       "id": "conceptual-overlay",
@@ -225,9 +262,11 @@
           "items": [
             {
               "english_text": "Defining Business Attributes Profile with Performance Criteria, Key Performance Indicators & Key Risk Indicators",
-              "german_text": "Definition des Business-Attribute-Profils mit Leistungskriterien, Leistungsindikatoren und Risikoindikatoren"
+              "german_text": "Definition des Business-Attribute-Profils mit Leistungskriterien, Leistungsindikatoren und Risikoindikatoren",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:assets-what:defining-business-attributes-profile-with-performance-criteria-key-performance-indicators-and-key-risk-indicators"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:assets-what"
         },
         {
           "key": "conceptual-overlay-motivation-why",
@@ -237,13 +276,16 @@
           "items": [
             {
               "english_text": "Maintaining Risk Modelling Framework",
-              "german_text": "Pflege des Risiko-Modellierungsrahmens"
+              "german_text": "Pflege des Risiko-Modellierungsrahmens",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:motivation-why:maintaining-risk-modelling-framework"
             },
             {
               "english_text": "Risk Analysis on Business Attributes Profile",
-              "german_text": "Risikoanalyse auf dem Business-Attribute-Profil"
+              "german_text": "Risikoanalyse auf dem Business-Attribute-Profil",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:motivation-why:risk-analysis-on-business-attributes-profile"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:motivation-why"
         },
         {
           "key": "conceptual-overlay-process-how",
@@ -253,25 +295,31 @@
           "items": [
             {
               "english_text": "Service Level Agreement Planning",
-              "german_text": "Planung von Service Level Agreements"
+              "german_text": "Planung von Service Level Agreements",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:service-level-agreement-planning"
             },
             {
               "english_text": "Business Continuity Planning",
-              "german_text": "Notfallvorsorge- und Kontinuitätsplanung"
+              "german_text": "Notfallvorsorge- und Kontinuitätsplanung",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:business-continuity-planning"
             },
             {
               "english_text": "Financial Planning",
-              "german_text": "Finanzplanung"
+              "german_text": "Finanzplanung",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:financial-planning"
             },
             {
               "english_text": "Transition Planning",
-              "german_text": "Planung von Übergängen"
+              "german_text": "Planung von Übergängen",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:transition-planning"
             },
             {
               "english_text": "Planning and Maintaining the Inventory of Processes and Services Catalogue",
-              "german_text": "Planung und Pflege des Prozessinventars und des Servicekatalogs"
+              "german_text": "Planung und Pflege des Prozessinventars und des Servicekatalogs",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:planning-and-maintaining-the-inventory-of-processes-and-services-catalogue"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:process-how"
         },
         {
           "key": "conceptual-overlay-people-who",
@@ -281,13 +329,16 @@
           "items": [
             {
               "english_text": "Maintaining Trust Modelling Framework",
-              "german_text": "Pflege des Vertrauensmodellierungsrahmens"
+              "german_text": "Pflege des Vertrauensmodellierungsrahmens",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:people-who:maintaining-trust-modelling-framework"
             },
             {
               "english_text": "Defining Roles, Responsibilities, Liabilities & Cultural Values",
-              "german_text": "Definition von Rollen, Verantwortlichkeiten, Haftungen und kulturellen Leitwerten"
+              "german_text": "Definition von Rollen, Verantwortlichkeiten, Haftungen und kulturellen Leitwerten",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:people-who:defining-roles-responsibilities-liabilities-and-cultural-values"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:people-who"
         },
         {
           "key": "conceptual-overlay-location-where",
@@ -297,9 +348,11 @@
           "items": [
             {
               "english_text": "Planning & Maintaining the Business Footprint: Points of Supply and Access",
-              "german_text": "Planung und Pflege des Geschäfts-Footprints mit Versorgungs- und Zugangspunkten"
+              "german_text": "Planung und Pflege des Geschäfts-Footprints mit Versorgungs- und Zugangspunkten",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:location-where:planning-and-maintaining-the-business-footprint-points-of-supply-and-access"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:location-where"
         },
         {
           "key": "conceptual-overlay-time-when",
@@ -309,15 +362,19 @@
           "items": [
             {
               "english_text": "Managing Performance Criteria and Targets",
-              "german_text": "Steuerung von Leistungskriterien und Zielwerten"
+              "german_text": "Steuerung von Leistungskriterien und Zielwerten",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:time-when:managing-performance-criteria-and-targets"
             },
             {
               "english_text": "Abstracting Attribute Performance Targets",
-              "german_text": "Ableitung von Zielwerten für Attribute"
+              "german_text": "Ableitung von Zielwerten für Attribute",
+              "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:time-when:abstracting-attribute-performance-targets"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:conceptual-overlay:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:conceptual-overlay"
     },
     {
       "id": "logical-overlay",
@@ -332,13 +389,16 @@
           "items": [
             {
               "english_text": "Knowledge Management",
-              "german_text": "Wissensmanagement"
+              "german_text": "Wissensmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:assets-what:knowledge-management"
             },
             {
               "english_text": "Release & Deployment Management",
-              "german_text": "Release- und Bereitstellungsmanagement"
+              "german_text": "Release- und Bereitstellungsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:assets-what:release-and-deployment-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:assets-what"
         },
         {
           "key": "logical-overlay-motivation-why",
@@ -348,17 +408,21 @@
           "items": [
             {
               "english_text": "Risk Modelling",
-              "german_text": "Risikomodellierung"
+              "german_text": "Risikomodellierung",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:motivation-why:risk-modelling"
             },
             {
               "english_text": "Management of Policy Development & Maintenance",
-              "german_text": "Steuerung von Entwicklung und Pflege von Richtlinien"
+              "german_text": "Steuerung von Entwicklung und Pflege von Richtlinien",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:motivation-why:management-of-policy-development-and-maintenance"
             },
             {
               "english_text": "Policy Publication & Compliance Management",
-              "german_text": "Veröffentlichung von Richtlinien und Steuerung der Compliance"
+              "german_text": "Veröffentlichung von Richtlinien und Steuerung der Compliance",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:motivation-why:policy-publication-and-compliance-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:motivation-why"
         },
         {
           "key": "logical-overlay-process-how",
@@ -368,25 +432,31 @@
           "items": [
             {
               "english_text": "Service Level Agreement Management",
-              "german_text": "Steuerung von Service Level Agreements"
+              "german_text": "Steuerung von Service Level Agreements",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:service-level-agreement-management"
             },
             {
               "english_text": "Supply Chain Management",
-              "german_text": "Management der Lieferkette"
+              "german_text": "Management der Lieferkette",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:supply-chain-management"
             },
             {
               "english_text": "Business Continuity Management",
-              "german_text": "Kontinuitätsmanagement"
+              "german_text": "Kontinuitätsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:business-continuity-management"
             },
             {
               "english_text": "Financial Management",
-              "german_text": "Finanzmanagement"
+              "german_text": "Finanzmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:financial-management"
             },
             {
               "english_text": "Transition Management",
-              "german_text": "Transitionsmanagement"
+              "german_text": "Transitionsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:transition-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:process-how"
         },
         {
           "key": "logical-overlay-people-who",
@@ -396,17 +466,21 @@
           "items": [
             {
               "english_text": "Trust Modelling",
-              "german_text": "Vertrauensmodellierung"
+              "german_text": "Vertrauensmodellierung",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:people-who:trust-modelling"
             },
             {
               "english_text": "Identity & Access Management",
-              "german_text": "Identitäts- und Zugriffsmanagement"
+              "german_text": "Identitäts- und Zugriffsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:people-who:identity-and-access-management"
             },
             {
               "english_text": "Management of User Privileges, Account Administration & Provisioning",
-              "german_text": "Steuerung von Benutzerrechten, Kontoverwaltung und Bereitstellung"
+              "german_text": "Steuerung von Benutzerrechten, Kontoverwaltung und Bereitstellung",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:people-who:management-of-user-privileges-account-administration-and-provisioning"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:people-who"
         },
         {
           "key": "logical-overlay-location-where",
@@ -416,17 +490,21 @@
           "items": [
             {
               "english_text": "Configuration Management Database (CMDB) Management",
-              "german_text": "Steuerung der Konfigurationsdatenbank"
+              "german_text": "Steuerung der Konfigurationsdatenbank",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:location-where:configuration-management-database-cmdb-management"
             },
             {
               "english_text": "Capacity Planning",
-              "german_text": "Kapazitätsplanung"
+              "german_text": "Kapazitätsplanung",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:location-where:capacity-planning"
             },
             {
               "english_text": "Availability Management",
-              "german_text": "Verfügbarkeitsmanagement"
+              "german_text": "Verfügbarkeitsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:location-where:availability-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:location-where"
         },
         {
           "key": "logical-overlay-time-when",
@@ -436,11 +514,14 @@
           "items": [
             {
               "english_text": "Monitoring & Reporting Performance against Key Performance Indicators and Key Risk Indicators",
-              "german_text": "Überwachung und Berichterstattung zur Leistung anhand von Leistungs- und Risikoindikatoren"
+              "german_text": "Überwachung und Berichterstattung zur Leistung anhand von Leistungs- und Risikoindikatoren",
+              "archimate_key": "sabsa-management-matrix:item:logical-overlay:time-when:monitoring-and-reporting-performance-against-key-performance-indicators-and-key-risk-indicators"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:logical-overlay:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:logical-overlay"
     },
     {
       "id": "physical-overlay",
@@ -455,13 +536,16 @@
           "items": [
             {
               "english_text": "Change Management",
-              "german_text": "Änderungsmanagement"
+              "german_text": "Änderungsmanagement",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:assets-what:change-management"
             },
             {
               "english_text": "Platform & Data Storage Management",
-              "german_text": "Management von Plattformen und Datenspeichern"
+              "german_text": "Management von Plattformen und Datenspeichern",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:assets-what:platform-and-data-storage-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:assets-what"
         },
         {
           "key": "physical-overlay-motivation-why",
@@ -471,13 +555,16 @@
           "items": [
             {
               "english_text": "Risk Procedure Management",
-              "german_text": "Steuerung von Risikoverfahren"
+              "german_text": "Steuerung von Risikoverfahren",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:motivation-why:risk-procedure-management"
             },
             {
               "english_text": "Risk Metadata Management",
-              "german_text": "Steuerung von Risikometadaten"
+              "german_text": "Steuerung von Risikometadaten",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:motivation-why:risk-metadata-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:motivation-why"
         },
         {
           "key": "physical-overlay-process-how",
@@ -487,9 +574,11 @@
           "items": [
             {
               "english_text": "Job, Incident, Event, and Disaster Recovery Management",
-              "german_text": "Management von Jobs, Incidents, Events und Wiederanlaufverfahren"
+              "german_text": "Management von Jobs, Incidents, Events und Wiederanlaufverfahren",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:process-how:job-incident-event-and-disaster-recovery-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:process-how"
         },
         {
           "key": "physical-overlay-people-who",
@@ -499,9 +588,11 @@
           "items": [
             {
               "english_text": "Service Desk, Problem, and Request Management",
-              "german_text": "Steuerung von Service Desk, Problem- und Anforderungsbearbeitung"
+              "german_text": "Steuerung von Service Desk, Problem- und Anforderungsbearbeitung",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:people-who:service-desk-problem-and-request-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:people-who"
         },
         {
           "key": "physical-overlay-location-where",
@@ -511,13 +602,16 @@
           "items": [
             {
               "english_text": "Physical & Environmental Security Management",
-              "german_text": "Management physischer und umgebungsbezogener Sicherheit"
+              "german_text": "Management physischer und umgebungsbezogener Sicherheit",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:location-where:physical-and-environmental-security-management"
             },
             {
               "english_text": "Real Estate and Facilities Management",
-              "german_text": "Immobilien- und Facilities-Management"
+              "german_text": "Immobilien- und Facilities-Management",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:location-where:real-estate-and-facilities-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:location-where"
         },
         {
           "key": "physical-overlay-time-when",
@@ -527,11 +621,14 @@
           "items": [
             {
               "english_text": "Business Systems Monitoring Procedure Management",
-              "german_text": "Steuerung der Überwachungsverfahren für Geschäftssysteme"
+              "german_text": "Steuerung der Überwachungsverfahren für Geschäftssysteme",
+              "archimate_key": "sabsa-management-matrix:item:physical-overlay:time-when:business-systems-monitoring-procedure-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:physical-overlay:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:physical-overlay"
     },
     {
       "id": "component-overlay",
@@ -546,9 +643,11 @@
           "items": [
             {
               "english_text": "Product & Component Standards Management",
-              "german_text": "Steuerung von Produkt- und Komponentenstandards"
+              "german_text": "Steuerung von Produkt- und Komponentenstandards",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:assets-what:product-and-component-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:assets-what"
         },
         {
           "key": "component-overlay-motivation-why",
@@ -558,9 +657,11 @@
           "items": [
             {
               "english_text": "Risk Analysis, Monitoring & Reporting Components, Systems and Standards Management",
-              "german_text": "Steuerung von Komponenten, Systemen und Standards für Risikoanalyse, Überwachung und Berichterstattung"
+              "german_text": "Steuerung von Komponenten, Systemen und Standards für Risikoanalyse, Überwachung und Berichterstattung",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:motivation-why:risk-analysis-monitoring-and-reporting-components-systems-and-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:motivation-why"
         },
         {
           "key": "component-overlay-process-how",
@@ -570,13 +671,16 @@
           "items": [
             {
               "english_text": "Product & Component Selection, Procurement",
-              "german_text": "Auswahl und Beschaffung von Produkten und Komponenten"
+              "german_text": "Auswahl und Beschaffung von Produkten und Komponenten",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:process-how:product-and-component-selection-procurement"
             },
             {
               "english_text": "Project and Standards Management",
-              "german_text": "Projekt- und Standards-Management"
+              "german_text": "Projekt- und Standards-Management",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:process-how:project-and-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:process-how"
         },
         {
           "key": "component-overlay-people-who",
@@ -586,13 +690,16 @@
           "items": [
             {
               "english_text": "Recruitment, Disciplinary, Training & Awareness Delivery",
-              "german_text": "Durchführung von Rekrutierung, Disziplinarmaßnahmen, Schulung und Awareness"
+              "german_text": "Durchführung von Rekrutierung, Disziplinarmaßnahmen, Schulung und Awareness",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:people-who:recruitment-disciplinary-training-and-awareness-delivery"
             },
             {
               "english_text": "Component and Standards Management",
-              "german_text": "Steuerung von Komponenten und Standards"
+              "german_text": "Steuerung von Komponenten und Standards",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:people-who:component-and-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:people-who"
         },
         {
           "key": "component-overlay-location-where",
@@ -602,9 +709,11 @@
           "items": [
             {
               "english_text": "Physical and Environmental Security Component and Standards Management",
-              "german_text": "Steuerung physischer und umgebungsbezogener Sicherheitskomponenten und -standards"
+              "german_text": "Steuerung physischer und umgebungsbezogener Sicherheitskomponenten und -standards",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:location-where:physical-and-environmental-security-component-and-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:location-where"
         },
         {
           "key": "component-overlay-time-when",
@@ -614,11 +723,14 @@
           "items": [
             {
               "english_text": "Analysis, Monitoring & Reporting Component and Standards Management",
-              "german_text": "Steuerung von Analyse-, Monitoring- und Reporting-Komponenten und -standards"
+              "german_text": "Steuerung von Analyse-, Monitoring- und Reporting-Komponenten und -standards",
+              "archimate_key": "sabsa-management-matrix:item:component-overlay:time-when:analysis-monitoring-and-reporting-component-and-standards-management"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-management-matrix:cell:component-overlay:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-management-matrix:row:component-overlay"
     }
   ]
 }

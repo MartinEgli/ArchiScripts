@@ -3,38 +3,45 @@
     "markdown_path": "analyse/sabsa/architecture-matrix/sabsa-architecture-matrix-analysis.de.md",
     "generated_at": "2026-04-16T00:00:00Z",
     "language": "bilingual",
-    "view_default_language": "english"
+    "view_default_language": "english",
+    "generation_namespace": "sabsa-architecture-matrix"
   },
   "columns": [
     {
       "id": "assets-what",
       "english_title": "Assets (What)",
-      "german_title": "Werte (Was)"
+      "german_title": "Werte (Was)",
+      "archimate_key": "sabsa-architecture-matrix:column:assets-what"
     },
     {
       "id": "motivation-why",
       "english_title": "Motivation (Why)",
-      "german_title": "Motivation (Warum)"
+      "german_title": "Motivation (Warum)",
+      "archimate_key": "sabsa-architecture-matrix:column:motivation-why"
     },
     {
       "id": "process-how",
       "english_title": "Process (How)",
-      "german_title": "Prozess (Wie)"
+      "german_title": "Prozess (Wie)",
+      "archimate_key": "sabsa-architecture-matrix:column:process-how"
     },
     {
       "id": "people-who",
       "english_title": "People (Who)",
-      "german_title": "Personen (Wer)"
+      "german_title": "Personen (Wer)",
+      "archimate_key": "sabsa-architecture-matrix:column:people-who"
     },
     {
       "id": "location-where",
       "english_title": "Location (Where)",
-      "german_title": "Ort (Wo)"
+      "german_title": "Ort (Wo)",
+      "archimate_key": "sabsa-architecture-matrix:column:location-where"
     },
     {
       "id": "time-when",
       "english_title": "Time (When)",
-      "german_title": "Zeit (Wann)"
+      "german_title": "Zeit (Wann)",
+      "archimate_key": "sabsa-architecture-matrix:column:time-when"
     }
   ],
   "rows": [
@@ -51,13 +58,16 @@
           "items": [
             {
               "english_text": "Business Value",
-              "german_text": "Geschäftlicher Nutzen"
+              "german_text": "Geschäftlicher Nutzen",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:assets-what:business-value"
             },
             {
               "english_text": "Taxonomy of Business Assets, including Goals & Objectives, Success Factors, Targets",
-              "german_text": "Taxonomie geschäftlicher Werte einschließlich Ziele, Vorgaben, Erfolgsfaktoren und Zielwerte"
+              "german_text": "Taxonomie geschäftlicher Werte einschließlich Ziele, Vorgaben, Erfolgsfaktoren und Zielwerte",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:assets-what:taxonomy-of-business-assets-including-goals-and-objectives-success-factors-targets"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:assets-what"
         },
         {
           "key": "contextual-architecture-motivation-why",
@@ -67,9 +77,11 @@
           "items": [
             {
               "english_text": "Opportunities & Threats Inventory",
-              "german_text": "Chancen- und Bedrohungsinventar"
+              "german_text": "Chancen- und Bedrohungsinventar",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:motivation-why:opportunities-and-threats-inventory"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:motivation-why"
         },
         {
           "key": "contextual-architecture-process-how",
@@ -79,13 +91,16 @@
           "items": [
             {
               "english_text": "Business Value Chain",
-              "german_text": "Geschäftswertschöpfungskette"
+              "german_text": "Geschäftswertschöpfungskette",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:process-how:business-value-chain"
             },
             {
               "english_text": "Business Capabilities",
-              "german_text": "Geschäftsfähigkeiten"
+              "german_text": "Geschäftsfähigkeiten",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:process-how:business-capabilities"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:process-how"
         },
         {
           "key": "contextual-architecture-people-who",
@@ -95,9 +110,11 @@
           "items": [
             {
               "english_text": "Organisational Structure & the Extended Enterprise",
-              "german_text": "Organisationsstruktur und erweitertes Unternehmen"
+              "german_text": "Organisationsstruktur und erweitertes Unternehmen",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:people-who:organisational-structure-and-the-extended-enterprise"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:people-who"
         },
         {
           "key": "contextual-architecture-location-where",
@@ -107,9 +124,11 @@
           "items": [
             {
               "english_text": "Inventory of Buildings, Sites, Territories, Jurisdictions",
-              "german_text": "Inventar von Gebäuden, Standorten, Gebieten und Rechtsräumen"
+              "german_text": "Inventar von Gebäuden, Standorten, Gebieten und Rechtsräumen",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:location-where:inventory-of-buildings-sites-territories-jurisdictions"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:location-where"
         },
         {
           "key": "contextual-architecture-time-when",
@@ -119,11 +138,14 @@
           "items": [
             {
               "english_text": "Time dependencies of Business Goals and Value Creation",
-              "german_text": "Zeitliche Abhängigkeiten von Geschäftszielen und Wertschöpfung"
+              "german_text": "Zeitliche Abhängigkeiten von Geschäftszielen und Wertschöpfung",
+              "archimate_key": "sabsa-architecture-matrix:item:contextual-architecture:time-when:time-dependencies-of-business-goals-and-value-creation"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:contextual-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:contextual-architecture"
     },
     {
       "id": "conceptual-architecture",
@@ -138,9 +160,11 @@
           "items": [
             {
               "english_text": "Business Attributes Taxonomy & Profile, with integrated performance targets",
-              "german_text": "Taxonomie und Profil geschäftlicher Attribute mit integrierten Leistungszielen"
+              "german_text": "Taxonomie und Profil geschäftlicher Attribute mit integrierten Leistungszielen",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:assets-what"
         },
         {
           "key": "conceptual-architecture-motivation-why",
@@ -150,29 +174,36 @@
           "items": [
             {
               "english_text": "Enablement & Control Objectives",
-              "german_text": "Befähigungs- und Steuerungsziele"
+              "german_text": "Befähigungs- und Steuerungsziele",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives"
             },
             {
               "english_text": "Policy Architecture",
-              "german_text": "Richtlinienarchitektur"
+              "german_text": "Richtlinienarchitektur",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture"
             },
             {
               "english_text": "Risk Categories",
-              "german_text": "Risikokategorien"
+              "german_text": "Risikokategorien",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories"
             },
             {
               "english_text": "Risk Management Strategies",
-              "german_text": "Risikomanagementstrategien"
+              "german_text": "Risikomanagementstrategien",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies"
             },
             {
               "english_text": "Risk Modelling Framework",
-              "german_text": "Rahmenwerk für Risikomodellierung"
+              "german_text": "Rahmenwerk für Risikomodellierung",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework"
             },
             {
               "english_text": "Assurance Framework",
-              "german_text": "Rahmenwerk für Assurance"
+              "german_text": "Rahmenwerk für Assurance",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:motivation-why"
         },
         {
           "key": "conceptual-architecture-process-how",
@@ -182,17 +213,21 @@
           "items": [
             {
               "english_text": "Inventory of all Operational Processes (IT, industriell & manuell)",
-              "german_text": "Inventar aller operativen Prozesse (IT, industriell und manuell)"
+              "german_text": "Inventar aller operativen Prozesse (IT, industriell und manuell)",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell"
             },
             {
               "english_text": "Process Mapping Framework",
-              "german_text": "Rahmenwerk zur Prozessabbildung"
+              "german_text": "Rahmenwerk zur Prozessabbildung",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework"
             },
             {
               "english_text": "Architectural Strategies for IT used in process support",
-              "german_text": "Architekturstrategien für IT zur Prozessunterstützung"
+              "german_text": "Architekturstrategien für IT zur Prozessunterstützung",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:process-how"
         },
         {
           "key": "conceptual-architecture-people-who",
@@ -202,17 +237,21 @@
           "items": [
             {
               "english_text": "Owners, Custodians & Users",
-              "german_text": "Eigentümer, Verwahrer und Nutzende"
+              "german_text": "Eigentümer, Verwahrer und Nutzende",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:owners-custodians-and-users"
             },
             {
               "english_text": "Service Providers & Customers",
-              "german_text": "Dienstleister und Kunden"
+              "german_text": "Dienstleister und Kunden",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers"
             },
             {
               "english_text": "Trust Modelling Framework",
-              "german_text": "Rahmenwerk zur Vertrauensmodellierung"
+              "german_text": "Rahmenwerk zur Vertrauensmodellierung",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:people-who"
         },
         {
           "key": "conceptual-architecture-location-where",
@@ -222,9 +261,11 @@
           "items": [
             {
               "english_text": "Security Domain Concepts & Framework",
-              "german_text": "Sicherheitsdomänen-Konzepte und Domänenrahmenwerk"
+              "german_text": "Sicherheitsdomänen-Konzepte und Domänenrahmenwerk",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:location-where"
         },
         {
           "key": "conceptual-architecture-time-when",
@@ -234,15 +275,19 @@
           "items": [
             {
               "english_text": "Through-Life Risk Management Framework",
-              "german_text": "Rahmenwerk für durchgängiges Risikomanagement über den Lebenszyklus"
+              "german_text": "Rahmenwerk für durchgängiges Risikomanagement über den Lebenszyklus",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:through-life-risk-management-framework"
             },
             {
               "english_text": "Attribute Performance Targets",
-              "german_text": "Leistungsziele für Attribute"
+              "german_text": "Leistungsziele für Attribute",
+              "archimate_key": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:conceptual-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:conceptual-architecture"
     },
     {
       "id": "logical-architecture",
@@ -257,13 +302,16 @@
           "items": [
             {
               "english_text": "Inventory of Information Assets",
-              "german_text": "Inventar der Informationswerte"
+              "german_text": "Inventar der Informationswerte",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:assets-what:inventory-of-information-assets"
             },
             {
               "english_text": "Information Model of the Business",
-              "german_text": "Informationsmodell des Unternehmens"
+              "german_text": "Informationsmodell des Unternehmens",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:assets-what:information-model-of-the-business"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:assets-what"
         },
         {
           "key": "logical-architecture-motivation-why",
@@ -273,17 +321,21 @@
           "items": [
             {
               "english_text": "Risk Models",
-              "german_text": "Risikomodelle"
+              "german_text": "Risikomodelle",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:motivation-why:risk-models"
             },
             {
               "english_text": "Domain Policies",
-              "german_text": "Domänenrichtlinien"
+              "german_text": "Domänenrichtlinien",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:motivation-why:domain-policies"
             },
             {
               "english_text": "Assurance Criteria (populated Assurance Framework)",
-              "german_text": "Assurance-Kriterien (konkretisiertes Assurance-Rahmenwerk)"
+              "german_text": "Assurance-Kriterien (konkretisiertes Assurance-Rahmenwerk)",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:motivation-why:assurance-criteria-populated-assurance-framework"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:motivation-why"
         },
         {
           "key": "logical-architecture-process-how",
@@ -293,25 +345,31 @@
           "items": [
             {
               "english_text": "Information Flows",
-              "german_text": "Informationsflüsse"
+              "german_text": "Informationsflüsse",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:process-how:information-flows"
             },
             {
               "english_text": "Functional Transformations",
-              "german_text": "Funktionale Transformationen"
+              "german_text": "Funktionale Transformationen",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:process-how:functional-transformations"
             },
             {
               "english_text": "Service-Oriented Architecture",
-              "german_text": "Serviceorientierte Architektur"
+              "german_text": "Serviceorientierte Architektur",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:process-how:service-oriented-architecture"
             },
             {
               "english_text": "Services Catalogue",
-              "german_text": "Servicekatalog"
+              "german_text": "Servicekatalog",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:process-how:services-catalogue"
             },
             {
               "english_text": "Application Functionality and Services",
-              "german_text": "Anwendungsfunktionen und Services"
+              "german_text": "Anwendungsfunktionen und Services",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:process-how:application-functionality-and-services"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:process-how"
         },
         {
           "key": "logical-architecture-people-who",
@@ -321,21 +379,26 @@
           "items": [
             {
               "english_text": "Domain Authorities",
-              "german_text": "Domänenverantwortliche"
+              "german_text": "Domänenverantwortliche",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:people-who:domain-authorities"
             },
             {
               "english_text": "Entity Schema",
-              "german_text": "Entitätenschema"
+              "german_text": "Entitätenschema",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:people-who:entity-schema"
             },
             {
               "english_text": "Privilege Profiles",
-              "german_text": "Berechtigungsprofile"
+              "german_text": "Berechtigungsprofile",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:people-who:privilege-profiles"
             },
             {
               "english_text": "Trust Relationship Models",
-              "german_text": "Modelle von Vertrauensbeziehungen"
+              "german_text": "Modelle von Vertrauensbeziehungen",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:people-who:trust-relationship-models"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:people-who"
         },
         {
           "key": "logical-architecture-location-where",
@@ -345,13 +408,16 @@
           "items": [
             {
               "english_text": "Domain Definitions",
-              "german_text": "Domänendefinitionen"
+              "german_text": "Domänendefinitionen",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:location-where:domain-definitions"
             },
             {
               "english_text": "Inter-domain Associations & Interactions",
-              "german_text": "Domänenübergreifende Zuordnungen und Interaktionen"
+              "german_text": "Domänenübergreifende Zuordnungen und Interaktionen",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:location-where:inter-domain-associations-and-interactions"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:location-where"
         },
         {
           "key": "logical-architecture-time-when",
@@ -361,11 +427,14 @@
           "items": [
             {
               "english_text": "Start Times, Lifetimes & Deadlines",
-              "german_text": "Startzeitpunkte, Gültigkeitsdauern und Fristen"
+              "german_text": "Startzeitpunkte, Gültigkeitsdauern und Fristen",
+              "archimate_key": "sabsa-architecture-matrix:item:logical-architecture:time-when:start-times-lifetimes-and-deadlines"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:logical-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:logical-architecture"
     },
     {
       "id": "physical-architecture",
@@ -380,9 +449,11 @@
           "items": [
             {
               "english_text": "Data Dictionary & Data Storage Devices Inventory",
-              "german_text": "Datenlexikon und Inventar der Datenspeicher"
+              "german_text": "Datenlexikon und Inventar der Datenspeicher",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:assets-what:data-dictionary-and-data-storage-devices-inventory"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:assets-what"
         },
         {
           "key": "physical-architecture-motivation-why",
@@ -392,13 +463,16 @@
           "items": [
             {
               "english_text": "Risk Management Rules & Procedures",
-              "german_text": "Regeln und Verfahren des Risikomanagements"
+              "german_text": "Regeln und Verfahren des Risikomanagements",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:motivation-why:risk-management-rules-and-procedures"
             },
             {
               "english_text": "Risk Metadata",
-              "german_text": "Risikometadaten"
+              "german_text": "Risikometadaten",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:motivation-why:risk-metadata"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:motivation-why"
         },
         {
           "key": "physical-architecture-process-how",
@@ -408,25 +482,31 @@
           "items": [
             {
               "english_text": "Working Procedures",
-              "german_text": "Arbeitsverfahren"
+              "german_text": "Arbeitsverfahren",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:process-how:working-procedures"
             },
             {
               "english_text": "Application Software",
-              "german_text": "Anwendungssoftware"
+              "german_text": "Anwendungssoftware",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:process-how:application-software"
             },
             {
               "english_text": "Middleware & Systems",
-              "german_text": "Middleware und Systeme"
+              "german_text": "Middleware und Systeme",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:process-how:middleware-and-systems"
             },
             {
               "english_text": "Security Mechanisms",
-              "german_text": "Sicherheitsmechanismen"
+              "german_text": "Sicherheitsmechanismen",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:process-how:security-mechanisms"
             },
             {
               "english_text": "Process Control Points",
-              "german_text": "Prozesskontrollpunkte"
+              "german_text": "Prozesskontrollpunkte",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:process-how:process-control-points"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:process-how"
         },
         {
           "key": "physical-architecture-people-who",
@@ -436,13 +516,16 @@
           "items": [
             {
               "english_text": "User Interface to Business Systems",
-              "german_text": "Benutzerschnittstellen zu Geschäftssystemen"
+              "german_text": "Benutzerschnittstellen zu Geschäftssystemen",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:people-who:user-interface-to-business-systems"
             },
             {
               "english_text": "Identity & Access Control Systems",
-              "german_text": "Identitäts- und Zugriffssteuerungssysteme"
+              "german_text": "Identitäts- und Zugriffssteuerungssysteme",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:people-who:identity-and-access-control-systems"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:people-who"
         },
         {
           "key": "physical-architecture-location-where",
@@ -452,13 +535,16 @@
           "items": [
             {
               "english_text": "Workspaces",
-              "german_text": "Arbeitsbereiche"
+              "german_text": "Arbeitsbereiche",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:location-where:workspaces"
             },
             {
               "english_text": "Host Platforms, Layout of Devices & Networks",
-              "german_text": "Host-Plattformen sowie Topologie von Geräten und Netzwerken"
+              "german_text": "Host-Plattformen sowie Topologie von Geräten und Netzwerken",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:location-where:host-platforms-layout-of-devices-and-networks"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:location-where"
         },
         {
           "key": "physical-architecture-time-when",
@@ -468,11 +554,14 @@
           "items": [
             {
               "english_text": "Timing & Sequencing of Processes and Sessions",
-              "german_text": "Taktung und Abfolge von Prozessen und Sitzungen"
+              "german_text": "Taktung und Abfolge von Prozessen und Sitzungen",
+              "archimate_key": "sabsa-architecture-matrix:item:physical-architecture:time-when:timing-and-sequencing-of-processes-and-sessions"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:physical-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:physical-architecture"
     },
     {
       "id": "component-architecture",
@@ -487,9 +576,11 @@
           "items": [
             {
               "english_text": "Products & Tools, Data Repositories and Processors",
-              "german_text": "Produkte und Werkzeuge, Datenablagen und Verarbeitungsinstanzen"
+              "german_text": "Produkte und Werkzeuge, Datenablagen und Verarbeitungsinstanzen",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:assets-what:products-and-tools-data-repositories-and-processors"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:assets-what"
         },
         {
           "key": "component-architecture-motivation-why",
@@ -499,17 +590,21 @@
           "items": [
             {
               "english_text": "Risk Analysis Tools",
-              "german_text": "Werkzeuge zur Risikoanalyse"
+              "german_text": "Werkzeuge zur Risikoanalyse",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:motivation-why:risk-analysis-tools"
             },
             {
               "english_text": "Risk Registers",
-              "german_text": "Risikoregister"
+              "german_text": "Risikoregister",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:motivation-why:risk-registers"
             },
             {
               "english_text": "Risk Monitoring & Reporting Tools",
-              "german_text": "Werkzeuge zur Risikoüberwachung und Berichterstattung"
+              "german_text": "Werkzeuge zur Risikoüberwachung und Berichterstattung",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:motivation-why:risk-monitoring-and-reporting-tools"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:motivation-why"
         },
         {
           "key": "component-architecture-process-how",
@@ -519,13 +614,16 @@
           "items": [
             {
               "english_text": "Tools & Protocols for Process Delivery",
-              "german_text": "Werkzeuge und Protokolle für die Prozessausführung"
+              "german_text": "Werkzeuge und Protokolle für die Prozessausführung",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:process-how:tools-and-protocols-for-process-delivery"
             },
             {
               "english_text": "Application Products",
-              "german_text": "Anwendungsprodukte"
+              "german_text": "Anwendungsprodukte",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:process-how:application-products"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:process-how"
         },
         {
           "key": "component-architecture-people-who",
@@ -535,21 +633,26 @@
           "items": [
             {
               "english_text": "Identities",
-              "german_text": "Identitäten"
+              "german_text": "Identitäten",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:people-who:identities"
             },
             {
               "english_text": "Job Descriptions",
-              "german_text": "Stellenbeschreibungen"
+              "german_text": "Stellenbeschreibungen",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:people-who:job-descriptions"
             },
             {
               "english_text": "Roles & Functions",
-              "german_text": "Rollen und Funktionen"
+              "german_text": "Rollen und Funktionen",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:people-who:roles-and-functions"
             },
             {
               "english_text": "Actions & Access Control Lists",
-              "german_text": "Aktionen und Zugriffssteuerungslisten"
+              "german_text": "Aktionen und Zugriffssteuerungslisten",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:people-who:actions-and-access-control-lists"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:people-who"
         },
         {
           "key": "component-architecture-location-where",
@@ -559,13 +662,16 @@
           "items": [
             {
               "english_text": "Nodes, Addresses & other Locators",
-              "german_text": "Knoten, Adressen und weitere Lokatoren"
+              "german_text": "Knoten, Adressen und weitere Lokatoren",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:location-where:nodes-addresses-and-other-locators"
             },
             {
               "english_text": "Component Configuration",
-              "german_text": "Komponentenkonfiguration"
+              "german_text": "Komponentenkonfiguration",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:location-where:component-configuration"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:location-where"
         },
         {
           "key": "component-architecture-time-when",
@@ -575,15 +681,19 @@
           "items": [
             {
               "english_text": "Time Schedules",
-              "german_text": "Zeitpläne"
+              "german_text": "Zeitpläne",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:time-when:time-schedules"
             },
             {
               "english_text": "Clocks, Timers & Interrupts",
-              "german_text": "Uhren, Timer und Interrupts"
+              "german_text": "Uhren, Timer und Interrupts",
+              "archimate_key": "sabsa-architecture-matrix:item:component-architecture:time-when:clocks-timers-and-interrupts"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:component-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:component-architecture"
     },
     {
       "id": "management-architecture",
@@ -598,9 +708,11 @@
           "items": [
             {
               "english_text": "Assurance of Operational Excellence & Continuity",
-              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität"
+              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:assets-what:assurance-of-operational-excellence-and-continuity"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:assets-what"
         },
         {
           "key": "management-architecture-motivation-why",
@@ -610,17 +722,21 @@
           "items": [
             {
               "english_text": "Risk Assessment",
-              "german_text": "Risikobewertung"
+              "german_text": "Risikobewertung",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-assessment"
             },
             {
               "english_text": "Risk Monitoring & Reporting",
-              "german_text": "Risikoüberwachung und Berichterstattung"
+              "german_text": "Risikoüberwachung und Berichterstattung",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-monitoring-and-reporting"
             },
             {
               "english_text": "Risk Treatment",
-              "german_text": "Risikobehandlung"
+              "german_text": "Risikobehandlung",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-treatment"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:motivation-why"
         },
         {
           "key": "management-architecture-process-how",
@@ -630,9 +746,11 @@
           "items": [
             {
               "english_text": "Management & Support of Systems, Applications & Services",
-              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services"
+              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:process-how:management-and-support-of-systems-applications-and-services"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:process-how"
         },
         {
           "key": "management-architecture-people-who",
@@ -642,9 +760,11 @@
           "items": [
             {
               "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
-              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen"
+              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:people-who:management-and-support-of-enterprise-wide-and-extended-enterprise-relationships"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:people-who"
         },
         {
           "key": "management-architecture-location-where",
@@ -654,9 +774,11 @@
           "items": [
             {
               "english_text": "Management of Buildings, Sites, Platforms & Networks",
-              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken"
+              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:location-where:management-of-buildings-sites-platforms-and-networks"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:location-where"
         },
         {
           "key": "management-architecture-time-when",
@@ -666,11 +788,14 @@
           "items": [
             {
               "english_text": "Management of Calendar and Timetable",
-              "german_text": "Steuerung von Kalendern und Zeitplänen"
+              "german_text": "Steuerung von Kalendern und Zeitplänen",
+              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:time-when:management-of-calendar-and-timetable"
             }
-          ]
+          ],
+          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:time-when"
         }
-      ]
+      ],
+      "archimate_key": "sabsa-architecture-matrix:row:management-architecture"
     }
   ]
 }
