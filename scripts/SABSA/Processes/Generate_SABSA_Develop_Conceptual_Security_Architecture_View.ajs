@@ -23,6 +23,7 @@ var CONST = {
         Main: "Main Process",
         Steps: "Steps",
         Subprocesses: "Subprocesses",
+        Artifacts: "Artifacts",
         Inputs: "Inputs",
         Outputs: "Outputs",
         Relations: {
@@ -37,9 +38,9 @@ var CONST = {
         ViewMarginY: 40,
         InputX: 40,
         MainX: 520,
-        OutputX: 1770,
+        OutputX: 1410,
         MainY: 40,
-        MainWidth: 470,
+        MainWidth: 760,
         MainMinHeight: 120,
         MainInnerX: 16,
         MainInnerY: 44,
@@ -49,9 +50,13 @@ var CONST = {
         OutputWidth: 360,
         ArtifactMinHeight: 58,
         ArtifactGap: 18,
-        StepWidth: 400,
+        StepWidth: 360,
         StepMinHeight: 58,
         StepGap: 12,
+        StepArtifactWidth: 170,
+        StepArtifactMinHeight: 34,
+        StepArtifactGap: 6,
+        StepColumnGap: 14,
         StepInnerX: 12,
         StepInnerY: 28,
         StepInnerRight: 12,
@@ -145,6 +150,30 @@ var DATA = {
             id: "step-1",
             name: "Step 1 - Synthesize Business Value & Knowledge Strategy",
             description: "Refines business attributes at conceptual level, integrates performance targets, and derives the conceptual business information architecture.",
+            inputs: [
+                {
+                    id: "sabsa-business-attributes-profile-bap",
+                    name: "SABSA Business Attributes Profile (BAP)",
+                    description: "Validated business attributes profile from the contextual layer."
+                },
+                {
+                    id: "stakeholder-expectations-and-business-strategy",
+                    name: "Stakeholder Expectations & Business Strategy",
+                    description: "Stakeholder goals, vision, and performance expectations relevant for the conceptual WHAT perspective."
+                },
+                {
+                    id: "sabsa-generic-attributes-library",
+                    name: "SABSA Generic Attributes Library",
+                    description: "Reference taxonomy used to validate completeness and consistency of the business attributes profile."
+                }
+            ],
+            outputs: [
+                {
+                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
+                    description: "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets."
+                }
+            ],
             subprocesses: [
                 "Attribute Taxonomy Review",
                 "Performance Target Integration",
@@ -156,6 +185,60 @@ var DATA = {
             id: "step-2",
             name: "Step 2 - Develop Risk Management Strategy & Objectives",
             description: "Builds conceptual risk management including objectives, policy architecture, risk categories, modelling, and assurance.",
+            inputs: [
+                {
+                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
+                    description: "Output from Step 1 and the basis for deriving control objectives."
+                },
+                {
+                    id: "business-risk-context",
+                    name: "Business Risk Context",
+                    description: "Contextual threats, vulnerabilities, and impacts used for the conceptual WHY perspective."
+                },
+                {
+                    id: "compliance-and-regulatory-requirements",
+                    name: "Compliance & Regulatory Requirements",
+                    description: "Relevant regulatory and contractual obligations shaping conceptual policy architecture."
+                },
+                {
+                    id: "threat-intelligence-conceptual",
+                    name: "Threat Intelligence (conceptual)",
+                    description: "High-level threat landscape used to support conceptual risk categorisation."
+                }
+            ],
+            outputs: [
+                {
+                    id: "enablement-and-control-objectives",
+                    name: "Enablement & Control Objectives",
+                    description: "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective."
+                },
+                {
+                    id: "policy-architecture",
+                    name: "Policy Architecture",
+                    description: "Conceptual policy hierarchy linking control objectives, requirements, and governance intent."
+                },
+                {
+                    id: "risk-categories",
+                    name: "Risk Categories",
+                    description: "Conceptual risk categories mapped to business attributes and control objectives."
+                },
+                {
+                    id: "risk-management-strategies",
+                    name: "Risk Management Strategies",
+                    description: "Conceptual risk treatment strategies aligned to risk appetite and policy direction."
+                },
+                {
+                    id: "risk-modelling-framework",
+                    name: "Risk Modelling Framework",
+                    description: "Shared conceptual evaluation framework for assessing and comparing risk across layers."
+                },
+                {
+                    id: "assurance-framework",
+                    name: "Assurance Framework",
+                    description: "Conceptual assurance framework mapping evidence and assurance activities to objectives."
+                }
+            ],
             subprocesses: [
                 "Control Objectives Derivation",
                 "Risk Categorisation",
@@ -169,6 +252,45 @@ var DATA = {
             id: "step-3",
             name: "Step 3 - Define Strategies for Process Assurance",
             description: "Inventories operational processes, classifies them, and defines process mapping and IT support strategies.",
+            inputs: [
+                {
+                    id: "enablement-and-control-objectives",
+                    name: "Enablement & Control Objectives",
+                    description: "Conceptual control objectives determining which operational processes matter most."
+                },
+                {
+                    id: "policy-architecture",
+                    name: "Policy Architecture",
+                    description: "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping."
+                },
+                {
+                    id: "business-process-inventory-contextual-layer",
+                    name: "Business Process Inventory (Contextual Layer)",
+                    description: "Existing list of business processes used as the starting point for operational process analysis."
+                },
+                {
+                    id: "technology-context",
+                    name: "Technology Context",
+                    description: "High-level technology architecture context supporting the derivation of process-support strategies."
+                }
+            ],
+            outputs: [
+                {
+                    id: "inventory-of-all-operational-processes",
+                    name: "Inventory of all Operational Processes",
+                    description: "Classified inventory of operational processes across IT, industrial, and manual contexts."
+                },
+                {
+                    id: "process-mapping-framework",
+                    name: "Process Mapping Framework",
+                    description: "Traceability framework linking processes to control objectives and business attributes."
+                },
+                {
+                    id: "architectural-strategies-for-it-used-in-process-support",
+                    name: "Architectural Strategies for IT used in Process Support",
+                    description: "Conceptual IT architecture strategies used to support and secure operational processes."
+                }
+            ],
             subprocesses: [
                 "Operational Process Inventory",
                 "Process Classification & Criticality",
@@ -181,6 +303,35 @@ var DATA = {
             id: "step-4",
             name: "Step 4 - Synthesize Domain Framework",
             description: "Identifies, maps, and formalises security domains and their boundaries.",
+            inputs: [
+                {
+                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
+                    description: "Business attributes and performance targets defining domain protection needs."
+                },
+                {
+                    id: "enablement-and-control-objectives",
+                    name: "Enablement & Control Objectives",
+                    description: "Conceptual objectives shaping the scope and intent of security domains."
+                },
+                {
+                    id: "policy-architecture",
+                    name: "Policy Architecture",
+                    description: "Conceptual policy structure influencing domain boundaries and control expectations."
+                },
+                {
+                    id: "organisation-structure-and-locations",
+                    name: "Organisation Structure & Locations",
+                    description: "Organisational and geographical structure used to identify conceptual security domains."
+                }
+            ],
+            outputs: [
+                {
+                    id: "security-domain-concepts-and-framework",
+                    name: "Security Domain Concepts & Framework",
+                    description: "Conceptual domain framework with domain boundaries, interactions, and attribute mappings."
+                }
+            ],
             subprocesses: [
                 "Domain Identification",
                 "Domain Attribute Mapping",
@@ -192,6 +343,45 @@ var DATA = {
             id: "step-5",
             name: "Step 5 - Develop Security & Risk Governance; Trust Framework",
             description: "Defines entities, service-provider/customer mappings, accountability, and trust relationships.",
+            inputs: [
+                {
+                    id: "security-domain-concepts-and-framework",
+                    name: "Security Domain Concepts & Framework",
+                    description: "Conceptual domain model providing the structure for governance and trust allocation."
+                },
+                {
+                    id: "enablement-and-control-objectives",
+                    name: "Enablement & Control Objectives",
+                    description: "Objectives that need explicit governance ownership and accountability."
+                },
+                {
+                    id: "assurance-framework",
+                    name: "Assurance Framework",
+                    description: "Assurance responsibilities used to support entity and governance assignments."
+                },
+                {
+                    id: "business-entity-structure",
+                    name: "Business Entity Structure",
+                    description: "Stakeholders, partners, customers, and organisational entities relevant for classification."
+                }
+            ],
+            outputs: [
+                {
+                    id: "owners-custodians-and-users",
+                    name: "Owners, Custodians & Users",
+                    description: "Conceptual entity register with role classification and accountability."
+                },
+                {
+                    id: "service-providers-and-customers",
+                    name: "Service Providers & Customers",
+                    description: "Conceptual provider and customer map including security responsibilities in the service chain."
+                },
+                {
+                    id: "trust-modelling-framework",
+                    name: "Trust Modelling Framework",
+                    description: "Conceptual trust model defining trust relationships, levels, and boundaries."
+                }
+            ],
             subprocesses: [
                 "Entity Identification & Classification",
                 "Service Provider & Customer Mapping",
@@ -204,6 +394,40 @@ var DATA = {
             id: "step-6",
             name: "Step 6 - Define Time Management Framework",
             description: "Defines lifecycle, timing, and traceability for risk management and performance targets.",
+            inputs: [
+                {
+                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
+                    description: "Performance targets that need to be anchored across time and lifecycle perspectives."
+                },
+                {
+                    id: "risk-management-strategies",
+                    name: "Risk Management Strategies",
+                    description: "Conceptual risk strategies that need to be sustained through lifecycle planning."
+                },
+                {
+                    id: "assurance-framework",
+                    name: "Assurance Framework",
+                    description: "Assurance activities that need a conceptual timing and review structure."
+                },
+                {
+                    id: "inventory-of-all-operational-processes",
+                    name: "Inventory of all Operational Processes",
+                    description: "Operational processes used to anchor lifecycle and timing concepts."
+                }
+            ],
+            outputs: [
+                {
+                    id: "through-life-risk-management-framework",
+                    name: "Through-Life Risk Management Framework",
+                    description: "Conceptual lifecycle framework for risk management including reviews and trigger events."
+                },
+                {
+                    id: "attribute-performance-targets",
+                    name: "Attribute Performance Targets",
+                    description: "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring."
+                }
+            ],
             subprocesses: [
                 "Security Lifecycle Definition",
                 "Risk Management Lifecycle Integration",
@@ -338,6 +562,10 @@ function resolveConceptPlacement(conceptType, properties) {
     }
 
     if (conceptType === "business-object") {
+        if (role === "Artifact") {
+            return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
+        }
+
         if (role === "InputArtifact") {
             return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Inputs]) };
         }
@@ -543,14 +771,33 @@ function estimateTextHeight(text, width, minHeight) {
 }
 
 function getStepXInMain() {
-    return Math.max(
-        CONST.Layout.MainInnerX,
-        Math.floor((CONST.Layout.MainWidth - CONST.Layout.StepWidth) / 2)
-    );
+    return getStepInputsX() + CONST.Layout.StepArtifactWidth + CONST.Layout.StepColumnGap;
 }
 
 function getSubprocessWidth() {
     return CONST.Layout.StepWidth - CONST.Layout.StepInnerX - CONST.Layout.StepInnerRight;
+}
+
+function getStepInputsX() {
+    return CONST.Layout.MainInnerX;
+}
+
+function getStepOutputsX() {
+    return getStepXInMain() + CONST.Layout.StepWidth + CONST.Layout.StepColumnGap;
+}
+
+function estimateArtifactStackHeight(artifacts, width, minHeight, gap) {
+    var totalHeight = 0;
+
+    (artifacts || []).forEach(function (artifact, index) {
+        totalHeight += estimateTextHeight(artifact.name, width, minHeight);
+
+        if (index < artifacts.length - 1) {
+            totalHeight += gap;
+        }
+    });
+
+    return totalHeight;
 }
 
 function estimateStepContainerHeight(stepData) {
@@ -599,6 +846,8 @@ function buildInputDocumentation(inputData) {
 
 function optimizeGeneratedLayout(layout) {
     var stepX = getStepXInMain();
+    var stepInputsX = getStepInputsX();
+    var stepOutputsX = getStepOutputsX();
     var subprocessWidth = getSubprocessWidth();
     var currentStepY = CONST.Layout.MainInnerY;
     var mainBounds = layout.mainVisual.bounds;
@@ -632,21 +881,73 @@ function optimizeGeneratedLayout(layout) {
             currentSubY = CONST.Layout.StepInnerY;
         }
 
+        var inputStackHeight = estimateArtifactStackHeight(
+            stepEntry.data.inputs,
+            CONST.Layout.StepArtifactWidth,
+            CONST.Layout.StepArtifactMinHeight,
+            CONST.Layout.StepArtifactGap
+        );
+        var outputStackHeight = estimateArtifactStackHeight(
+            stepEntry.data.outputs,
+            CONST.Layout.StepArtifactWidth,
+            CONST.Layout.StepArtifactMinHeight,
+            CONST.Layout.StepArtifactGap
+        );
         var stepHeight = Math.max(
             CONST.Layout.StepMinHeight,
             titleHeight + CONST.Layout.StepInnerY + CONST.Layout.StepInnerBottom,
             currentSubY + CONST.Layout.StepInnerBottom
         );
+        var rowHeight = Math.max(stepHeight, inputStackHeight, outputStackHeight);
+        var stepY = currentStepY + Math.max(0, Math.floor((rowHeight - stepHeight) / 2));
+        var inputY = currentStepY + Math.max(0, Math.floor((rowHeight - inputStackHeight) / 2));
+        var outputY = currentStepY + Math.max(0, Math.floor((rowHeight - outputStackHeight) / 2));
 
         setVisualBounds(
             stepEntry.visual,
             stepX,
-            currentStepY,
+            stepY,
             CONST.Layout.StepWidth,
             stepHeight
         );
 
-        currentStepY += stepHeight + CONST.Layout.StepGap;
+        stepEntry.inputVisuals.forEach(function (inputEntry) {
+            var height = estimateTextHeight(
+                inputEntry.data.name,
+                CONST.Layout.StepArtifactWidth,
+                CONST.Layout.StepArtifactMinHeight
+            );
+
+            setVisualBounds(
+                inputEntry.visual,
+                stepInputsX,
+                inputY,
+                CONST.Layout.StepArtifactWidth,
+                height
+            );
+
+            inputY += height + CONST.Layout.StepArtifactGap;
+        });
+
+        stepEntry.outputVisuals.forEach(function (outputEntry) {
+            var height = estimateTextHeight(
+                outputEntry.data.name,
+                CONST.Layout.StepArtifactWidth,
+                CONST.Layout.StepArtifactMinHeight
+            );
+
+            setVisualBounds(
+                outputEntry.visual,
+                stepOutputsX,
+                outputY,
+                CONST.Layout.StepArtifactWidth,
+                height
+            );
+
+            outputY += height + CONST.Layout.StepArtifactGap;
+        });
+
+        currentStepY += rowHeight + CONST.Layout.StepGap;
     });
 
     if (layout.stepVisuals.length > 0) {
@@ -697,12 +998,20 @@ function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
     }, 0);
+    var stepInputCount = DATA.steps.reduce(function (sum, step) {
+        return sum + (step.inputs ? step.inputs.length : 0);
+    }, 0);
+    var stepOutputCount = DATA.steps.reduce(function (sum, step) {
+        return sum + (step.outputs ? step.outputs.length : 0);
+    }, 0);
 
     return dialogs.confirmInfo(
         "This script will generate or update a focused process view for '" + DATA.process.name + "'." +
         "\n\nSource markdown: " + CONST.SourceMarkdownPath +
         "\nInputs: " + DATA.inputs.length +
         "\nOutputs: " + DATA.outputs.length +
+        "\nStep inputs: " + stepInputCount +
+        "\nStep outputs: " + stepOutputCount +
         "\nSteps: " + DATA.steps.length +
         "\nSub-processes: " + subprocessCount +
         "\n\nThe script will create or reuse process, artefact, and relationship elements in the open Archi model." +
@@ -863,10 +1172,106 @@ function createView() {
             concept: stepConcept,
             visual: stepVisual,
             data: stepData,
+            inputVisuals: [],
+            outputVisuals: [],
             subprocessVisuals: []
         };
 
         stepVisuals.push(stepEntry);
+
+        (stepData.inputs || []).forEach(function (artifactData, artifactIndex) {
+            var artifactConcept = ensureConcept(
+                "business-object",
+                artifactData.name,
+                "artifact:" + artifactData.id,
+                {
+                    id: "sabsa-process:artifact:" + artifactData.id,
+                    ProcessViewRole: "Artifact",
+                    SourceDocument: CONST.SourceMarkdownPath
+                },
+                artifactData.description
+            );
+            var artifactVisual = addStyledVisual(
+                mainVisual,
+                artifactConcept,
+                getStepInputsX(),
+                currentStepY + (artifactIndex * (CONST.Layout.StepArtifactMinHeight + CONST.Layout.StepArtifactGap)),
+                CONST.Layout.StepArtifactWidth,
+                estimateTextHeight(
+                    artifactData.name,
+                    CONST.Layout.StepArtifactWidth,
+                    CONST.Layout.StepArtifactMinHeight
+                ),
+                CONST.Style.InputFill
+            );
+            var accessRelationship = ensureRelationship(
+                "access-relationship",
+                stepConcept,
+                artifactConcept,
+                "step-input-access:" + stepData.id + ":" + artifactData.id,
+                {
+                    ProcessViewRelationRole: "InputAccess",
+                    AccessMode: "Read",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, accessRelationship, stepVisual, artifactVisual);
+            stats.artifacts++;
+            stats.relationships++;
+            stepEntry.inputVisuals.push({
+                concept: artifactConcept,
+                visual: artifactVisual,
+                data: artifactData
+            });
+        });
+
+        (stepData.outputs || []).forEach(function (artifactData, artifactIndex) {
+            var artifactConcept = ensureConcept(
+                "business-object",
+                artifactData.name,
+                "artifact:" + artifactData.id,
+                {
+                    id: "sabsa-process:artifact:" + artifactData.id,
+                    ProcessViewRole: "Artifact",
+                    SourceDocument: CONST.SourceMarkdownPath
+                },
+                artifactData.description
+            );
+            var artifactVisual = addStyledVisual(
+                mainVisual,
+                artifactConcept,
+                getStepOutputsX(),
+                currentStepY + (artifactIndex * (CONST.Layout.StepArtifactMinHeight + CONST.Layout.StepArtifactGap)),
+                CONST.Layout.StepArtifactWidth,
+                estimateTextHeight(
+                    artifactData.name,
+                    CONST.Layout.StepArtifactWidth,
+                    CONST.Layout.StepArtifactMinHeight
+                ),
+                CONST.Style.OutputFill
+            );
+            var accessRelationship = ensureRelationship(
+                "access-relationship",
+                stepConcept,
+                artifactConcept,
+                "step-output-access:" + stepData.id + ":" + artifactData.id,
+                {
+                    ProcessViewRelationRole: "OutputAccess",
+                    AccessMode: "Write",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, accessRelationship, stepVisual, artifactVisual);
+            stats.artifacts++;
+            stats.relationships++;
+            stepEntry.outputVisuals.push({
+                concept: artifactConcept,
+                visual: artifactVisual,
+                data: artifactData
+            });
+        });
 
         stepData.subprocesses.forEach(function (subprocessName, subprocessIndex) {
             var subprocessId = slugify(stepData.id + "-" + subprocessName);
