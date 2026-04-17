@@ -29,6 +29,7 @@ var CONST = {
         Columns: "Columns",
         Rows: "Rows",
         Cells: "Cells",
+        Processes: "Processes",
         Representations: "Representations",
         Activities: "Activities"
     },
@@ -194,6 +195,13 @@ function resolveConceptFolderPlacement(conceptType, properties) {
         return {
             rootName: "Business",
             pathSegments: getMatrixFolderSegments(CONST.Folder.MatrixName, [CONST.Folder.Activities])
+        };
+    }
+
+    if (conceptType === "business-process") {
+        return {
+            rootName: "Business",
+            pathSegments: getMatrixFolderSegments(CONST.Folder.MatrixName, [CONST.Folder.Processes])
         };
     }
 
@@ -694,6 +702,14 @@ function getItemConceptType(rowData) {
     return safeString(rowData.id) === "management-architecture" ? "representation" : "business-function";
 }
 
+function getCellConceptType(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? "grouping" : "business-process";
+}
+
+function getCellKind(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? "Cell" : "Process";
+}
+
 function getItemKind(rowData) {
     return safeString(rowData.id) === "management-architecture" ? "Representation" : "Activity";
 }
@@ -849,10 +865,12 @@ function createMatrixView(matrixData) {
             var cellKey = safeString(cellData.conceptKey) || ("cell:" + rowData.id + ":" + cellData.columnId);
             var columnKey = safeString(cellData.columnConceptKey) || ("column:" + cellData.columnId);
             var columnConcept = findConceptByTypeAndKey("grouping", columnKey);
-            var cellConcept = ensureConcept("grouping", cellData.title, cellKey, {
+            var cellConceptType = getCellConceptType(rowData);
+            var cellKind = getCellKind(rowData);
+            var cellConcept = ensureConcept(cellConceptType, cellData.title, cellKey, {
                 id: safeString(cellData.id || cellData.key),
                 __legacyPropertyIds: [buildLegacyCellPropertyId(matrixData, rowData.id, cellData.columnId)],
-                SabsaMatrixKind: "Cell",
+                SabsaMatrixKind: cellKind,
                 ConceptId: cellKey,
                 RowId: rowData.id,
                 RowTitle: rowData.title,
@@ -879,7 +897,7 @@ function createMatrixView(matrixData) {
                 rowKey,
                 cellKey
             ].join(":"), {
-                SabsaMatrixKind: "RowToCell"
+                SabsaMatrixKind: cellKind === "Cell" ? "RowToCell" : "RowToProcess"
             });
             stats.relationships++;
 
@@ -889,7 +907,7 @@ function createMatrixView(matrixData) {
                     columnKey,
                     cellKey
                 ].join(":"), {
-                    SabsaMatrixKind: "ColumnToCell"
+                    SabsaMatrixKind: cellKind === "Cell" ? "ColumnToCell" : "ColumnToProcess"
                 });
                 stats.relationships++;
             }
