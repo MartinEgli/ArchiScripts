@@ -39,27 +39,26 @@ var CONST = {
         MainX: 520,
         OutputX: 1770,
         MainY: 40,
-        MainWidth: 500,
+        MainWidth: 470,
         MainMinHeight: 120,
-        MainInnerX: 18,
-        MainInnerY: 54,
-        MainInnerRight: 18,
-        MainInnerBottom: 20,
+        MainInnerX: 16,
+        MainInnerY: 44,
+        MainInnerRight: 16,
+        MainInnerBottom: 16,
         InputWidth: 310,
         OutputWidth: 360,
         ArtifactMinHeight: 58,
         ArtifactGap: 18,
-        StepWidth: 464,
-        StepMinHeight: 72,
-        StepGap: 18,
-        StepInnerX: 18,
-        StepInnerY: 40,
-        StepInnerRight: 18,
-        StepInnerBottom: 14,
-        SubprocessStartGap: 8,
-        SubprocessWidth: 424,
-        SubprocessMinHeight: 42,
-        SubprocessGap: 10
+        StepWidth: 400,
+        StepMinHeight: 58,
+        StepGap: 12,
+        StepInnerX: 12,
+        StepInnerY: 28,
+        StepInnerRight: 12,
+        StepInnerBottom: 10,
+        SubprocessStartGap: 6,
+        SubprocessMinHeight: 32,
+        SubprocessGap: 6
     },
     Style: {
         MainProcessFill: "#ffcc64",
@@ -510,7 +509,7 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
 
 function estimateTextHeight(text, width, minHeight) {
     var cleaned = trim(text);
-    var lineLength = Math.max(18, Math.floor((width - 20) / 7));
+    var lineLength = Math.max(16, Math.floor((width - 18) / 6.4));
     var lines;
 
     if (!cleaned) {
@@ -518,17 +517,29 @@ function estimateTextHeight(text, width, minHeight) {
     }
 
     lines = Math.ceil(cleaned.length / lineLength);
-    return Math.max(minHeight, 18 + (lines * 16));
+    return Math.max(minHeight, 14 + (lines * 14));
+}
+
+function getStepXInMain() {
+    return Math.max(
+        CONST.Layout.MainInnerX,
+        Math.floor((CONST.Layout.MainWidth - CONST.Layout.StepWidth) / 2)
+    );
+}
+
+function getSubprocessWidth() {
+    return CONST.Layout.StepWidth - CONST.Layout.StepInnerX - CONST.Layout.StepInnerRight;
 }
 
 function estimateStepContainerHeight(stepData) {
     var titleHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
+    var subprocessWidth = getSubprocessWidth();
     var subprocessHeight = 0;
 
     stepData.subprocesses.forEach(function (subprocessName, index) {
         subprocessHeight += estimateTextHeight(
             subprocessName,
-            CONST.Layout.SubprocessWidth,
+            subprocessWidth,
             CONST.Layout.SubprocessMinHeight
         );
 
@@ -709,7 +720,7 @@ function createView() {
         var stepVisual = addStyledVisual(
             mainVisual,
             stepConcept,
-            CONST.Layout.MainInnerX,
+            getStepXInMain(),
             currentStepY,
             CONST.Layout.StepWidth,
             stepHeight,
@@ -752,13 +763,14 @@ function createView() {
                 "Sub-process of " + stepData.name + " derived from " + CONST.SourceMarkdownPath + "."
             );
             var relativeSubY = CONST.Layout.StepInnerY + CONST.Layout.SubprocessStartGap;
+            var subprocessWidth = getSubprocessWidth();
             var previousSubprocesses = stepData.subprocesses.slice(0, subprocessIndex);
-            var subHeight = estimateTextHeight(subprocessName, CONST.Layout.SubprocessWidth, CONST.Layout.SubprocessMinHeight);
+            var subHeight = estimateTextHeight(subprocessName, subprocessWidth, CONST.Layout.SubprocessMinHeight);
 
             previousSubprocesses.forEach(function (previousName) {
                 relativeSubY += estimateTextHeight(
                     previousName,
-                    CONST.Layout.SubprocessWidth,
+                    subprocessWidth,
                     CONST.Layout.SubprocessMinHeight
                 ) + CONST.Layout.SubprocessGap;
             });
@@ -768,7 +780,7 @@ function createView() {
                 subprocessConcept,
                 CONST.Layout.StepInnerX,
                 relativeSubY,
-                CONST.Layout.SubprocessWidth,
+                subprocessWidth,
                 subHeight,
                 CONST.Style.SubprocessFill
             );
