@@ -28,7 +28,7 @@ var CONST = {
         SharedArchitectureMatrixName: "Architecture Matrix",
         Columns: "Columns",
         Rows: "Rows",
-        Cells: "Cells",
+        WorkPackages: "Work Packages",
         Processes: "Processes",
         Representations: "Representations",
         Activities: "Activities"
@@ -127,8 +127,37 @@ function decodeEntities(value) {
         .replace(/&nbsp;/g, " ");
 }
 
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function getTopLevelFolder(rootName) {
-    return $("folder." + rootName).first();
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"]
+    };
+    var candidateNames = aliasesByFolderName[rootName] || [rootName];
+    var wantedNames = candidateNames.map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
 }
 
 function ensureChildFolder(parentFolder, childName) {
@@ -199,6 +228,16 @@ function resolveConceptFolderPlacement(conceptType, properties) {
         };
     }
 
+    if (conceptType === "work-package") {
+        return {
+            rootName: "Implementation & Migration",
+            pathSegments: getMatrixFolderSegments(
+                CONST.Folder.SharedArchitectureMatrixName,
+                [CONST.Folder.WorkPackages]
+            )
+        };
+    }
+
     if (conceptType === "business-process") {
         return {
             rootName: "Business",
@@ -221,12 +260,6 @@ function resolveConceptFolderPlacement(conceptType, properties) {
             };
         }
 
-        if (kind === "Cell") {
-            return {
-                rootName: "Other",
-                pathSegments: getMatrixFolderSegments(CONST.Folder.MatrixName, [CONST.Folder.Cells])
-            };
-        }
     }
 
     return null;
@@ -704,11 +737,11 @@ function getItemConceptType(rowData) {
 }
 
 function getCellConceptType(rowData) {
-    return safeString(rowData.id) === "management-architecture" ? "grouping" : "business-process";
+    return safeString(rowData.id) === "management-architecture" ? "work-package" : "business-process";
 }
 
 function getCellKind(rowData) {
-    return safeString(rowData.id) === "management-architecture" ? "Cell" : "Process";
+    return safeString(rowData.id) === "management-architecture" ? "WorkPackage" : "Process";
 }
 
 function getItemKind(rowData) {
@@ -902,7 +935,7 @@ function createMatrixView(matrixData) {
                 rowKey,
                 cellKey
             ].join(":"), {
-                SabsaMatrixKind: cellKind === "Cell" ? "RowToCell" : "RowToProcess"
+                SabsaMatrixKind: cellKind === "WorkPackage" ? "RowToWorkPackage" : "RowToProcess"
             });
             stats.relationships++;
 
@@ -912,7 +945,7 @@ function createMatrixView(matrixData) {
                     columnKey,
                     cellKey
                 ].join(":"), {
-                    SabsaMatrixKind: cellKind === "Cell" ? "ColumnToCell" : "ColumnToProcess"
+                    SabsaMatrixKind: cellKind === "WorkPackage" ? "ColumnToWorkPackage" : "ColumnToProcess"
                 });
                 stats.relationships++;
             }

@@ -27,7 +27,7 @@ var CONST = {
         MatrixName: "Architecture Matrix",
         Columns: "Columns",
         Rows: "Rows",
-        Cells: "Cells",
+        WorkPackages: "Work Packages",
         Representations: "Representations"
     },
     Layout: {
@@ -119,8 +119,37 @@ function decodeEntities(value) {
         .replace(/&nbsp;/g, " ");
 }
 
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function getTopLevelFolder(rootName) {
-    return $("folder." + rootName).first();
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"]
+    };
+    var candidateNames = aliasesByFolderName[rootName] || [rootName];
+    var wantedNames = candidateNames.map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
 }
 
 function ensureChildFolder(parentFolder, childName) {
@@ -181,6 +210,13 @@ function resolveConceptFolderPlacement(conceptType, properties) {
         };
     }
 
+    if (conceptType === "work-package") {
+        return {
+            rootName: "Implementation & Migration",
+            pathSegments: getMatrixFolderSegments([CONST.Folder.WorkPackages])
+        };
+    }
+
     if (conceptType === "grouping") {
         if (kind === "Column") {
             return {
@@ -196,12 +232,6 @@ function resolveConceptFolderPlacement(conceptType, properties) {
             };
         }
 
-        if (kind === "Cell") {
-            return {
-                rootName: "Other",
-                pathSegments: getMatrixFolderSegments([CONST.Folder.Cells])
-            };
-        }
     }
 
     return null;
@@ -638,6 +668,14 @@ function buildLegacyCellPropertyId(matrixData, rowId, columnId) {
     return [getLegacyRowNamespace(matrixData, rowId), "cell", safeString(rowId), safeString(columnId)].join(":");
 }
 
+function getCellConceptType() {
+    return "work-package";
+}
+
+function getCellKind() {
+    return "WorkPackage";
+}
+
 function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var currentY = startY;
@@ -707,7 +745,7 @@ function createMatrixView(matrixData) {
     var view = model.createArchimateView(viewName);
     var rowY = CONST.Layout.RowStartY;
 
-    view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell groups contain representation elements for each bullet item.";
+    view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell work packages contain representation elements for each bullet item.";
     moveViewToSabsaFolder(view);
 
     matrixData.columns.forEach(function (column, index) {
@@ -776,10 +814,12 @@ function createMatrixView(matrixData) {
             var cellKey = safeString(cellData.conceptKey) || ("cell:" + rowData.id + ":" + cellData.columnId);
             var columnKey = safeString(cellData.columnConceptKey) || ("column:" + cellData.columnId);
             var columnConcept = findConceptByTypeAndKey("grouping", columnKey);
-            var cellConcept = ensureConcept("grouping", cellData.title, cellKey, {
+            var cellConceptType = getCellConceptType(rowData);
+            var cellKind = getCellKind(rowData);
+            var cellConcept = ensureConcept(cellConceptType, cellData.title, cellKey, {
                 id: safeString(cellData.id || cellData.key),
                 __legacyPropertyIds: [buildLegacyCellPropertyId(matrixData, rowData.id, cellData.columnId)],
-                SabsaMatrixKind: "Cell",
+                SabsaMatrixKind: cellKind,
                 ConceptId: cellKey,
                 RowId: rowData.id,
                 RowTitle: rowData.title,
@@ -806,7 +846,7 @@ function createMatrixView(matrixData) {
                 rowKey,
                 cellKey
             ].join(":"), {
-                SabsaMatrixKind: "RowToCell"
+                SabsaMatrixKind: "RowToWorkPackage"
             });
             stats.relationships++;
 
@@ -816,7 +856,7 @@ function createMatrixView(matrixData) {
                     columnKey,
                     cellKey
                 ].join(":"), {
-                    SabsaMatrixKind: "ColumnToCell"
+                    SabsaMatrixKind: "ColumnToWorkPackage"
                 });
                 stats.relationships++;
             }
