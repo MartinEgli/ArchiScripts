@@ -30,6 +30,7 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
   Die Generatoren ordnen Views unter `Views/SABSA/Matrices/...` ein und legen Gruppierungen unter `Other/SABSA/Matrices/...` sowie fachliche Elemente unter `Business/SABSA/Matrices/...` ab
 - `scripts/SABSA/Processes/`
   Generatoren fuer fokussierte SABSA-Prozess-Views, zum Beispiel fuer `Develop Conceptual Security Architecture` auf Basis der Analyse unter `../analyse/sabsa/`
+  Der Generator fuer `Develop Conceptual Security Architecture` liest den JSON-Extrakt `data/sabsa/sabsa-develop-conceptual-security-architecture-data.json`
 - `scripts/lib/logging/`
   gemeinsamer Logger fuer wiederverwendbare Konsolen-, Dialog- und strukturierte Log-Ausgaben
 - `scripts/lib/exchange/`
@@ -61,4 +62,5 @@ Aktuell werden dort insbesondere diese Dateien gespiegelt:
 
 - `data/sabsa/sabsa-architecture-matrix-data.json`
 - `data/sabsa/sabsa-management-matrix-data.json`
+- `data/sabsa/sabsa-develop-conceptual-security-architecture-data.json`
 

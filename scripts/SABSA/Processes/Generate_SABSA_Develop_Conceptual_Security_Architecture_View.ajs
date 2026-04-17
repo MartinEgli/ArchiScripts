@@ -1,4 +1,7 @@
 var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
@@ -14,6 +17,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
+    SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-develop-conceptual-security-architecture-data.json").getCanonicalPath(),
     SourceMarkdownPath: new File(__DIR__ + "../../../../analyse/sabsa/SABSA_Develop_Conceptual_Security_Architecture.md").getCanonicalPath(),
     ViewName: "SABSA - Develop Conceptual Security Architecture",
     Folder: {
@@ -73,367 +77,33 @@ var CONST = {
     }
 };
 
-var DATA = {
-    process: {
-        id: "develop-conceptual-security-architecture",
-        name: "Develop Conceptual Security Architecture",
-        description: "Translates contextual business requirements into the conceptual security architecture and establishes the traceability basis for the logical layer."
-    },
-    inputs: [
-        {
-            id: "sabsa-business-attributes-profile-bap",
-            name: "SABSA Business Attributes Profile (BAP)",
-            description: "Prioritised profile of business attributes with metrics and measures from the contextual layer.",
-            origin: "Inherited from the preceding 'Develop Contextual Security Architecture' process, especially from the contextual WHAT view and the prioritised business attributes profile.",
-            moscow: "Must"
-        },
-        {
-            id: "business-risk-context",
-            name: "Business Risk Context",
-            description: "Business-level threats, vulnerabilities, and impacts as the basis for the WHY dimension.",
-            origin: "Inherited from the contextual risk and threat baseline of the preceding process, consolidated from business impact, threat, and vulnerability analysis.",
-            moscow: "Must"
-        },
-        {
-            id: "business-drivers-and-constraints",
-            name: "Business Drivers & Constraints",
-            description: "Strategic drivers, organisational constraints, and business vision.",
-            origin: "Inherited from business vision, stakeholder goals, guiding constraints, and architecture principles from the strategic and contextual setup.",
-            moscow: "Should"
-        },
-        {
-            id: "compliance-and-regulatory-requirements",
-            name: "Compliance & Regulatory Requirements",
-            description: "Relevant legal, regulatory, and contractual requirements.",
-            origin: "Inherited from the compliance baseline, regulatory obligations, contractual requirements, and external obligations in the enterprise context.",
-            moscow: "Should"
-        }
-    ],
-    outputs: [
-        {
-            id: "what-business-attributes-taxonomy-and-profile",
-            name: "WHAT: Business Attributes Taxonomy & Profile with integrated performance targets",
-            description: "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets."
-        },
-        {
-            id: "why-enablement-and-control-objectives",
-            name: "WHY: Enablement & Control Objectives; Policy Architecture; Risk Categories; Risk Management Strategies; Risk Modelling Framework; Assurance Framework",
-            description: "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance."
-        },
-        {
-            id: "how-inventory-and-process-mapping-framework",
-            name: "HOW: Inventory of all Operational Processes; Process Mapping Framework; Architectural Strategies for IT used in Process Support",
-            description: "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability."
-        },
-        {
-            id: "where-security-domain-concepts-and-framework",
-            name: "WHERE: Security Domain Concepts & Framework",
-            description: "Conceptual layer WHERE artefact defining security domains and their interactions."
-        },
-        {
-            id: "who-owners-custodians-users-and-trust-framework",
-            name: "WHO: Owners, Custodians & Users; Service Providers & Customers; Trust Modelling Framework",
-            description: "Conceptual layer WHO artefacts for entities, accountability, and trust."
-        },
-        {
-            id: "when-through-life-risk-management-framework",
-            name: "WHEN: Through-Life Risk Management Framework; Attribute Performance Targets",
-            description: "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability."
-        }
-    ],
-    steps: [
-        {
-            id: "step-1",
-            name: "Step 1 - Synthesize Business Value & Knowledge Strategy",
-            description: "Refines business attributes at conceptual level, integrates performance targets, and derives the conceptual business information architecture.",
-            inputs: [
-                {
-                    id: "sabsa-business-attributes-profile-bap",
-                    name: "SABSA Business Attributes Profile (BAP)",
-                    description: "Validated business attributes profile from the contextual layer."
-                },
-                {
-                    id: "stakeholder-expectations-and-business-strategy",
-                    name: "Stakeholder Expectations & Business Strategy",
-                    description: "Stakeholder goals, vision, and performance expectations relevant for the conceptual WHAT perspective."
-                },
-                {
-                    id: "sabsa-generic-attributes-library",
-                    name: "SABSA Generic Attributes Library",
-                    description: "Reference taxonomy used to validate completeness and consistency of the business attributes profile."
-                }
-            ],
-            outputs: [
-                {
-                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
-                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
-                    description: "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets."
-                }
-            ],
-            subprocesses: [
-                "Attribute Taxonomy Review",
-                "Performance Target Integration",
-                "Knowledge Strategy Alignment",
-                "Stakeholder Validation"
-            ]
-        },
-        {
-            id: "step-2",
-            name: "Step 2 - Develop Risk Management Strategy & Objectives",
-            description: "Builds conceptual risk management including objectives, policy architecture, risk categories, modelling, and assurance.",
-            inputs: [
-                {
-                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
-                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
-                    description: "Output from Step 1 and the basis for deriving control objectives."
-                },
-                {
-                    id: "business-risk-context",
-                    name: "Business Risk Context",
-                    description: "Contextual threats, vulnerabilities, and impacts used for the conceptual WHY perspective."
-                },
-                {
-                    id: "compliance-and-regulatory-requirements",
-                    name: "Compliance & Regulatory Requirements",
-                    description: "Relevant regulatory and contractual obligations shaping conceptual policy architecture."
-                },
-                {
-                    id: "threat-intelligence-conceptual",
-                    name: "Threat Intelligence (conceptual)",
-                    description: "High-level threat landscape used to support conceptual risk categorisation."
-                }
-            ],
-            outputs: [
-                {
-                    id: "enablement-and-control-objectives",
-                    name: "Enablement & Control Objectives",
-                    description: "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective."
-                },
-                {
-                    id: "policy-architecture",
-                    name: "Policy Architecture",
-                    description: "Conceptual policy hierarchy linking control objectives, requirements, and governance intent."
-                },
-                {
-                    id: "risk-categories",
-                    name: "Risk Categories",
-                    description: "Conceptual risk categories mapped to business attributes and control objectives."
-                },
-                {
-                    id: "risk-management-strategies",
-                    name: "Risk Management Strategies",
-                    description: "Conceptual risk treatment strategies aligned to risk appetite and policy direction."
-                },
-                {
-                    id: "risk-modelling-framework",
-                    name: "Risk Modelling Framework",
-                    description: "Shared conceptual evaluation framework for assessing and comparing risk across layers."
-                },
-                {
-                    id: "assurance-framework",
-                    name: "Assurance Framework",
-                    description: "Conceptual assurance framework mapping evidence and assurance activities to objectives."
-                }
-            ],
-            subprocesses: [
-                "Control Objectives Derivation",
-                "Risk Categorisation",
-                "Risk Appetite & Strategy Definition",
-                "Policy Architecture Design",
-                "Risk Modelling Framework Establishment",
-                "Assurance Framework Definition"
-            ]
-        },
-        {
-            id: "step-3",
-            name: "Step 3 - Define Strategies for Process Assurance",
-            description: "Inventories operational processes, classifies them, and defines process mapping and IT support strategies.",
-            inputs: [
-                {
-                    id: "enablement-and-control-objectives",
-                    name: "Enablement & Control Objectives",
-                    description: "Conceptual control objectives determining which operational processes matter most."
-                },
-                {
-                    id: "policy-architecture",
-                    name: "Policy Architecture",
-                    description: "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping."
-                },
-                {
-                    id: "business-process-inventory-contextual-layer",
-                    name: "Business Process Inventory (Contextual Layer)",
-                    description: "Existing list of business processes used as the starting point for operational process analysis."
-                },
-                {
-                    id: "technology-context",
-                    name: "Technology Context",
-                    description: "High-level technology architecture context supporting the derivation of process-support strategies."
-                }
-            ],
-            outputs: [
-                {
-                    id: "inventory-of-all-operational-processes",
-                    name: "Inventory of all Operational Processes (IT, industrial & manual)",
-                    description: "Classified inventory of operational processes across IT, industrial, and manual contexts."
-                },
-                {
-                    id: "process-mapping-framework",
-                    name: "Process Mapping Framework",
-                    description: "Traceability framework linking processes to control objectives and business attributes."
-                },
-                {
-                    id: "architectural-strategies-for-it-used-in-process-support",
-                    name: "Architectural Strategies for IT used in Process Support",
-                    description: "Conceptual IT architecture strategies used to support and secure operational processes."
-                }
-            ],
-            subprocesses: [
-                "Operational Process Inventory",
-                "Process Classification & Criticality",
-                "Process Mapping Framework Design",
-                "IT Architectural Strategy Derivation",
-                "Process Assurance Validation"
-            ]
-        },
-        {
-            id: "step-4",
-            name: "Step 4 - Synthesize Domain Framework",
-            description: "Identifies, maps, and formalises security domains and their boundaries.",
-            inputs: [
-                {
-                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
-                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
-                    description: "Business attributes and performance targets defining domain protection needs."
-                },
-                {
-                    id: "enablement-and-control-objectives",
-                    name: "Enablement & Control Objectives",
-                    description: "Conceptual objectives shaping the scope and intent of security domains."
-                },
-                {
-                    id: "policy-architecture",
-                    name: "Policy Architecture",
-                    description: "Conceptual policy structure influencing domain boundaries and control expectations."
-                },
-                {
-                    id: "organisation-structure-and-locations",
-                    name: "Organisation Structure & Locations",
-                    description: "Organisational and geographical structure used to identify conceptual security domains."
-                }
-            ],
-            outputs: [
-                {
-                    id: "security-domain-concepts-and-framework",
-                    name: "Security Domain Concepts & Framework",
-                    description: "Conceptual domain framework with domain boundaries, interactions, and attribute mappings."
-                }
-            ],
-            subprocesses: [
-                "Domain Identification",
-                "Domain Attribute Mapping",
-                "Domain Boundary Definition",
-                "Security Domain Concept Formalization"
-            ]
-        },
-        {
-            id: "step-5",
-            name: "Step 5 - Develop Security & Risk Governance; Trust Framework",
-            description: "Defines entities, service-provider/customer mappings, accountability, and trust relationships.",
-            inputs: [
-                {
-                    id: "security-domain-concepts-and-framework",
-                    name: "Security Domain Concepts & Framework",
-                    description: "Conceptual domain model providing the structure for governance and trust allocation."
-                },
-                {
-                    id: "enablement-and-control-objectives",
-                    name: "Enablement & Control Objectives",
-                    description: "Objectives that need explicit governance ownership and accountability."
-                },
-                {
-                    id: "assurance-framework",
-                    name: "Assurance Framework",
-                    description: "Assurance responsibilities used to support entity and governance assignments."
-                },
-                {
-                    id: "business-entity-structure",
-                    name: "Business Entity Structure",
-                    description: "Stakeholders, partners, customers, and organisational entities relevant for classification."
-                }
-            ],
-            outputs: [
-                {
-                    id: "owners-custodians-and-users",
-                    name: "Owners, Custodians & Users",
-                    description: "Conceptual entity register with role classification and accountability."
-                },
-                {
-                    id: "service-providers-and-customers",
-                    name: "Service Providers & Customers",
-                    description: "Conceptual provider and customer map including security responsibilities in the service chain."
-                },
-                {
-                    id: "trust-modelling-framework",
-                    name: "Trust Modelling Framework",
-                    description: "Conceptual trust model defining trust relationships, levels, and boundaries."
-                }
-            ],
-            subprocesses: [
-                "Entity Identification & Classification",
-                "Service Provider & Customer Mapping",
-                "Governance Accountability Framework",
-                "Trust Modelling",
-                "Governance Validation"
-            ]
-        },
-        {
-            id: "step-6",
-            name: "Step 6 - Define Time Management Framework",
-            description: "Defines lifecycle, timing, and traceability for risk management and performance targets.",
-            inputs: [
-                {
-                    id: "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
-                    name: "Business Attributes Taxonomy & Profile with integrated performance targets",
-                    description: "Performance targets that need to be anchored across time and lifecycle perspectives."
-                },
-                {
-                    id: "risk-management-strategies",
-                    name: "Risk Management Strategies",
-                    description: "Conceptual risk strategies that need to be sustained through lifecycle planning."
-                },
-                {
-                    id: "assurance-framework",
-                    name: "Assurance Framework",
-                    description: "Assurance activities that need a conceptual timing and review structure."
-                },
-                {
-                    id: "inventory-of-all-operational-processes",
-                    name: "Inventory of all Operational Processes",
-                    description: "Operational processes used to anchor lifecycle and timing concepts."
-                }
-            ],
-            outputs: [
-                {
-                    id: "through-life-risk-management-framework",
-                    name: "Through-Life Risk Management Framework",
-                    description: "Conceptual lifecycle framework for risk management including reviews and trigger events."
-                },
-                {
-                    id: "attribute-performance-targets",
-                    name: "Attribute Performance Targets",
-                    description: "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring."
-                }
-            ],
-            subprocesses: [
-                "Security Lifecycle Definition",
-                "Risk Management Lifecycle Integration",
-                "Attribute Performance Target Setting",
-                "Assurance Timing Framework",
-                "Lifecycle Traceability Check"
-            ]
-        }
-    ]
-};
+function loadSourceData() {
+    var jsonText = String(new java.lang.String(
+        Files.readAllBytes(Paths.get(CONST.SourceJsonPath)),
+        StandardCharsets.UTF_8
+    ));
+    var data = JSON.parse(jsonText);
+
+    if (!data || !data.process) {
+        throw new Error("Invalid SABSA process data file: missing process object");
+    }
+
+    if (!data.steps || !data.steps.length) {
+        throw new Error("Invalid SABSA process data file: missing steps");
+    }
+
+    if (!data.inputs) {
+        data.inputs = [];
+    }
+
+    if (!data.outputs) {
+        data.outputs = [];
+    }
+
+    return data;
+}
+
+var DATA = loadSourceData();
 
 var stats = {
     processes: 0,
@@ -972,7 +642,8 @@ function confirmExecution() {
     }, 0);
     return dialogs.confirmInfo(
         "This script will generate or update a focused process view for '" + DATA.process.name + "'." +
-        "\n\nSource markdown: " + CONST.SourceMarkdownPath +
+        "\n\nSource JSON: " + CONST.SourceJsonPath +
+        "\nSource markdown: " + CONST.SourceMarkdownPath +
         "\nInputs: " + DATA.inputs.length +
         "\nOutputs: " + DATA.outputs.length +
         "\nSteps: " + DATA.steps.length +
@@ -1017,7 +688,7 @@ function createView() {
     var currentStepY = CONST.Layout.MainInnerY;
     var mainHeight = estimateMainProcessHeight();
 
-    view.documentation = "Generated from " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
+    view.documentation = "Generated from JSON extract " + CONST.SourceJsonPath + " based on " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
     moveViewToFolder(view);
     stats.views++;
 
@@ -1315,18 +986,21 @@ function main() {
 
     if (!confirmExecution()) {
         logger.info("SABSA conceptual process generation cancelled by user.", {
+            source_json: CONST.SourceJsonPath,
             source_markdown: CONST.SourceMarkdownPath
         }, "sabsa.process.generation.cancelled");
         return;
     }
 
     logger.start("SABSA conceptual process generation started.", {
+        source_json: CONST.SourceJsonPath,
         source_markdown: CONST.SourceMarkdownPath
     });
 
     view = createView();
 
     logger.finish("SABSA conceptual process generation finished.", {
+        source_json: CONST.SourceJsonPath,
         view_name: view.name,
         layout_optimized: true,
         processes_created_or_reused: stats.processes,
