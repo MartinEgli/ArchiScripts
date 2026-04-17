@@ -1,0 +1,849 @@
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_Develop_Conceptual_Security_Architecture_View";
+var LOG_LEVEL = "WARN";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: LOG_LEVEL
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA Develop Conceptual Security Architecture"
+});
+
+var CONST = {
+    SourceMarkdownPath: new File(__DIR__ + "../../../../analyse/sabsa/SABSA_Develop_Conceptual_Security_Architecture.md").getCanonicalPath(),
+    ViewName: "SABSA - Develop Conceptual Security Architecture",
+    Folder: {
+        Root: "SABSA",
+        Processes: "Processes",
+        ProcessName: "Develop Conceptual Security Architecture",
+        Main: "Main Process",
+        Steps: "Steps",
+        Subprocesses: "Subprocesses",
+        Inputs: "Inputs",
+        Outputs: "Outputs",
+        Relations: {
+            Composition: "Composition",
+            Triggering: "Triggering",
+            Inputs: "Inputs",
+            Outputs: "Outputs"
+        }
+    },
+    Layout: {
+        ViewMarginX: 40,
+        ViewMarginY: 40,
+        InputX: 40,
+        MainX: 430,
+        OutputX: 1770,
+        MainY: 40,
+        MainWidth: 340,
+        MainHeight: 90,
+        InputWidth: 310,
+        OutputWidth: 360,
+        ArtifactMinHeight: 58,
+        ArtifactGap: 18,
+        StepStartY: 190,
+        StepWidth: 250,
+        StepMinHeight: 86,
+        StepGap: 24,
+        SubprocessStartGap: 22,
+        SubprocessWidth: 250,
+        SubprocessMinHeight: 56,
+        SubprocessGap: 14
+    },
+    Style: {
+        MainProcessFill: "#ffcc64",
+        StepFill: "#ffff9a",
+        SubprocessFill: "#fff6bf",
+        InputFill: "#ccffff",
+        OutputFill: "#ccff9a",
+        NoteFill: "#f3f3f3",
+        LineColor: "#111111",
+        FontColor: "#111111"
+    }
+};
+
+var DATA = {
+    process: {
+        id: "develop-conceptual-security-architecture",
+        name: "Develop Conceptual Security Architecture",
+        description: "Translates contextual business requirements into the conceptual security architecture and establishes the traceability basis for the logical layer."
+    },
+    inputs: [
+        {
+            id: "sabsa-business-attributes-profile-bap",
+            name: "SABSA Business Attributes Profile (BAP)",
+            description: "Prioritised profile of business attributes with metrics and measures from the contextual layer."
+        },
+        {
+            id: "business-risk-context",
+            name: "Business Risk Context",
+            description: "Business-level threats, vulnerabilities, and impacts as the basis for the WHY dimension."
+        },
+        {
+            id: "business-drivers-and-constraints",
+            name: "Business Drivers & Constraints",
+            description: "Strategic drivers, organisational constraints, and business vision."
+        },
+        {
+            id: "compliance-and-regulatory-requirements",
+            name: "Compliance & Regulatory Requirements",
+            description: "Relevant legal, regulatory, and contractual requirements."
+        }
+    ],
+    outputs: [
+        {
+            id: "what-business-attributes-taxonomy-and-profile",
+            name: "WHAT: Business Attributes Taxonomy & Profile with integrated performance targets",
+            description: "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets."
+        },
+        {
+            id: "why-enablement-and-control-objectives",
+            name: "WHY: Enablement & Control Objectives; Policy Architecture; Risk Categories; Risk Management Strategies; Risk Modelling Framework; Assurance Framework",
+            description: "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance."
+        },
+        {
+            id: "how-inventory-and-process-mapping-framework",
+            name: "HOW: Inventory of all Operational Processes; Process Mapping Framework; Architectural Strategies for IT used in Process Support",
+            description: "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability."
+        },
+        {
+            id: "where-security-domain-concepts-and-framework",
+            name: "WHERE: Security Domain Concepts & Framework",
+            description: "Conceptual layer WHERE artefact defining security domains and their interactions."
+        },
+        {
+            id: "who-owners-custodians-users-and-trust-framework",
+            name: "WHO: Owners, Custodians & Users; Service Providers & Customers; Trust Modelling Framework",
+            description: "Conceptual layer WHO artefacts for entities, accountability, and trust."
+        },
+        {
+            id: "when-through-life-risk-management-framework",
+            name: "WHEN: Through-Life Risk Management Framework; Attribute Performance Targets",
+            description: "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability."
+        }
+    ],
+    steps: [
+        {
+            id: "step-1",
+            name: "Step 1 - Synthesize Business Value & Knowledge Strategy",
+            description: "Refines business attributes at conceptual level, integrates performance targets, and derives the conceptual business information architecture.",
+            subprocesses: [
+                "Attribute Taxonomy Review",
+                "Performance Target Integration",
+                "Knowledge Strategy Alignment",
+                "Stakeholder Validation"
+            ]
+        },
+        {
+            id: "step-2",
+            name: "Step 2 - Develop Risk Management Strategy & Objectives",
+            description: "Builds conceptual risk management including objectives, policy architecture, risk categories, modelling, and assurance.",
+            subprocesses: [
+                "Control Objectives Derivation",
+                "Risk Categorisation",
+                "Risk Appetite & Strategy Definition",
+                "Policy Architecture Design",
+                "Risk Modelling Framework Establishment",
+                "Assurance Framework Definition"
+            ]
+        },
+        {
+            id: "step-3",
+            name: "Step 3 - Define Strategies for Process Assurance",
+            description: "Inventories operational processes, classifies them, and defines process mapping and IT support strategies.",
+            subprocesses: [
+                "Operational Process Inventory",
+                "Process Classification & Criticality",
+                "Process Mapping Framework Design",
+                "IT Architectural Strategy Derivation",
+                "Process Assurance Validation"
+            ]
+        },
+        {
+            id: "step-4",
+            name: "Step 4 - Synthesize Domain Framework",
+            description: "Identifies, maps, and formalises security domains and their boundaries.",
+            subprocesses: [
+                "Domain Identification",
+                "Domain Attribute Mapping",
+                "Domain Boundary Definition",
+                "Security Domain Concept Formalization"
+            ]
+        },
+        {
+            id: "step-5",
+            name: "Step 5 - Develop Security & Risk Governance; Trust Framework",
+            description: "Defines entities, service-provider/customer mappings, accountability, and trust relationships.",
+            subprocesses: [
+                "Entity Identification & Classification",
+                "Service Provider & Customer Mapping",
+                "Governance Accountability Framework",
+                "Trust Modelling",
+                "Governance Validation"
+            ]
+        },
+        {
+            id: "step-6",
+            name: "Step 6 - Define Time Management Framework",
+            description: "Defines lifecycle, timing, and traceability for risk management and performance targets.",
+            subprocesses: [
+                "Security Lifecycle Definition",
+                "Risk Management Lifecycle Integration",
+                "Attribute Performance Target Setting",
+                "Assurance Timing Framework",
+                "Lifecycle Traceability Check"
+            ]
+        }
+    ]
+};
+
+var stats = {
+    processes: 0,
+    artifacts: 0,
+    views: 0,
+    relationships: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function slugify(value) {
+    return trim(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var candidateNames = aliasesByFolderName[rootName] || [rootName];
+    var wantedNames = candidateNames.map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
+    if (!objectToMove) {
+        return null;
+    }
+
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    targetFolder.add(objectToMove);
+    return targetFolder;
+}
+
+function getProcessFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.Processes, CONST.Folder.ProcessName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType, properties) {
+    var role = safeString(properties && properties.ProcessViewRole);
+
+    if (conceptType === "business-process") {
+        if (role === "MainProcess") {
+            return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Main]) };
+        }
+
+        if (role === "StepProcess") {
+            return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Steps]) };
+        }
+
+        return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Subprocesses]) };
+    }
+
+    if (conceptType === "business-object") {
+        if (role === "InputArtifact") {
+            return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Inputs]) };
+        }
+
+        if (role === "OutputArtifact") {
+            return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Outputs]) };
+        }
+    }
+
+    return null;
+}
+
+function moveConceptToFolder(concept, conceptType, properties) {
+    var placement = resolveConceptPlacement(conceptType, properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.Processes], viewObject);
+}
+
+function resolveRelationshipPlacement(properties) {
+    var role = safeString(properties && properties.ProcessViewRelationRole);
+    var relationFolderName;
+
+    if (role === "Composition") {
+        relationFolderName = CONST.Folder.Relations.Composition;
+    } else if (role === "Triggering") {
+        relationFolderName = CONST.Folder.Relations.Triggering;
+    } else if (role === "InputAccess") {
+        relationFolderName = CONST.Folder.Relations.Inputs;
+    } else if (role === "OutputAccess") {
+        relationFolderName = CONST.Folder.Relations.Outputs;
+    } else {
+        return null;
+    }
+
+    return {
+        rootName: "Relations",
+        pathSegments: getProcessFolderSegments([relationFolderName])
+    };
+}
+
+function moveRelationshipToFolder(relationship, properties) {
+    var placement = resolveRelationshipPlacement(properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaProcessKey")) === safeString(key);
+    }).first();
+}
+
+function findConceptById(conceptType, id) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("id")) === safeString(id);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation) {
+    var concept = findConceptByKey(conceptType, key);
+    var placement = resolveConceptPlacement(conceptType, properties);
+    var conceptCreated = false;
+
+    if (!concept) {
+        concept = findConceptById(conceptType, safeString(properties && properties.id));
+    }
+
+    if (!concept) {
+        if (placement) {
+            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        } else {
+            concept = model.createElement(conceptType, name);
+        }
+        conceptCreated = true;
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaProcessKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        concept.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (conceptCreated) {
+        moveConceptToFolder(concept, conceptType, properties);
+    }
+
+    return concept;
+}
+
+function ensureRelationship(relationshipType, sourceConcept, targetConcept, key, properties) {
+    var relationship = $("relationship").filter(function (candidate) {
+        return safeString(candidate.prop("SabsaProcessKey")) === safeString(key);
+    }).first();
+    var relationshipCreated = false;
+
+    if (!relationship) {
+        relationship = model.createRelationship(relationshipType, "", sourceConcept, targetConcept);
+        relationshipCreated = true;
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = "";
+    relationship.prop("SabsaProcessKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        relationship.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (relationshipCreated) {
+        moveRelationshipToFolder(relationship, properties);
+    }
+
+    return relationship;
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    return visual;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+    return connection;
+}
+
+function estimateTextHeight(text, width, minHeight) {
+    var cleaned = trim(text);
+    var lineLength = Math.max(18, Math.floor((width - 20) / 7));
+    var lines;
+
+    if (!cleaned) {
+        return minHeight;
+    }
+
+    lines = Math.ceil(cleaned.length / lineLength);
+    return Math.max(minHeight, 18 + (lines * 16));
+}
+
+function confirmExecution() {
+    var subprocessCount = DATA.steps.reduce(function (sum, step) {
+        return sum + step.subprocesses.length;
+    }, 0);
+
+    return dialogs.confirmInfo(
+        "This script will generate or update a focused process view for '" + DATA.process.name + "'." +
+        "\n\nSource markdown: " + CONST.SourceMarkdownPath +
+        "\nInputs: " + DATA.inputs.length +
+        "\nOutputs: " + DATA.outputs.length +
+        "\nSteps: " + DATA.steps.length +
+        "\nSub-processes: " + subprocessCount +
+        "\n\nThe script will create or reuse process, artefact, and relationship elements in the open Archi model." +
+        "\n\nDo you want to continue?",
+        "Run SABSA Conceptual Process Generator"
+    );
+}
+
+function buildResultMessage(view) {
+    return "Generated view: " + view.name +
+        "\nProcesses: " + stats.processes +
+        "\nArtifacts: " + stats.artifacts +
+        "\nRelationships: " + stats.relationships +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused;
+}
+
+function createView() {
+    var inputVisuals = [];
+    var outputVisuals = [];
+    var stepVisuals = [];
+    var allSubprocessVisuals = [];
+    var viewName = buildUniqueViewName(CONST.ViewName);
+    var view = model.createArchimateView(viewName);
+    var mainConcept = ensureConcept(
+        "business-process",
+        DATA.process.name,
+        "process:" + DATA.process.id,
+        {
+            id: "sabsa-process:" + DATA.process.id,
+            ProcessViewRole: "MainProcess",
+            SourceDocument: CONST.SourceMarkdownPath
+        },
+        DATA.process.description
+    );
+    var mainVisual;
+
+    view.documentation = "Generated from " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
+    moveViewToFolder(view);
+    stats.views++;
+
+    DATA.inputs.forEach(function (inputData, index) {
+        var concept = ensureConcept(
+            "business-object",
+            inputData.name,
+            "input:" + inputData.id,
+            {
+                id: "sabsa-process:input:" + inputData.id,
+                ProcessViewRole: "InputArtifact",
+                SourceDocument: CONST.SourceMarkdownPath
+            },
+            inputData.description
+        );
+        var visual = addStyledVisual(
+            view,
+            concept,
+            CONST.Layout.InputX,
+            CONST.Layout.MainY + (index * (CONST.Layout.ArtifactMinHeight + CONST.Layout.ArtifactGap)),
+            CONST.Layout.InputWidth,
+            estimateTextHeight(inputData.name, CONST.Layout.InputWidth, CONST.Layout.ArtifactMinHeight),
+            CONST.Style.InputFill
+        );
+
+        inputVisuals.push({
+            concept: concept,
+            visual: visual,
+            data: inputData
+        });
+        stats.artifacts++;
+    });
+
+    DATA.outputs.forEach(function (outputData, index) {
+        var concept = ensureConcept(
+            "business-object",
+            outputData.name,
+            "output:" + outputData.id,
+            {
+                id: "sabsa-process:output:" + outputData.id,
+                ProcessViewRole: "OutputArtifact",
+                SourceDocument: CONST.SourceMarkdownPath
+            },
+            outputData.description
+        );
+        var visual = addStyledVisual(
+            view,
+            concept,
+            CONST.Layout.OutputX,
+            CONST.Layout.MainY + (index * (CONST.Layout.ArtifactMinHeight + CONST.Layout.ArtifactGap)),
+            CONST.Layout.OutputWidth,
+            estimateTextHeight(outputData.name, CONST.Layout.OutputWidth, CONST.Layout.ArtifactMinHeight),
+            CONST.Style.OutputFill
+        );
+
+        outputVisuals.push({
+            concept: concept,
+            visual: visual,
+            data: outputData
+        });
+        stats.artifacts++;
+    });
+
+    mainVisual = addStyledVisual(
+        view,
+        mainConcept,
+        CONST.Layout.MainX,
+        CONST.Layout.MainY,
+        CONST.Layout.MainWidth,
+        CONST.Layout.MainHeight,
+        CONST.Style.MainProcessFill
+    );
+    stats.processes++;
+
+    DATA.steps.forEach(function (stepData, stepIndex) {
+        var stepConcept = ensureConcept(
+            "business-process",
+            stepData.name,
+            "step:" + stepData.id,
+            {
+                id: "sabsa-process:step:" + stepData.id,
+                ProcessViewRole: "StepProcess",
+                StepNumber: String(stepIndex + 1),
+                SourceDocument: CONST.SourceMarkdownPath
+            },
+            stepData.description
+        );
+        var stepX = CONST.Layout.ViewMarginX + (stepIndex * (CONST.Layout.StepWidth + CONST.Layout.StepGap));
+        var stepHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
+        var stepVisual = addStyledVisual(
+            view,
+            stepConcept,
+            stepX,
+            CONST.Layout.StepStartY,
+            CONST.Layout.StepWidth,
+            stepHeight,
+            CONST.Style.StepFill
+        );
+        var composition = ensureRelationship(
+            "composition-relationship",
+            mainConcept,
+            stepConcept,
+            "composition:" + DATA.process.id + ":" + stepData.id,
+            {
+                ProcessViewRelationRole: "Composition",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+
+        addConnection(view, composition, mainVisual, stepVisual);
+        stats.processes++;
+        stats.relationships++;
+        stepVisuals.push({
+            concept: stepConcept,
+            visual: stepVisual,
+            data: stepData
+        });
+
+        stepData.subprocesses.forEach(function (subprocessName, subprocessIndex) {
+            var subprocessId = slugify(stepData.id + "-" + subprocessName);
+            var subprocessConcept = ensureConcept(
+                "business-process",
+                subprocessName,
+                "subprocess:" + subprocessId,
+                {
+                    id: "sabsa-process:subprocess:" + subprocessId,
+                    ProcessViewRole: "Subprocess",
+                    StepNumber: String(stepIndex + 1),
+                    SubprocessOrder: String(subprocessIndex + 1),
+                    ParentStep: stepData.id,
+                    SourceDocument: CONST.SourceMarkdownPath
+                },
+                "Sub-process of " + stepData.name + " derived from " + CONST.SourceMarkdownPath + "."
+            );
+            var subY = CONST.Layout.StepStartY + stepHeight + CONST.Layout.SubprocessStartGap +
+                (subprocessIndex * (CONST.Layout.SubprocessMinHeight + CONST.Layout.SubprocessGap));
+            var subHeight = estimateTextHeight(subprocessName, CONST.Layout.SubprocessWidth, CONST.Layout.SubprocessMinHeight);
+            var subVisual = addStyledVisual(
+                view,
+                subprocessConcept,
+                stepX,
+                subY,
+                CONST.Layout.SubprocessWidth,
+                subHeight,
+                CONST.Style.SubprocessFill
+            );
+            var stepComposition = ensureRelationship(
+                "composition-relationship",
+                stepConcept,
+                subprocessConcept,
+                "composition:" + stepData.id + ":" + subprocessId,
+                {
+                    ProcessViewRelationRole: "Composition",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, stepComposition, stepVisual, subVisual);
+            stats.processes++;
+            stats.relationships++;
+            allSubprocessVisuals.push({
+                concept: subprocessConcept,
+                visual: subVisual,
+                stepId: stepData.id,
+                order: subprocessIndex + 1
+            });
+        });
+    });
+
+    stepVisuals.forEach(function (stepEntry, index) {
+        if (index === 0) {
+            return;
+        }
+
+        var previous = stepVisuals[index - 1];
+        var relationship = ensureRelationship(
+            "triggering-relationship",
+            previous.concept,
+            stepEntry.concept,
+            "triggering:step:" + previous.data.id + ":" + stepEntry.data.id,
+            {
+                ProcessViewRelationRole: "Triggering",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+
+        addConnection(view, relationship, previous.visual, stepEntry.visual);
+        stats.relationships++;
+    });
+
+    DATA.steps.forEach(function (stepData) {
+        var stepSubprocesses = allSubprocessVisuals.filter(function (entry) {
+            return entry.stepId === stepData.id;
+        }).sort(function (left, right) {
+            return left.order - right.order;
+        });
+
+        stepSubprocesses.forEach(function (entry, index) {
+            if (index === 0) {
+                return;
+            }
+
+            var previous = stepSubprocesses[index - 1];
+            var relationship = ensureRelationship(
+                "triggering-relationship",
+                previous.concept,
+                entry.concept,
+                "triggering:subprocess:" + previous.stepId + ":" + previous.order + ":" + entry.order,
+                {
+                    ProcessViewRelationRole: "Triggering",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, relationship, previous.visual, entry.visual);
+            stats.relationships++;
+        });
+    });
+
+    inputVisuals.forEach(function (entry) {
+        var relationship = ensureRelationship(
+            "access-relationship",
+            mainConcept,
+            entry.concept,
+            "input-access:" + DATA.process.id + ":" + entry.data.id,
+            {
+                ProcessViewRelationRole: "InputAccess",
+                AccessMode: "Read",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+
+        addConnection(view, relationship, mainVisual, entry.visual);
+        stats.relationships++;
+    });
+
+    outputVisuals.forEach(function (entry) {
+        var relationship = ensureRelationship(
+            "access-relationship",
+            mainConcept,
+            entry.concept,
+            "output-access:" + DATA.process.id + ":" + entry.data.id,
+            {
+                ProcessViewRelationRole: "OutputAccess",
+                AccessMode: "Write",
+                SourceDocument: CONST.SourceMarkdownPath
+            }
+        );
+
+        addConnection(view, relationship, mainVisual, entry.visual);
+        stats.relationships++;
+    });
+
+    return view;
+}
+
+function main() {
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    if (!confirmExecution()) {
+        logger.info("SABSA conceptual process generation cancelled by user.", {
+            source_markdown: CONST.SourceMarkdownPath
+        }, "sabsa.process.generation.cancelled");
+        return;
+    }
+
+    logger.start("SABSA conceptual process generation started.", {
+        source_markdown: CONST.SourceMarkdownPath
+    });
+
+    view = createView();
+
+    logger.finish("SABSA conceptual process generation finished.", {
+        view_name: view.name,
+        processes_created_or_reused: stats.processes,
+        artifacts_created_or_reused: stats.artifacts,
+        relationships_created_or_reused: stats.relationships,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(buildResultMessage(view), "SABSA Conceptual Process View");
+}
+
+main();
