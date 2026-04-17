@@ -41,17 +41,17 @@
     {
       "id": "management-architecture",
       "english_title": "Management Architecture",
-      "german_title": "Managementarchitektur",
+      "german_title": "Management-Architektur",
       "cells": [
         {
           "key": "management-architecture-assets-what",
           "column_id": "assets-what",
           "english_title": "Delivery and Continuity Management",
-          "german_title": "Steuerung von Leistungserbringung und Kontinuität",
+          "german_title": "Bereitstellungs- und Kontinuitätsmanagement",
           "items": [
             {
               "english_text": "Assurance of Operational Excellence & Continuity",
-              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität"
+              "german_text": "Assurance operativer Exzellenz und Kontinuität"
             }
           ]
         },
@@ -79,11 +79,11 @@
           "key": "management-architecture-process-how",
           "column_id": "process-how",
           "english_title": "Process Delivery Management",
-          "german_title": "Steuerung der Leistungserbringung",
+          "german_title": "Management der Prozessbereitstellung",
           "items": [
             {
               "english_text": "Management & Support of Systems, Applications & Services",
-              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services"
+              "german_text": "Management und Unterstützung von Systemen, Anwendungen und Services"
             }
           ]
         },
@@ -91,11 +91,11 @@
           "key": "management-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Governance, Relationship & Personnel Management",
-          "german_title": "Governance, Beziehungs- und Personalsteuerung",
+          "german_title": "Governance-, Beziehungs- und Personalmanagement",
           "items": [
             {
               "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
-              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen"
+              "german_text": "Management und Unterstützung unternehmensweiter sowie erweiterter Unternehmensbeziehungen"
             }
           ]
         },
@@ -107,7 +107,7 @@
           "items": [
             {
               "english_text": "Management of Buildings, Sites, Platforms & Networks",
-              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken"
+              "german_text": "Management von Gebäuden, Standorten, Plattformen und Netzwerken"
             }
           ]
         },
@@ -119,7 +119,7 @@
           "items": [
             {
               "english_text": "Management of Calendar and Timetable",
-              "german_text": "Steuerung von Kalendern und Zeitplänen"
+              "german_text": "Management von Kalender und Zeitplan"
             }
           ]
         }
@@ -134,11 +134,11 @@
           "key": "contextual-overlay-assets-what",
           "column_id": "assets-what",
           "english_title": "Business Driver Development",
-          "german_title": "Entwicklung geschäftlicher Treiber",
+          "german_title": "Business-Driver-Entwicklung",
           "items": [
             {
               "english_text": "Business Benchmarking & Identification of Business Drivers",
-              "german_text": "Benchmarking des Geschäfts und Identifikation geschäftlicher Treiber"
+              "german_text": "Business Benchmarking und Identifikation von Business Drivers"
             }
           ]
         },

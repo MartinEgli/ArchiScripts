@@ -47,15 +47,15 @@
           "key": "contextual-architecture-assets-what",
           "column_id": "assets-what",
           "english_title": "Business Goals & Decisions",
-          "german_title": "Geschäftsziele und Leitentscheidungen",
+          "german_title": "Geschäftsziele und Entscheidungen",
           "items": [
             {
               "english_text": "Business Value",
-              "german_text": "Geschäftlicher Nutzen"
+              "german_text": "Geschäftswert"
             },
             {
               "english_text": "Taxonomy of Business Assets, including Goals & Objectives, Success Factors, Targets",
-              "german_text": "Taxonomie geschäftlicher Werte einschließlich Ziele, Vorgaben, Erfolgsfaktoren und Zielwerte"
+              "german_text": "Taxonomie der Geschäftswerte einschließlich Ziele und Vorgaben, Erfolgsfaktoren und Zielwerte"
             }
           ]
         },
@@ -63,7 +63,7 @@
           "key": "contextual-architecture-motivation-why",
           "column_id": "motivation-why",
           "english_title": "Business Risk",
-          "german_title": "Geschäftsrisiken",
+          "german_title": "Geschäftsrisiko",
           "items": [
             {
               "english_text": "Opportunities & Threats Inventory",
@@ -91,7 +91,7 @@
           "key": "contextual-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Business Governance",
-          "german_title": "Geschäftssteuerung und Governance",
+          "german_title": "Unternehmensführung",
           "items": [
             {
               "english_text": "Organisational Structure & the Extended Enterprise",
@@ -103,11 +103,11 @@
           "key": "contextual-architecture-location-where",
           "column_id": "location-where",
           "english_title": "Business Geography",
-          "german_title": "Geschäftlicher Wirkungsraum",
+          "german_title": "Geschäftsgeografie",
           "items": [
             {
               "english_text": "Inventory of Buildings, Sites, Territories, Jurisdictions",
-              "german_text": "Inventar von Gebäuden, Standorten, Gebieten und Rechtsräumen"
+              "german_text": "Inventar von Gebäuden, Standorten, Territorien und Zuständigkeitsräumen"
             }
           ]
         },
@@ -115,7 +115,7 @@
           "key": "contextual-architecture-time-when",
           "column_id": "time-when",
           "english_title": "Business Time Dependence",
-          "german_title": "Zeitliche Abhängigkeiten der Geschäftstätigkeit",
+          "german_title": "Zeitliche Abhängigkeiten des Geschäfts",
           "items": [
             {
               "english_text": "Time dependencies of Business Goals and Value Creation",
@@ -134,11 +134,11 @@
           "key": "conceptual-architecture-assets-what",
           "column_id": "assets-what",
           "english_title": "Business Value & Knowledge Strategy",
-          "german_title": "Strategie für Geschäftsnutzen und Wissen",
+          "german_title": "Geschäftswert- und Wissensstrategie",
           "items": [
             {
               "english_text": "Business Attributes Taxonomy & Profile, with integrated performance targets",
-              "german_text": "Taxonomie und Profil geschäftlicher Attribute mit integrierten Leistungszielen"
+              "german_text": "Taxonomie und Profil der Geschäftsattribute mit integrierten Leistungszielen"
             }
           ]
         },
@@ -150,7 +150,7 @@
           "items": [
             {
               "english_text": "Enablement & Control Objectives",
-              "german_text": "Befähigungs- und Steuerungsziele"
+              "german_text": "Befähigungs- und Kontrollziele"
             },
             {
               "english_text": "Policy Architecture",
@@ -166,11 +166,11 @@
             },
             {
               "english_text": "Risk Modelling Framework",
-              "german_text": "Rahmenwerk für Risikomodellierung"
+              "german_text": "Rahmenwerk zur Risikomodellierung"
             },
             {
               "english_text": "Assurance Framework",
-              "german_text": "Rahmenwerk für Assurance"
+              "german_text": "Assurance-Rahmenwerk"
             }
           ]
         },
@@ -178,7 +178,7 @@
           "key": "conceptual-architecture-process-how",
           "column_id": "process-how",
           "english_title": "Strategies for Process Assurance",
-          "german_title": "Strategien zur Absicherung von Prozessen",
+          "german_title": "Strategien zur Prozesssicherung",
           "items": [
             {
               "english_text": "Inventory of all Operational Processes (IT, industriell & manuell)",
@@ -198,15 +198,15 @@
           "key": "conceptual-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Security & Risk Governance; Trust Framework",
-          "german_title": "Sicherheits- und Risiko-Governance; Vertrauensrahmenwerk",
+          "german_title": "Governance für Sicherheit und Risiko; Vertrauensrahmen",
           "items": [
             {
               "english_text": "Owners, Custodians & Users",
-              "german_text": "Eigentümer, Verwahrer und Nutzende"
+              "german_text": "Eigentümer, Verwahrende und Nutzende"
             },
             {
               "english_text": "Service Providers & Customers",
-              "german_text": "Dienstleister und Kunden"
+              "german_text": "Dienstleistende und Kundschaft"
             },
             {
               "english_text": "Trust Modelling Framework",
@@ -218,11 +218,11 @@
           "key": "conceptual-architecture-location-where",
           "column_id": "location-where",
           "english_title": "Domain Framework",
-          "german_title": "Domänenrahmenwerk",
+          "german_title": "Domänenrahmen",
           "items": [
             {
               "english_text": "Security Domain Concepts & Framework",
-              "german_text": "Sicherheitsdomänen-Konzepte und Domänenrahmenwerk"
+              "german_text": "Konzepte und Rahmenwerk für Sicherheitsdomänen"
             }
           ]
         },
@@ -230,11 +230,11 @@
           "key": "conceptual-architecture-time-when",
           "column_id": "time-when",
           "english_title": "Time Management Framework",
-          "german_title": "Rahmenwerk für Zeit- und Fristensteuerung",
+          "german_title": "Zeitmanagement-Rahmenwerk",
           "items": [
             {
               "english_text": "Through-Life Risk Management Framework",
-              "german_text": "Rahmenwerk für durchgängiges Risikomanagement über den Lebenszyklus"
+              "german_text": "Lebenszyklusweites Risikomanagement-Rahmenwerk"
             },
             {
               "english_text": "Attribute Performance Targets",
@@ -281,7 +281,7 @@
             },
             {
               "english_text": "Assurance Criteria (populated Assurance Framework)",
-              "german_text": "Assurance-Kriterien (konkretisiertes Assurance-Rahmenwerk)"
+              "german_text": "Assurance-Kriterien (ausgefülltes Assurance-Rahmenwerk)"
             }
           ]
         },
@@ -357,11 +357,11 @@
           "key": "logical-architecture-time-when",
           "column_id": "time-when",
           "english_title": "Calendar & Timetable",
-          "german_title": "Kalender und Zeitsteuerung",
+          "german_title": "Kalender und Zeitplan",
           "items": [
             {
               "english_text": "Start Times, Lifetimes & Deadlines",
-              "german_text": "Startzeitpunkte, Gültigkeitsdauern und Fristen"
+              "german_text": "Startzeiten, Laufzeiten und Fristen"
             }
           ]
         }
@@ -376,11 +376,11 @@
           "key": "physical-architecture-assets-what",
           "column_id": "assets-what",
           "english_title": "Data Assets",
-          "german_title": "Datenbestände",
+          "german_title": "Datenwerte",
           "items": [
             {
               "english_text": "Data Dictionary & Data Storage Devices Inventory",
-              "german_text": "Datenlexikon und Inventar der Datenspeicher"
+              "german_text": "Datenlexikon und Inventar der Datenspeichergeräte"
             }
           ]
         },
@@ -388,11 +388,11 @@
           "key": "physical-architecture-motivation-why",
           "column_id": "motivation-why",
           "english_title": "Risk Management Practices",
-          "german_title": "Risikomanagement-Verfahren",
+          "german_title": "Risikomanagement-Praktiken",
           "items": [
             {
               "english_text": "Risk Management Rules & Procedures",
-              "german_text": "Regeln und Verfahren des Risikomanagements"
+              "german_text": "Risikomanagement-Regeln und -Verfahren"
             },
             {
               "english_text": "Risk Metadata",
@@ -432,11 +432,11 @@
           "key": "physical-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Human Interface",
-          "german_title": "Benutzerschnittstelle",
+          "german_title": "Mensch-Maschine-Schnittstelle",
           "items": [
             {
               "english_text": "User Interface to Business Systems",
-              "german_text": "Benutzerschnittstellen zu Geschäftssystemen"
+              "german_text": "Benutzungsschnittstelle zu Geschäftssystemen"
             },
             {
               "english_text": "Identity & Access Control Systems",
@@ -456,7 +456,7 @@
             },
             {
               "english_text": "Host Platforms, Layout of Devices & Networks",
-              "german_text": "Host-Plattformen sowie Topologie von Geräten und Netzwerken"
+              "german_text": "Host-Plattformen sowie Anordnung von Geräten und Netzwerken"
             }
           ]
         },
@@ -464,11 +464,11 @@
           "key": "physical-architecture-time-when",
           "column_id": "time-when",
           "english_title": "Processing Schedule",
-          "german_title": "Verarbeitungs- und Ablaufplan",
+          "german_title": "Verarbeitungszeitplan",
           "items": [
             {
               "english_text": "Timing & Sequencing of Processes and Sessions",
-              "german_text": "Taktung und Abfolge von Prozessen und Sitzungen"
+              "german_text": "Zeitliche Abstimmung und Abfolge von Prozessen und Sitzungen"
             }
           ]
         }
@@ -487,7 +487,7 @@
           "items": [
             {
               "english_text": "Products & Tools, Data Repositories and Processors",
-              "german_text": "Produkte und Werkzeuge, Datenablagen und Verarbeitungsinstanzen"
+              "german_text": "Produkte und Werkzeuge, Datenablagen und Prozessoren"
             }
           ]
         },
@@ -515,7 +515,7 @@
           "key": "component-architecture-process-how",
           "column_id": "process-how",
           "english_title": "Process Components & Standards",
-          "german_title": "Prozesskomponenten und -standards",
+          "german_title": "Prozess-Komponenten und -Standards",
           "items": [
             {
               "english_text": "Tools & Protocols for Process Delivery",
@@ -531,7 +531,7 @@
           "key": "component-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Human Entities: Components & Standards",
-          "german_title": "Personelle Komponenten und Standards",
+          "german_title": "Menschliche Einheiten: Komponenten und Standards",
           "items": [
             {
               "english_text": "Identities",
@@ -555,11 +555,11 @@
           "key": "component-architecture-location-where",
           "column_id": "location-where",
           "english_title": "Locator Components & Standards",
-          "german_title": "Adressierungs- und Lokalisierungskomponenten",
+          "german_title": "Lokalisierungskomponenten und -standards",
           "items": [
             {
               "english_text": "Nodes, Addresses & other Locators",
-              "german_text": "Knoten, Adressen und weitere Lokatoren"
+              "german_text": "Knoten, Adressen und andere Lokatoren"
             },
             {
               "english_text": "Component Configuration",
@@ -571,7 +571,7 @@
           "key": "component-architecture-time-when",
           "column_id": "time-when",
           "english_title": "Step Timing & Sequencing Components and Standards",
-          "german_title": "Komponenten und Standards für Ablauf- und Schrittsteuerung",
+          "german_title": "Komponenten und Standards für Schritt-Timing und -Sequenzierung",
           "items": [
             {
               "english_text": "Time Schedules",
@@ -588,17 +588,17 @@
     {
       "id": "management-architecture",
       "english_title": "Management Architecture",
-      "german_title": "Managementarchitektur",
+      "german_title": "Management-Architektur",
       "cells": [
         {
           "key": "management-architecture-assets-what",
           "column_id": "assets-what",
           "english_title": "Delivery and Continuity Management",
-          "german_title": "Steuerung von Leistungserbringung und Kontinuität",
+          "german_title": "Leistungsbereitstellungs- und Kontinuitätsmanagement",
           "items": [
             {
               "english_text": "Assurance of Operational Excellence & Continuity",
-              "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität"
+              "german_text": "Sicherstellung operativer Exzellenz und Kontinuität"
             }
           ]
         },
@@ -626,11 +626,11 @@
           "key": "management-architecture-process-how",
           "column_id": "process-how",
           "english_title": "Process Delivery Management",
-          "german_title": "Steuerung der Leistungserbringung",
+          "german_title": "Management der Prozessausführung",
           "items": [
             {
               "english_text": "Management & Support of Systems, Applications & Services",
-              "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services"
+              "german_text": "Management und Unterstützung von Systemen, Anwendungen und Services"
             }
           ]
         },
@@ -638,11 +638,11 @@
           "key": "management-architecture-people-who",
           "column_id": "people-who",
           "english_title": "Governance, Relationship & Personnel Management",
-          "german_title": "Governance, Beziehungs- und Personalsteuerung",
+          "german_title": "Governance-, Beziehungs- und Personalmanagement",
           "items": [
             {
               "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
-              "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen"
+              "german_text": "Management und Unterstützung unternehmensweiter sowie erweiterter Unternehmensbeziehungen"
             }
           ]
         },
@@ -654,7 +654,7 @@
           "items": [
             {
               "english_text": "Management of Buildings, Sites, Platforms & Networks",
-              "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken"
+              "german_text": "Management von Gebäuden, Standorten, Plattformen und Netzwerken"
             }
           ]
         },
@@ -666,7 +666,7 @@
           "items": [
             {
               "english_text": "Management of Calendar and Timetable",
-              "german_text": "Steuerung von Kalendern und Zeitplänen"
+              "german_text": "Management von Kalender und Zeitplan"
             }
           ]
         }
