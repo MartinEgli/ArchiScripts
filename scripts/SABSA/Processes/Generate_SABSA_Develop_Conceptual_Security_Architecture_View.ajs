@@ -24,15 +24,13 @@ var CONST = {
         Steps: "Steps",
         Subprocesses: "Subprocesses",
         Artifacts: "Artifacts",
-        WorkPackages: "Work Packages",
         Inputs: "Inputs",
         Outputs: "Outputs",
         Relations: {
             Composition: "Composition",
             Triggering: "Triggering",
             Inputs: "Inputs",
-            Outputs: "Outputs",
-            WorkPackageToRepresentations: "Work Package to Representations"
+            Outputs: "Outputs"
         }
     },
     Layout: {
@@ -55,18 +53,6 @@ var CONST = {
         StepWidth: 360,
         StepMinHeight: 58,
         StepGap: 12,
-        StepArtifactWidth: 170,
-        StepArtifactMinHeight: 34,
-        StepArtifactGap: 6,
-        StepColumnGap: 14,
-        StepArtifactOuterGap: 20,
-        StepArtifactTitleReserve: 28,
-        StepArtifactTitleGap: 6,
-        StepArtifactInnerX: 8,
-        StepArtifactInnerY: 6,
-        StepArtifactInnerRight: 8,
-        StepArtifactInnerBottom: 6,
-        StepArtifactRepresentationMinHeight: 26,
         StepInnerX: 12,
         StepInnerY: 28,
         StepInnerRight: 12,
@@ -79,8 +65,6 @@ var CONST = {
         MainProcessFill: "#ffcc64",
         StepFill: "#ffff9a",
         SubprocessFill: "#fff6bf",
-        ArtifactWorkPackageFill: "#ffff64",
-        ArtifactRepresentationFill: "#ffffcc",
         InputFill: "#ccffff",
         OutputFill: "#ccff9a",
         NoteFill: "#f3f3f3",
@@ -574,14 +558,6 @@ function resolveConceptPlacement(conceptType, properties) {
         return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Subprocesses]) };
     }
 
-    if (conceptType === "representation") {
-        return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
-    }
-
-    if (conceptType === "work-package") {
-        return { rootName: "Implementation & Migration", pathSegments: getProcessFolderSegments([CONST.Folder.WorkPackages]) };
-    }
-
     if (conceptType === "business-object") {
         if (role === "Artifact") {
             return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
@@ -625,8 +601,6 @@ function resolveRelationshipPlacement(properties) {
         relationFolderName = CONST.Folder.Relations.Inputs;
     } else if (role === "OutputAccess") {
         relationFolderName = CONST.Folder.Relations.Outputs;
-    } else if (role === "WorkPackageToRepresentation") {
-        relationFolderName = CONST.Folder.Relations.WorkPackageToRepresentations;
     } else {
         return null;
     }
@@ -852,79 +826,6 @@ function getSubprocessWidth() {
     return CONST.Layout.StepWidth - CONST.Layout.StepInnerX - CONST.Layout.StepInnerRight;
 }
 
-function getStepInputsX() {
-    return CONST.Layout.MainX - CONST.Layout.StepArtifactWidth - CONST.Layout.StepArtifactOuterGap;
-}
-
-function getStepOutputsX() {
-    return CONST.Layout.MainX + CONST.Layout.MainWidth + CONST.Layout.StepArtifactOuterGap;
-}
-
-function estimateArtifactStackHeight(artifacts, width, minHeight, gap) {
-    var totalHeight = 0;
-
-    (artifacts || []).forEach(function (artifact, index) {
-        totalHeight += typeof artifact.height === "number"
-            ? artifact.height
-            : estimateTextHeight(artifact.name, width, minHeight);
-
-        if (index < artifacts.length - 1) {
-            totalHeight += gap;
-        }
-    });
-
-    return totalHeight;
-}
-
-function getStepArtifactRepresentationWidth() {
-    return CONST.Layout.StepArtifactWidth - CONST.Layout.StepArtifactInnerX - CONST.Layout.StepArtifactInnerRight;
-}
-
-function estimateStepArtifactRepresentationHeight(artifactData) {
-    return estimateTextHeight(
-        safeString(artifactData && artifactData.name),
-        getStepArtifactRepresentationWidth(),
-        CONST.Layout.StepArtifactRepresentationMinHeight
-    );
-}
-
-function estimateStepArtifactTitleHeight(title) {
-    return estimateTextHeight(
-        safeString(title),
-        CONST.Layout.StepArtifactWidth,
-        CONST.Layout.StepArtifactTitleReserve
-    );
-}
-
-function estimateStepArtifactRepresentationStackHeight(artifacts) {
-    var totalHeight = 0;
-
-    (artifacts || []).forEach(function (artifactData, index) {
-        totalHeight += estimateStepArtifactRepresentationHeight(artifactData);
-
-        if (index < artifacts.length - 1) {
-            totalHeight += CONST.Layout.StepArtifactGap;
-        }
-    });
-
-    return totalHeight;
-}
-
-function estimateStepArtifactContainerHeight(title, artifacts) {
-    return Math.max(
-        CONST.Layout.StepArtifactMinHeight,
-        estimateStepArtifactTitleHeight(title) +
-            CONST.Layout.StepArtifactTitleGap +
-            CONST.Layout.StepArtifactInnerY +
-            estimateStepArtifactRepresentationStackHeight(artifacts) +
-            CONST.Layout.StepArtifactInnerBottom
-    );
-}
-
-function getStepDisplayTitle(stepName) {
-    return safeString(stepName).replace(/^Step\s+\d+\s*-\s*/i, "");
-}
-
 function estimateStepContainerHeight(stepData) {
     var titleHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
     var subprocessWidth = getSubprocessWidth();
@@ -967,31 +868,6 @@ function buildInputDocumentation(inputData) {
     return inputData.description +
         "\n\nOrigin: " + safeString(inputData.origin) +
         "\nMoSCoW: " + safeString(inputData.moscow);
-}
-
-var MATRIX_ARTIFACT_IDS = {
-    "business-attributes-taxonomy-and-profile-with-integrated-performance-targets": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
-    "enablement-and-control-objectives": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
-    "policy-architecture": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
-    "risk-categories": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories",
-    "risk-management-strategies": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
-    "risk-modelling-framework": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
-    "assurance-framework": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
-    "inventory-of-all-operational-processes": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
-    "process-mapping-framework": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
-    "architectural-strategies-for-it-used-in-process-support": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
-    "owners-custodians-and-users": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:owners-custodians-and-users",
-    "service-providers-and-customers": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers",
-    "trust-modelling-framework": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework",
-    "security-domain-concepts-and-framework": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
-    "through-life-risk-management-framework": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:through-life-risk-management-framework",
-    "attribute-performance-targets": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets"
-};
-
-function getStepArtifactConceptId(artifactData) {
-    var artifactId = safeString(artifactData && artifactData.id);
-
-    return MATRIX_ARTIFACT_IDS[artifactId] || ("sabsa-process:artifact:" + artifactId);
 }
 
 function optimizeGeneratedLayout(layout) {
