@@ -5,8 +5,8 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 var BufferedImage = Java.type("java.awt.image.BufferedImage");
 var Font = Java.type("java.awt.Font");
 
-load(new File(__DIR__ + "../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_Architecture_Matrix_View";
 var LOG_LEVEL = "WARN";
@@ -19,7 +19,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../data/sabsa/sabsa-architecture-matrix-data.json").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-architecture-matrix-data.json").getCanonicalPath(),
     ViewName: "SABSA Architecture Matrix",
     Layout: {
         StartX: 54,

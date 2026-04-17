@@ -25,6 +25,8 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
   Bereich fuer eigene auslieferbare Skripte und spaetere Deliverables
 - `scripts/SABSA/`
   SABSA- und Security-Overlay-Skripte, inklusive zentralem `Security_Overlay_Toolkit.ajs`
+- `scripts/SABSA/Matrices/`
+  Generatoren fuer die SABSA Architecture Matrix und die SABSA Management Matrix
 - `scripts/lib/logging/`
   gemeinsamer Logger fuer wiederverwendbare Konsolen-, Dialog- und strukturierte Log-Ausgaben
 - `scripts/lib/exchange/`
