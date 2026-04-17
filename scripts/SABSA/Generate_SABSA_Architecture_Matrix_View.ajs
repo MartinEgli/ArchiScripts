@@ -19,7 +19,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../data/sabsa/sabsa_architecture_matrix.json").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../data/sabsa/sabsa-architecture-matrix-data.json").getCanonicalPath(),
     ViewName: "SABSA Architecture Matrix",
     Layout: {
         StartX: 54,
@@ -474,7 +474,7 @@ function createMatrixView(matrixData) {
     var view = model.createArchimateView(viewName);
     var rowY = CONST.Layout.RowStartY;
 
-    view.documentation = "Generated from sabsa_architecture_matrix.json. English labels only. Cell groups contain representation elements for each bullet item.";
+    view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell groups contain representation elements for each bullet item.";
 
     matrixData.columns.forEach(function (column, index) {
         var columnKey = "column:" + column.id;

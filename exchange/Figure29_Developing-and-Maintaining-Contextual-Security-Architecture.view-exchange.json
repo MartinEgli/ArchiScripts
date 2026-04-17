@@ -1076,7 +1076,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Assets (What)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1111,7 +1111,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Assets (What)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1146,7 +1146,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Assets (What)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1181,7 +1181,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Location (Where)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1216,7 +1216,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Location (Where)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1251,7 +1251,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Location (Where)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1286,7 +1286,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Location (Where)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1321,7 +1321,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Time (When)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
@@ -1356,7 +1356,7 @@
         "properties": {
           "SABSA Layer": "Contextual Architecture",
           "SABSA Cell": "Time (When)",
-          "Source Matrix": "SABSA_Architecture_Matrix_DE.md"
+          "Source Matrix": "sabsa-architecture-matrix-analysis.de.md"
         }
       },
       "visual": {
