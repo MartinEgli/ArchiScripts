@@ -41,8 +41,10 @@ var CONST = {
         ViewMarginX: 40,
         ViewMarginY: 40,
         InputX: 40,
+        StepInputX: 270,
         MainX: 520,
-        OutputX: 1500,
+        StepOutputX: 1320,
+        OutputX: 1580,
         MainY: 40,
         MainWidth: 760,
         MainMinHeight: 120,
@@ -54,6 +56,9 @@ var CONST = {
         OutputWidth: 300,
         ArtifactMinHeight: 58,
         ArtifactGap: 18,
+        StepArtifactWidth: 220,
+        StepArtifactMinHeight: 42,
+        StepArtifactGap: 8,
         StepWidth: 360,
         StepMinHeight: 58,
         StepGap: 12,
@@ -71,6 +76,8 @@ var CONST = {
         SubprocessFill: "#fff6bf",
         InputFill: "#ccffff",
         OutputFill: "#ffff64",
+        StepInputFill: "#dff7ff",
+        StepOutputFill: "#fff0a6",
         NoteFill: "#f3f3f3",
         LineColor: "#111111",
         FontColor: "#111111"
@@ -489,6 +496,20 @@ function estimateTextHeight(text, width, minHeight) {
     return Math.max(minHeight, 14 + (lines * 14));
 }
 
+function estimateArtifactStackHeight(artifactEntries, width, minHeight, gap) {
+    var totalHeight = 0;
+
+    (artifactEntries || []).forEach(function (entry, index) {
+        totalHeight += estimateTextHeight(entry.data.name, width, minHeight);
+
+        if (index < artifactEntries.length - 1) {
+            totalHeight += gap;
+        }
+    });
+
+    return totalHeight;
+}
+
 function getStepXInMain() {
     return Math.max(
         CONST.Layout.MainInnerX,
@@ -768,31 +789,64 @@ function optimizeGeneratedLayout(layout) {
         mainHeight
     );
 
-    function alignArtifacts(artifactEntries, x, width) {
-        var totalHeight = 0;
+    function alignArtifacts(artifactEntries, x, width, minHeight, gap, startY, availableHeight) {
         var currentY;
 
-        artifactEntries.forEach(function (entry, index) {
-            var height = estimateTextHeight(entry.data.name, width, CONST.Layout.ArtifactMinHeight);
-            totalHeight += height;
-
-            if (index < artifactEntries.length - 1) {
-                totalHeight += CONST.Layout.ArtifactGap;
-            }
-        });
-
-        currentY = CONST.Layout.MainY + Math.max(0, Math.floor((mainHeight - totalHeight) / 2));
+        currentY = startY + Math.max(
+            0,
+            Math.floor((availableHeight - estimateArtifactStackHeight(artifactEntries, width, minHeight, gap)) / 2)
+        );
 
         artifactEntries.forEach(function (entry) {
-            var height = estimateTextHeight(entry.data.name, width, CONST.Layout.ArtifactMinHeight);
+            var height = estimateTextHeight(entry.data.name, width, minHeight);
 
             setVisualBounds(entry.visual, x, currentY, width, height);
-            currentY += height + CONST.Layout.ArtifactGap;
+            currentY += height + gap;
         });
     }
 
-    alignArtifacts(layout.inputVisuals, CONST.Layout.InputX, CONST.Layout.InputWidth);
-    alignArtifacts(layout.outputVisuals, CONST.Layout.OutputX, CONST.Layout.OutputWidth);
+    alignArtifacts(
+        layout.inputVisuals,
+        CONST.Layout.InputX,
+        CONST.Layout.InputWidth,
+        CONST.Layout.ArtifactMinHeight,
+        CONST.Layout.ArtifactGap,
+        CONST.Layout.MainY,
+        mainHeight
+    );
+    alignArtifacts(
+        layout.outputVisuals,
+        CONST.Layout.OutputX,
+        CONST.Layout.OutputWidth,
+        CONST.Layout.ArtifactMinHeight,
+        CONST.Layout.ArtifactGap,
+        CONST.Layout.MainY,
+        mainHeight
+    );
+
+    layout.stepVisuals.forEach(function (stepEntry) {
+        var stepBounds = stepEntry.visual.bounds;
+        var absoluteStepY = mainBounds.y + stepBounds.y;
+
+        alignArtifacts(
+            stepEntry.stepInputVisuals,
+            CONST.Layout.StepInputX,
+            CONST.Layout.StepArtifactWidth,
+            CONST.Layout.StepArtifactMinHeight,
+            CONST.Layout.StepArtifactGap,
+            absoluteStepY,
+            stepBounds.height
+        );
+        alignArtifacts(
+            stepEntry.stepOutputVisuals,
+            CONST.Layout.StepOutputX,
+            CONST.Layout.StepArtifactWidth,
+            CONST.Layout.StepArtifactMinHeight,
+            CONST.Layout.StepArtifactGap,
+            absoluteStepY,
+            stepBounds.height
+        );
+    });
 }
 
 function confirmExecution() {
@@ -847,7 +901,7 @@ function createView() {
     var currentStepY = CONST.Layout.MainInnerY;
     var mainHeight = estimateMainProcessHeight();
 
-    view.documentation = "Generated from JSON extract " + CONST.SourceJsonPath + " based on " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
+    view.documentation = "Generated from JSON extract " + CONST.SourceJsonPath + " based on " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, subprocesses, and top-level plus step-level inputs/outputs for Develop Conceptual Security Architecture.";
     moveViewToFolder(view);
     stats.views++;
 
@@ -968,10 +1022,81 @@ function createView() {
             concept: stepConcept,
             visual: stepVisual,
             data: stepData,
+            stepInputVisuals: [],
+            stepOutputVisuals: [],
             subprocessVisuals: []
         };
 
         stepVisuals.push(stepEntry);
+
+        (stepData.inputs || []).forEach(function (artifactData) {
+            var artifactConcept = ensureProcessArtifactConcept(artifactData);
+            var artifactVisual = addStyledVisual(
+                view,
+                artifactConcept,
+                CONST.Layout.StepInputX,
+                CONST.Layout.MainY,
+                CONST.Layout.StepArtifactWidth,
+                estimateTextHeight(artifactData.name, CONST.Layout.StepArtifactWidth, CONST.Layout.StepArtifactMinHeight),
+                CONST.Style.StepInputFill
+            );
+            var artifactRelationship = ensureRelationship(
+                "access-relationship",
+                stepConcept,
+                artifactConcept,
+                "step-input-access:" + stepData.id + ":" + safeString(artifactData.id),
+                {
+                    ProcessViewRelationRole: "InputAccess",
+                    AccessMode: "Read",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, artifactRelationship, stepVisual, artifactVisual);
+            stepEntry.stepInputVisuals.push({
+                concept: artifactConcept,
+                visual: artifactVisual,
+                data: artifactData
+            });
+            stats.artifacts++;
+            stats.relationships++;
+        });
+
+        (stepData.outputs || []).forEach(function (artifactData) {
+            var artifactConcept = ensureProcessArtifactConcept(artifactData);
+            var preferredRelationshipType = safeString(artifactConcept && artifactConcept.type) === "work-package"
+                ? "association-relationship"
+                : "access-relationship";
+            var artifactVisual = addStyledVisual(
+                view,
+                artifactConcept,
+                CONST.Layout.StepOutputX,
+                CONST.Layout.MainY,
+                CONST.Layout.StepArtifactWidth,
+                estimateTextHeight(artifactData.name, CONST.Layout.StepArtifactWidth, CONST.Layout.StepArtifactMinHeight),
+                CONST.Style.StepOutputFill
+            );
+            var artifactRelationship = ensureRelationship(
+                preferredRelationshipType,
+                stepConcept,
+                artifactConcept,
+                "step-output-access:" + stepData.id + ":" + safeString(artifactData.id),
+                {
+                    ProcessViewRelationRole: "OutputAccess",
+                    AccessMode: "Write",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+
+            addConnection(view, artifactRelationship, stepVisual, artifactVisual);
+            stepEntry.stepOutputVisuals.push({
+                concept: artifactConcept,
+                visual: artifactVisual,
+                data: artifactData
+            });
+            stats.artifacts++;
+            stats.relationships++;
+        });
 
         getSubprocessEntries(stepData).forEach(function (subprocessData, subprocessIndex) {
             var subprocessName = getSubprocessName(subprocessData);
@@ -1042,8 +1167,8 @@ function createView() {
                 subprocessConcept,
                 subVisual,
                 subprocessData,
-                inputVisuals,
-                outputVisuals
+                stepEntry.stepInputVisuals.concat(inputVisuals),
+                stepEntry.stepOutputVisuals.concat(outputVisuals)
             );
             allSubprocessVisuals.push({
                 concept: subprocessConcept,
