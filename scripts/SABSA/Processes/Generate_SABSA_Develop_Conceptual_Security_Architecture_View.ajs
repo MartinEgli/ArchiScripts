@@ -59,6 +59,11 @@ var CONST = {
         StepArtifactWidth: 220,
         StepArtifactMinHeight: 42,
         StepArtifactGap: 8,
+        StepOutputWorkPackageMinHeight: 58,
+        StepOutputWorkPackageInnerX: 10,
+        StepOutputWorkPackageInnerY: 28,
+        StepOutputWorkPackageInnerRight: 10,
+        StepOutputWorkPackageInnerBottom: 10,
         StepWidth: 360,
         StepMinHeight: 58,
         StepGap: 12,
@@ -77,6 +82,7 @@ var CONST = {
         InputFill: "#ccffff",
         OutputFill: "#ffff64",
         StepInputFill: "#dff7ff",
+        StepOutputWorkPackageFill: "#ffff64",
         StepOutputFill: "#fff0a6",
         NoteFill: "#f3f3f3",
         LineColor: "#111111",
@@ -608,6 +614,12 @@ function buildArtifactDocumentation(artifactData) {
     return lines.join("\n");
 }
 
+function buildWorkPackageDocumentation(workPackageData) {
+    return "Reused conceptual work package from the SABSA Architecture Matrix." +
+        "\n\nMatrix row: " + safeString(workPackageData && workPackageData.row_id) +
+        "\nMatrix column: " + safeString(workPackageData && workPackageData.column_id);
+}
+
 function findConceptByPropertyId(propertyId) {
     var wantedId = safeString(propertyId);
 
@@ -649,6 +661,32 @@ function ensureProcessArtifactConcept(artifactData) {
         "artifact:" + artifactId,
         properties,
         buildArtifactDocumentation(artifactData)
+    );
+}
+
+function ensureProcessOutputWorkPackageConcept(workPackageData) {
+    var workPackageId = safeString(workPackageData && workPackageData.id);
+    var existingConcept = findConceptById("work-package", workPackageId);
+    var properties = {
+        id: workPackageId,
+        ProcessViewRole: "OutputArtifact",
+        MatrixRowId: safeString(workPackageData && workPackageData.row_id),
+        MatrixColumnId: safeString(workPackageData && workPackageData.column_id),
+        SourceDocument: CONST.SourceMarkdownPath
+    };
+
+    if (existingConcept) {
+        stats.conceptsReused++;
+        applyProperties(existingConcept, properties);
+        return existingConcept;
+    }
+
+    return ensureConcept(
+        "work-package",
+        safeString(workPackageData && workPackageData.name),
+        "output-work-package:" + workPackageId,
+        properties,
+        buildWorkPackageDocumentation(workPackageData)
     );
 }
 
@@ -805,6 +843,86 @@ function optimizeGeneratedLayout(layout) {
         });
     }
 
+    function getStepOutputInnerWidth() {
+        return CONST.Layout.StepArtifactWidth -
+            CONST.Layout.StepOutputWorkPackageInnerX -
+            CONST.Layout.StepOutputWorkPackageInnerRight;
+    }
+
+    function estimateStepOutputEntryHeight(entry) {
+        var titleHeight;
+        var itemsHeight;
+
+        if (entry.kind !== "group") {
+            return estimateTextHeight(entry.data.name, CONST.Layout.StepArtifactWidth, CONST.Layout.StepArtifactMinHeight);
+        }
+
+        titleHeight = estimateTextHeight(
+            entry.data.name,
+            CONST.Layout.StepArtifactWidth,
+            CONST.Layout.StepOutputWorkPackageMinHeight
+        );
+        itemsHeight = estimateArtifactStackHeight(
+            entry.itemVisuals,
+            getStepOutputInnerWidth(),
+            CONST.Layout.StepArtifactMinHeight,
+            CONST.Layout.StepArtifactGap
+        );
+
+        return Math.max(
+            CONST.Layout.StepOutputWorkPackageMinHeight,
+            titleHeight + CONST.Layout.StepOutputWorkPackageInnerY + CONST.Layout.StepOutputWorkPackageInnerBottom,
+            CONST.Layout.StepOutputWorkPackageInnerY + itemsHeight + CONST.Layout.StepOutputWorkPackageInnerBottom
+        );
+    }
+
+    function alignStepOutputEntries(stepEntry, startY, availableHeight) {
+        var entries = stepEntry.stepOutputLayoutEntries || [];
+        var totalHeight = 0;
+        var currentY;
+        var innerWidth = getStepOutputInnerWidth();
+
+        entries.forEach(function (entry, index) {
+            totalHeight += estimateStepOutputEntryHeight(entry);
+
+            if (index < entries.length - 1) {
+                totalHeight += CONST.Layout.StepArtifactGap;
+            }
+        });
+
+        currentY = startY + Math.max(0, Math.floor((availableHeight - totalHeight) / 2));
+
+        entries.forEach(function (entry) {
+            var entryHeight = estimateStepOutputEntryHeight(entry);
+
+            setVisualBounds(entry.visual, CONST.Layout.StepOutputX, currentY, CONST.Layout.StepArtifactWidth, entryHeight);
+
+            if (entry.kind === "group") {
+                var currentItemY = CONST.Layout.StepOutputWorkPackageInnerY;
+
+                entry.itemVisuals.forEach(function (itemEntry) {
+                    var itemHeight = estimateTextHeight(
+                        itemEntry.data.name,
+                        innerWidth,
+                        CONST.Layout.StepArtifactMinHeight
+                    );
+
+                    setVisualBounds(
+                        itemEntry.visual,
+                        CONST.Layout.StepOutputWorkPackageInnerX,
+                        currentItemY,
+                        innerWidth,
+                        itemHeight
+                    );
+
+                    currentItemY += itemHeight + CONST.Layout.StepArtifactGap;
+                });
+            }
+
+            currentY += entryHeight + CONST.Layout.StepArtifactGap;
+        });
+    }
+
     alignArtifacts(
         layout.inputVisuals,
         CONST.Layout.InputX,
@@ -837,15 +955,7 @@ function optimizeGeneratedLayout(layout) {
             absoluteStepY,
             stepBounds.height
         );
-        alignArtifacts(
-            stepEntry.stepOutputVisuals,
-            CONST.Layout.StepOutputX,
-            CONST.Layout.StepArtifactWidth,
-            CONST.Layout.StepArtifactMinHeight,
-            CONST.Layout.StepArtifactGap,
-            absoluteStepY,
-            stepBounds.height
-        );
+        alignStepOutputEntries(stepEntry, absoluteStepY, stepBounds.height);
     });
 }
 
@@ -1024,6 +1134,7 @@ function createView() {
             data: stepData,
             stepInputVisuals: [],
             stepOutputVisuals: [],
+            stepOutputLayoutEntries: [],
             subprocessVisuals: []
         };
 
@@ -1067,35 +1178,109 @@ function createView() {
             var preferredRelationshipType = safeString(artifactConcept && artifactConcept.type) === "work-package"
                 ? "association-relationship"
                 : "access-relationship";
-            var artifactVisual = addStyledVisual(
-                view,
-                artifactConcept,
-                CONST.Layout.StepOutputX,
-                CONST.Layout.MainY,
-                CONST.Layout.StepArtifactWidth,
-                estimateTextHeight(artifactData.name, CONST.Layout.StepArtifactWidth, CONST.Layout.StepArtifactMinHeight),
-                CONST.Style.StepOutputFill
-            );
-            var artifactRelationship = ensureRelationship(
-                preferredRelationshipType,
-                stepConcept,
-                artifactConcept,
-                "step-output-access:" + stepData.id + ":" + safeString(artifactData.id),
-                {
-                    ProcessViewRelationRole: "OutputAccess",
-                    AccessMode: "Write",
-                    SourceDocument: CONST.SourceMarkdownPath
-                }
-            );
+            var artifactVisual;
+            var workPackageData = artifactData.work_package;
 
-            addConnection(view, artifactRelationship, stepVisual, artifactVisual);
+            if (workPackageData && safeString(workPackageData.id)) {
+                var existingGroup = stepEntry.stepOutputLayoutEntries.filter(function (entry) {
+                    return entry.kind === "group" && safeString(entry.data.id) === safeString(workPackageData.id);
+                })[0];
+
+                if (!existingGroup) {
+                    var workPackageConcept = ensureProcessOutputWorkPackageConcept(workPackageData);
+                    var workPackageVisual = addStyledVisual(
+                        view,
+                        workPackageConcept,
+                        CONST.Layout.StepOutputX,
+                        CONST.Layout.MainY,
+                        CONST.Layout.StepArtifactWidth,
+                        CONST.Layout.StepOutputWorkPackageMinHeight,
+                        CONST.Style.StepOutputWorkPackageFill
+                    );
+                    var workPackageRelationship = ensureRelationship(
+                        "association-relationship",
+                        stepConcept,
+                        workPackageConcept,
+                        "step-output-work-package:" + stepData.id + ":" + safeString(workPackageData.id),
+                        {
+                            ProcessViewRelationRole: "OutputAccess",
+                            SourceDocument: CONST.SourceMarkdownPath
+                        }
+                    );
+
+                    addConnection(view, workPackageRelationship, stepVisual, workPackageVisual);
+                    existingGroup = {
+                        kind: "group",
+                        concept: workPackageConcept,
+                        visual: workPackageVisual,
+                        data: {
+                            id: workPackageData.id,
+                            name: workPackageData.name
+                        },
+                        itemVisuals: []
+                    };
+                    stepEntry.stepOutputLayoutEntries.push(existingGroup);
+                    stats.artifacts++;
+                    stats.relationships++;
+                }
+
+                artifactVisual = addStyledVisual(
+                    existingGroup.visual,
+                    artifactConcept,
+                    CONST.Layout.StepOutputWorkPackageInnerX,
+                    CONST.Layout.StepOutputWorkPackageInnerY,
+                    CONST.Layout.StepArtifactWidth - CONST.Layout.StepOutputWorkPackageInnerX - CONST.Layout.StepOutputWorkPackageInnerRight,
+                    estimateTextHeight(
+                        artifactData.name,
+                        CONST.Layout.StepArtifactWidth - CONST.Layout.StepOutputWorkPackageInnerX - CONST.Layout.StepOutputWorkPackageInnerRight,
+                        CONST.Layout.StepArtifactMinHeight
+                    ),
+                    CONST.Style.StepOutputFill
+                );
+                existingGroup.itemVisuals.push({
+                    concept: artifactConcept,
+                    visual: artifactVisual,
+                    data: artifactData
+                });
+            } else {
+                artifactVisual = addStyledVisual(
+                    view,
+                    artifactConcept,
+                    CONST.Layout.StepOutputX,
+                    CONST.Layout.MainY,
+                    CONST.Layout.StepArtifactWidth,
+                    estimateTextHeight(artifactData.name, CONST.Layout.StepArtifactWidth, CONST.Layout.StepArtifactMinHeight),
+                    CONST.Style.StepOutputFill
+                );
+                stepEntry.stepOutputLayoutEntries.push({
+                    kind: "artifact",
+                    concept: artifactConcept,
+                    visual: artifactVisual,
+                    data: artifactData
+                });
+
+                var artifactRelationship = ensureRelationship(
+                    preferredRelationshipType,
+                    stepConcept,
+                    artifactConcept,
+                    "step-output-access:" + stepData.id + ":" + safeString(artifactData.id),
+                    {
+                        ProcessViewRelationRole: "OutputAccess",
+                        AccessMode: "Write",
+                        SourceDocument: CONST.SourceMarkdownPath
+                    }
+                );
+
+                addConnection(view, artifactRelationship, stepVisual, artifactVisual);
+                stats.relationships++;
+            }
+
             stepEntry.stepOutputVisuals.push({
                 concept: artifactConcept,
                 visual: artifactVisual,
                 data: artifactData
             });
             stats.artifacts++;
-            stats.relationships++;
         });
 
         getSubprocessEntries(stepData).forEach(function (subprocessData, subprocessIndex) {
