@@ -83,22 +83,30 @@ var DATA = {
         {
             id: "sabsa-business-attributes-profile-bap",
             name: "SABSA Business Attributes Profile (BAP)",
-            description: "Prioritised profile of business attributes with metrics and measures from the contextual layer."
+            description: "Prioritised profile of business attributes with metrics and measures from the contextual layer.",
+            origin: "Inherited from the preceding 'Develop Contextual Security Architecture' process, especially from the contextual WHAT view and the prioritised business attributes profile.",
+            moscow: "Must"
         },
         {
             id: "business-risk-context",
             name: "Business Risk Context",
-            description: "Business-level threats, vulnerabilities, and impacts as the basis for the WHY dimension."
+            description: "Business-level threats, vulnerabilities, and impacts as the basis for the WHY dimension.",
+            origin: "Inherited from the contextual risk and threat baseline of the preceding process, consolidated from business impact, threat, and vulnerability analysis.",
+            moscow: "Must"
         },
         {
             id: "business-drivers-and-constraints",
             name: "Business Drivers & Constraints",
-            description: "Strategic drivers, organisational constraints, and business vision."
+            description: "Strategic drivers, organisational constraints, and business vision.",
+            origin: "Inherited from business vision, stakeholder goals, guiding constraints, and architecture principles from the strategic and contextual setup.",
+            moscow: "Should"
         },
         {
             id: "compliance-and-regulatory-requirements",
             name: "Compliance & Regulatory Requirements",
-            description: "Relevant legal, regulatory, and contractual requirements."
+            description: "Relevant legal, regulatory, and contractual requirements.",
+            origin: "Inherited from the compliance baseline, regulatory obligations, contractual requirements, and external obligations in the enterprise context.",
+            moscow: "Should"
         }
     ],
     outputs: [
@@ -550,6 +558,12 @@ function estimateMainProcessHeight() {
     return Math.max(CONST.Layout.MainMinHeight, totalHeight);
 }
 
+function buildInputDocumentation(inputData) {
+    return inputData.description +
+        "\n\nOrigin: " + safeString(inputData.origin) +
+        "\nMoSCoW: " + safeString(inputData.moscow);
+}
+
 function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
@@ -613,9 +627,11 @@ function createView() {
             {
                 id: "sabsa-process:input:" + inputData.id,
                 ProcessViewRole: "InputArtifact",
+                InputOrigin: inputData.origin,
+                MoSCoW: inputData.moscow,
                 SourceDocument: CONST.SourceMarkdownPath
             },
-            inputData.description
+            buildInputDocumentation(inputData)
         );
         var visual = addStyledVisual(
             view,
