@@ -24,13 +24,15 @@ var CONST = {
         Steps: "Steps",
         Subprocesses: "Subprocesses",
         Artifacts: "Artifacts",
+        WorkPackages: "Work Packages",
         Inputs: "Inputs",
         Outputs: "Outputs",
         Relations: {
             Composition: "Composition",
             Triggering: "Triggering",
             Inputs: "Inputs",
-            Outputs: "Outputs"
+            Outputs: "Outputs",
+            WorkPackageToRepresentations: "Work Package to Representations"
         }
     },
     Layout: {
@@ -57,6 +59,11 @@ var CONST = {
         StepArtifactMinHeight: 34,
         StepArtifactGap: 6,
         StepColumnGap: 14,
+        StepArtifactInnerX: 8,
+        StepArtifactInnerY: 6,
+        StepArtifactInnerRight: 8,
+        StepArtifactInnerBottom: 6,
+        StepArtifactRepresentationMinHeight: 26,
         StepInnerX: 12,
         StepInnerY: 28,
         StepInnerRight: 12,
@@ -69,6 +76,7 @@ var CONST = {
         MainProcessFill: "#ffcc64",
         StepFill: "#ffff9a",
         SubprocessFill: "#fff6bf",
+        ArtifactWorkPackageFill: "#ffff64",
         ArtifactRepresentationFill: "#ffffcc",
         InputFill: "#ccffff",
         OutputFill: "#ccff9a",
@@ -480,7 +488,8 @@ function getTopLevelFolder(rootName) {
     var aliasesByFolderName = {
         "Business": ["Business"],
         "Views": ["Views"],
-        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"]
     };
     var candidateNames = aliasesByFolderName[rootName] || [rootName];
     var wantedNames = candidateNames.map(normalizeFolderName);
@@ -566,6 +575,10 @@ function resolveConceptPlacement(conceptType, properties) {
         return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
     }
 
+    if (conceptType === "work-package") {
+        return { rootName: "Implementation & Migration", pathSegments: getProcessFolderSegments([CONST.Folder.WorkPackages]) };
+    }
+
     if (conceptType === "business-object") {
         if (role === "Artifact") {
             return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
@@ -609,6 +622,8 @@ function resolveRelationshipPlacement(properties) {
         relationFolderName = CONST.Folder.Relations.Inputs;
     } else if (role === "OutputAccess") {
         relationFolderName = CONST.Folder.Relations.Outputs;
+    } else if (role === "WorkPackageToRepresentation") {
+        relationFolderName = CONST.Folder.Relations.WorkPackageToRepresentations;
     } else {
         return null;
     }
@@ -829,7 +844,9 @@ function estimateArtifactStackHeight(artifacts, width, minHeight, gap) {
     var totalHeight = 0;
 
     (artifacts || []).forEach(function (artifact, index) {
-        totalHeight += estimateTextHeight(artifact.name, width, minHeight);
+        totalHeight += typeof artifact.height === "number"
+            ? artifact.height
+            : estimateTextHeight(artifact.name, width, minHeight);
 
         if (index < artifacts.length - 1) {
             totalHeight += gap;
@@ -837,6 +854,27 @@ function estimateArtifactStackHeight(artifacts, width, minHeight, gap) {
     });
 
     return totalHeight;
+}
+
+function getStepArtifactRepresentationWidth() {
+    return CONST.Layout.StepArtifactWidth - CONST.Layout.StepArtifactInnerX - CONST.Layout.StepArtifactInnerRight;
+}
+
+function estimateStepArtifactRepresentationHeight(artifactData) {
+    return estimateTextHeight(
+        safeString(artifactData && artifactData.name),
+        getStepArtifactRepresentationWidth(),
+        CONST.Layout.StepArtifactRepresentationMinHeight
+    );
+}
+
+function estimateStepArtifactContainerHeight(artifactData) {
+    return Math.max(
+        CONST.Layout.StepArtifactMinHeight,
+        estimateStepArtifactRepresentationHeight(artifactData) +
+            CONST.Layout.StepArtifactInnerY +
+            CONST.Layout.StepArtifactInnerBottom
+    );
 }
 
 function estimateStepContainerHeight(stepData) {
@@ -946,13 +984,23 @@ function optimizeGeneratedLayout(layout) {
         }
 
         var inputStackHeight = estimateArtifactStackHeight(
-            stepEntry.data.inputs,
+            stepEntry.inputVisuals.map(function (entry) {
+                return {
+                    name: safeString(entry.data && entry.data.name),
+                    height: estimateStepArtifactContainerHeight(entry.data)
+                };
+            }),
             CONST.Layout.StepArtifactWidth,
             CONST.Layout.StepArtifactMinHeight,
             CONST.Layout.StepArtifactGap
         );
         var outputStackHeight = estimateArtifactStackHeight(
-            stepEntry.data.outputs,
+            stepEntry.outputVisuals.map(function (entry) {
+                return {
+                    name: safeString(entry.data && entry.data.name),
+                    height: estimateStepArtifactContainerHeight(entry.data)
+                };
+            }),
             CONST.Layout.StepArtifactWidth,
             CONST.Layout.StepArtifactMinHeight,
             CONST.Layout.StepArtifactGap
@@ -976,39 +1024,49 @@ function optimizeGeneratedLayout(layout) {
         );
 
         stepEntry.inputVisuals.forEach(function (inputEntry) {
-            var height = estimateTextHeight(
-                inputEntry.data.name,
-                CONST.Layout.StepArtifactWidth,
-                CONST.Layout.StepArtifactMinHeight
-            );
+            var representationHeight = estimateStepArtifactRepresentationHeight(inputEntry.data);
+            var containerHeight = estimateStepArtifactContainerHeight(inputEntry.data);
 
             setVisualBounds(
                 inputEntry.visual,
                 stepInputsX,
                 inputY,
                 CONST.Layout.StepArtifactWidth,
-                height
+                containerHeight
             );
 
-            inputY += height + CONST.Layout.StepArtifactGap;
+            setVisualBounds(
+                inputEntry.representationVisual,
+                CONST.Layout.StepArtifactInnerX,
+                CONST.Layout.StepArtifactInnerY,
+                getStepArtifactRepresentationWidth(),
+                representationHeight
+            );
+
+            inputY += containerHeight + CONST.Layout.StepArtifactGap;
         });
 
         stepEntry.outputVisuals.forEach(function (outputEntry) {
-            var height = estimateTextHeight(
-                outputEntry.data.name,
-                CONST.Layout.StepArtifactWidth,
-                CONST.Layout.StepArtifactMinHeight
-            );
+            var representationHeight = estimateStepArtifactRepresentationHeight(outputEntry.data);
+            var containerHeight = estimateStepArtifactContainerHeight(outputEntry.data);
 
             setVisualBounds(
                 outputEntry.visual,
                 stepOutputsX,
                 outputY,
                 CONST.Layout.StepArtifactWidth,
-                height
+                containerHeight
             );
 
-            outputY += height + CONST.Layout.StepArtifactGap;
+            setVisualBounds(
+                outputEntry.representationVisual,
+                CONST.Layout.StepArtifactInnerX,
+                CONST.Layout.StepArtifactInnerY,
+                getStepArtifactRepresentationWidth(),
+                representationHeight
+            );
+
+            outputY += containerHeight + CONST.Layout.StepArtifactGap;
         });
 
         currentStepY += rowHeight + CONST.Layout.StepGap;
@@ -1245,6 +1303,26 @@ function createView() {
 
         (stepData.inputs || []).forEach(function (artifactData, artifactIndex) {
             var artifactConceptId = getStepArtifactConceptId(artifactData);
+            var workPackageKey = [
+                "artifact-work-package",
+                stepData.id,
+                "input",
+                artifactData.id
+            ].join(":");
+            var workPackageConcept = ensureConcept(
+                "work-package",
+                safeString(artifactData.name),
+                workPackageKey,
+                {
+                    id: "sabsa-process:artifact-work-package:" + stepData.id + ":input:" + artifactData.id,
+                    ProcessViewRole: "ArtifactWorkPackage",
+                    StepId: stepData.id,
+                    ArtifactId: artifactData.id,
+                    ArtifactDirection: "Input",
+                    SourceDocument: CONST.SourceMarkdownPath
+                },
+                "Work package container for " + safeString(artifactData.name) + "."
+            );
             var artifactConcept = ensureConcept(
                 "representation",
                 artifactData.name,
@@ -1256,21 +1334,38 @@ function createView() {
                 },
                 artifactData.description
             );
+            ensureRelationship(
+                "aggregation-relationship",
+                workPackageConcept,
+                artifactConcept,
+                "work-package-representation:" + stepData.id + ":input:" + artifactData.id,
+                {
+                    ProcessViewRelationRole: "WorkPackageToRepresentation",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+            stats.relationships++;
             var artifactVisual = addStyledVisual(
                 mainVisual,
-                artifactConcept,
+                workPackageConcept,
                 getStepInputsX(),
                 currentStepY + (artifactIndex * (CONST.Layout.StepArtifactMinHeight + CONST.Layout.StepArtifactGap)),
                 CONST.Layout.StepArtifactWidth,
-                estimateTextHeight(
-                    artifactData.name,
-                    CONST.Layout.StepArtifactWidth,
-                    CONST.Layout.StepArtifactMinHeight
-                ),
+                estimateStepArtifactContainerHeight(artifactData),
+                CONST.Style.ArtifactWorkPackageFill
+            );
+            tryApplyLabelExpression(artifactVisual, "");
+            var representationVisual = addStyledVisual(
+                artifactVisual,
+                artifactConcept,
+                CONST.Layout.StepArtifactInnerX,
+                CONST.Layout.StepArtifactInnerY,
+                getStepArtifactRepresentationWidth(),
+                estimateStepArtifactRepresentationHeight(artifactData),
                 CONST.Style.ArtifactRepresentationFill
             );
-            tryApplyLabelExpression(artifactVisual, "${name}");
-            tryApplyTextPosition(artifactVisual, 1);
+            tryApplyLabelExpression(representationVisual, "${name}");
+            tryApplyTextPosition(representationVisual, 1);
             var accessRelationship = ensureRelationship(
                 "access-relationship",
                 stepConcept,
@@ -1283,18 +1378,39 @@ function createView() {
                 }
             );
 
-            addConnection(view, accessRelationship, stepVisual, artifactVisual);
+            addConnection(view, accessRelationship, stepVisual, representationVisual);
             stats.artifacts++;
             stats.relationships++;
             stepEntry.inputVisuals.push({
                 concept: artifactConcept,
                 visual: artifactVisual,
+                representationVisual: representationVisual,
                 data: artifactData
             });
         });
 
         (stepData.outputs || []).forEach(function (artifactData, artifactIndex) {
             var artifactConceptId = getStepArtifactConceptId(artifactData);
+            var workPackageKey = [
+                "artifact-work-package",
+                stepData.id,
+                "output",
+                artifactData.id
+            ].join(":");
+            var workPackageConcept = ensureConcept(
+                "work-package",
+                safeString(artifactData.name),
+                workPackageKey,
+                {
+                    id: "sabsa-process:artifact-work-package:" + stepData.id + ":output:" + artifactData.id,
+                    ProcessViewRole: "ArtifactWorkPackage",
+                    StepId: stepData.id,
+                    ArtifactId: artifactData.id,
+                    ArtifactDirection: "Output",
+                    SourceDocument: CONST.SourceMarkdownPath
+                },
+                "Work package container for " + safeString(artifactData.name) + "."
+            );
             var artifactConcept = ensureConcept(
                 "representation",
                 artifactData.name,
@@ -1306,21 +1422,38 @@ function createView() {
                 },
                 artifactData.description
             );
+            ensureRelationship(
+                "aggregation-relationship",
+                workPackageConcept,
+                artifactConcept,
+                "work-package-representation:" + stepData.id + ":output:" + artifactData.id,
+                {
+                    ProcessViewRelationRole: "WorkPackageToRepresentation",
+                    SourceDocument: CONST.SourceMarkdownPath
+                }
+            );
+            stats.relationships++;
             var artifactVisual = addStyledVisual(
                 mainVisual,
-                artifactConcept,
+                workPackageConcept,
                 getStepOutputsX(),
                 currentStepY + (artifactIndex * (CONST.Layout.StepArtifactMinHeight + CONST.Layout.StepArtifactGap)),
                 CONST.Layout.StepArtifactWidth,
-                estimateTextHeight(
-                    artifactData.name,
-                    CONST.Layout.StepArtifactWidth,
-                    CONST.Layout.StepArtifactMinHeight
-                ),
+                estimateStepArtifactContainerHeight(artifactData),
+                CONST.Style.ArtifactWorkPackageFill
+            );
+            tryApplyLabelExpression(artifactVisual, "");
+            var representationVisual = addStyledVisual(
+                artifactVisual,
+                artifactConcept,
+                CONST.Layout.StepArtifactInnerX,
+                CONST.Layout.StepArtifactInnerY,
+                getStepArtifactRepresentationWidth(),
+                estimateStepArtifactRepresentationHeight(artifactData),
                 CONST.Style.ArtifactRepresentationFill
             );
-            tryApplyLabelExpression(artifactVisual, "${name}");
-            tryApplyTextPosition(artifactVisual, 1);
+            tryApplyLabelExpression(representationVisual, "${name}");
+            tryApplyTextPosition(representationVisual, 1);
             var accessRelationship = ensureRelationship(
                 "access-relationship",
                 stepConcept,
@@ -1333,12 +1466,13 @@ function createView() {
                 }
             );
 
-            addConnection(view, accessRelationship, stepVisual, artifactVisual);
+            addConnection(view, accessRelationship, stepVisual, representationVisual);
             stats.artifacts++;
             stats.relationships++;
             stepEntry.outputVisuals.push({
                 concept: artifactConcept,
                 visual: artifactVisual,
+                representationVisual: representationVisual,
                 data: artifactData
             });
         });
