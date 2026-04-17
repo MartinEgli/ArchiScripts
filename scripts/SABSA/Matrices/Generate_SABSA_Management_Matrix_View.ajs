@@ -66,8 +66,9 @@ var CONST = {
     Style: {
         ColumnFill: "#ff9a69",
         CellFill: "#ffff64",
+        ProcessFill: "#d4efc2",
         RepresentationFill: "#ffffcc",
-        ActivityFill: "#e8f7d3",
+        ActivityFill: "#eef8e3",
         NoteFill: "#fff7cc",
         RowFillById: {
             "contextual-overlay": "#ff9aff",
@@ -718,6 +719,10 @@ function getItemFill(rowData) {
     return safeString(rowData.id) === "management-architecture" ? CONST.Style.RepresentationFill : CONST.Style.ActivityFill;
 }
 
+function getCellFill(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? CONST.Style.CellFill : CONST.Style.ProcessFill;
+}
+
 function findItemConcept(rowData, cellData, itemData, index) {
     return getItemConceptType(rowData) === "representation"
         ? findRepresentationConcept(rowData, cellData, itemData, index)
@@ -885,7 +890,7 @@ function createMatrixView(matrixData) {
                 CONST.Layout.RowHeaderReserve + CONST.Layout.RowInsetY,
                 CONST.Layout.CellWidth,
                 rowCellHeight,
-                CONST.Style.CellFill
+                getCellFill(rowData)
             );
             tryApplyLabelExpression(cellVisual, "${name}");
             tryApplyTextPosition(cellVisual, 0);
