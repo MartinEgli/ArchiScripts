@@ -996,8 +996,6 @@ function getStepArtifactConceptId(artifactData) {
 
 function optimizeGeneratedLayout(layout) {
     var stepX = getStepXInMain();
-    var stepInputsX = getStepInputsX();
-    var stepOutputsX = getStepOutputsX();
     var subprocessWidth = getSubprocessWidth();
     var currentStepY = CONST.Layout.MainInnerY;
     var mainBounds = layout.mainVisual.bounds;
@@ -1031,115 +1029,21 @@ function optimizeGeneratedLayout(layout) {
             currentSubY = CONST.Layout.StepInnerY;
         }
 
-        var inputStackHeight = estimateArtifactStackHeight(
-            stepEntry.inputPackages.map(function (entry) {
-                return {
-                    name: safeString(entry.packageName),
-                    height: estimateStepArtifactContainerHeight(entry.packageName, entry.representations)
-                };
-            }),
-            CONST.Layout.StepArtifactWidth,
-            CONST.Layout.StepArtifactMinHeight,
-            CONST.Layout.StepArtifactGap
-        );
-        var outputStackHeight = estimateArtifactStackHeight(
-            stepEntry.outputPackages.map(function (entry) {
-                return {
-                    name: safeString(entry.packageName),
-                    height: estimateStepArtifactContainerHeight(entry.packageName, entry.representations)
-                };
-            }),
-            CONST.Layout.StepArtifactWidth,
-            CONST.Layout.StepArtifactMinHeight,
-            CONST.Layout.StepArtifactGap
-        );
         var stepHeight = Math.max(
             CONST.Layout.StepMinHeight,
             titleHeight + CONST.Layout.StepInnerY + CONST.Layout.StepInnerBottom,
             currentSubY + CONST.Layout.StepInnerBottom
         );
-        var rowHeight = Math.max(stepHeight, inputStackHeight, outputStackHeight);
-        var stepY = currentStepY + Math.max(0, Math.floor((rowHeight - stepHeight) / 2));
-        var inputY = currentStepY + Math.max(0, Math.floor((rowHeight - inputStackHeight) / 2));
-        var outputY = currentStepY + Math.max(0, Math.floor((rowHeight - outputStackHeight) / 2));
 
         setVisualBounds(
             stepEntry.visual,
             stepX,
-            stepY,
+            currentStepY,
             CONST.Layout.StepWidth,
             stepHeight
         );
 
-        stepEntry.inputPackages.forEach(function (inputPackage) {
-            var containerHeight = estimateStepArtifactContainerHeight(
-                inputPackage.packageName,
-                inputPackage.representations
-            );
-            var currentRepresentationY = estimateStepArtifactTitleHeight(inputPackage.packageName) +
-                CONST.Layout.StepArtifactTitleGap +
-                CONST.Layout.StepArtifactInnerY;
-
-            setVisualBounds(
-                inputPackage.visual,
-                stepInputsX,
-                inputY,
-                CONST.Layout.StepArtifactWidth,
-                containerHeight
-            );
-
-            inputPackage.representationVisuals.forEach(function (representationEntry) {
-                var representationHeight = estimateStepArtifactRepresentationHeight(representationEntry.data);
-
-                setVisualBounds(
-                    representationEntry.visual,
-                    CONST.Layout.StepArtifactInnerX,
-                    currentRepresentationY,
-                    getStepArtifactRepresentationWidth(),
-                    representationHeight
-                );
-
-                currentRepresentationY += representationHeight + CONST.Layout.StepArtifactGap;
-            });
-
-            inputY += containerHeight + CONST.Layout.StepArtifactGap;
-        });
-
-        stepEntry.outputPackages.forEach(function (outputPackage) {
-            var containerHeight = estimateStepArtifactContainerHeight(
-                outputPackage.packageName,
-                outputPackage.representations
-            );
-            var currentRepresentationY = estimateStepArtifactTitleHeight(outputPackage.packageName) +
-                CONST.Layout.StepArtifactTitleGap +
-                CONST.Layout.StepArtifactInnerY;
-
-            setVisualBounds(
-                outputPackage.visual,
-                stepOutputsX,
-                outputY,
-                CONST.Layout.StepArtifactWidth,
-                containerHeight
-            );
-
-            outputPackage.representationVisuals.forEach(function (representationEntry) {
-                var representationHeight = estimateStepArtifactRepresentationHeight(representationEntry.data);
-
-                setVisualBounds(
-                    representationEntry.visual,
-                    CONST.Layout.StepArtifactInnerX,
-                    currentRepresentationY,
-                    getStepArtifactRepresentationWidth(),
-                    representationHeight
-                );
-
-                currentRepresentationY += representationHeight + CONST.Layout.StepArtifactGap;
-            });
-
-            outputY += containerHeight + CONST.Layout.StepArtifactGap;
-        });
-
-        currentStepY += rowHeight + CONST.Layout.StepGap;
+        currentStepY += stepHeight + CONST.Layout.StepGap;
     });
 
     if (layout.stepVisuals.length > 0) {
@@ -1190,23 +1094,14 @@ function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
     }, 0);
-    var stepInputCount = DATA.steps.reduce(function (sum, step) {
-        return sum + (step.inputs ? step.inputs.length : 0);
-    }, 0);
-    var stepOutputCount = DATA.steps.reduce(function (sum, step) {
-        return sum + (step.outputs ? step.outputs.length : 0);
-    }, 0);
-
     return dialogs.confirmInfo(
         "This script will generate or update a focused process view for '" + DATA.process.name + "'." +
         "\n\nSource markdown: " + CONST.SourceMarkdownPath +
         "\nInputs: " + DATA.inputs.length +
         "\nOutputs: " + DATA.outputs.length +
-        "\nStep inputs: " + stepInputCount +
-        "\nStep outputs: " + stepOutputCount +
         "\nSteps: " + DATA.steps.length +
         "\nSub-processes: " + subprocessCount +
-        "\n\nThe script will create or reuse process, artefact, and relationship elements in the open Archi model." +
+        "\n\nThe script will create or reuse process, top-level artefact, and relationship elements in the open Archi model." +
         "\n\nDo you want to continue?",
         "Run SABSA Conceptual Process Generator"
     );
@@ -1364,212 +1259,10 @@ function createView() {
             concept: stepConcept,
             visual: stepVisual,
             data: stepData,
-            inputPackages: [],
-            outputPackages: [],
             subprocessVisuals: []
         };
 
         stepVisuals.push(stepEntry);
-
-        if (stepData.inputs && stepData.inputs.length) {
-            var inputPackageName = getStepDisplayTitle(stepData.name) + " Inputs";
-            var inputWorkPackageKey = [
-                "artifact-work-package",
-                stepData.id,
-                "inputs"
-            ].join(":");
-            var workPackageConcept = ensureConcept(
-                "work-package",
-                inputPackageName,
-                inputWorkPackageKey,
-                {
-                    id: "sabsa-process:artifact-work-package:" + stepData.id + ":inputs",
-                    ProcessViewRole: "ArtifactWorkPackage",
-                    StepId: stepData.id,
-                    ArtifactDirection: "InputGroup",
-                    SourceDocument: CONST.SourceMarkdownPath
-                },
-                "Work package container for input artefacts of " + getStepDisplayTitle(stepData.name) + "."
-            );
-            var artifactVisual = addStyledVisual(
-                view,
-                workPackageConcept,
-                getStepInputsX(),
-                CONST.Layout.MainY + currentStepY,
-                CONST.Layout.StepArtifactWidth,
-                estimateStepArtifactContainerHeight(inputPackageName, stepData.inputs),
-                CONST.Style.ArtifactWorkPackageFill
-            );
-            tryApplyLabelExpression(artifactVisual, "${name}");
-            tryApplyTextPosition(artifactVisual, 0);
-
-            var inputPackageEntry = {
-                concept: workPackageConcept,
-                visual: artifactVisual,
-                packageName: inputPackageName,
-                representations: stepData.inputs,
-                representationVisuals: []
-            };
-
-            stepData.inputs.forEach(function (artifactData) {
-                var artifactConceptId = getStepArtifactConceptId(artifactData);
-                var artifactConcept = ensureConcept(
-                    "representation",
-                    artifactData.name,
-                    "artifact:" + artifactData.id,
-                    {
-                        id: artifactConceptId,
-                        ProcessViewRole: "Artifact",
-                        SourceDocument: CONST.SourceMarkdownPath
-                    },
-                    artifactData.description
-                );
-                ensureRelationship(
-                    "aggregation-relationship",
-                    workPackageConcept,
-                    artifactConcept,
-                    "work-package-representation:" + stepData.id + ":input:" + artifactData.id,
-                    {
-                        ProcessViewRelationRole: "WorkPackageToRepresentation",
-                        SourceDocument: CONST.SourceMarkdownPath
-                    }
-                );
-                stats.relationships++;
-                var representationVisual = addStyledVisual(
-                    artifactVisual,
-                    artifactConcept,
-                    CONST.Layout.StepArtifactInnerX,
-                    CONST.Layout.StepArtifactInnerY,
-                    getStepArtifactRepresentationWidth(),
-                    estimateStepArtifactRepresentationHeight(artifactData),
-                    CONST.Style.ArtifactRepresentationFill
-                );
-                tryApplyLabelExpression(representationVisual, "${name}");
-                tryApplyTextPosition(representationVisual, 1);
-                var accessRelationship = ensureRelationship(
-                    "access-relationship",
-                    stepConcept,
-                    artifactConcept,
-                    "step-input-access:" + stepData.id + ":" + artifactData.id,
-                    {
-                        ProcessViewRelationRole: "InputAccess",
-                        AccessMode: "Read",
-                        SourceDocument: CONST.SourceMarkdownPath
-                    }
-                );
-
-                addConnection(view, accessRelationship, stepVisual, representationVisual);
-                stats.artifacts++;
-                stats.relationships++;
-                inputPackageEntry.representationVisuals.push({
-                    concept: artifactConcept,
-                    visual: representationVisual,
-                    data: artifactData
-                });
-            });
-
-            stepEntry.inputPackages.push(inputPackageEntry);
-        }
-
-        if (stepData.outputs && stepData.outputs.length) {
-            var outputPackageName = getStepDisplayTitle(stepData.name);
-            var outputWorkPackageKey = [
-                "artifact-work-package",
-                stepData.id,
-                "outputs"
-            ].join(":");
-            var outputWorkPackageConcept = ensureConcept(
-                "work-package",
-                outputPackageName,
-                outputWorkPackageKey,
-                {
-                    id: "sabsa-process:artifact-work-package:" + stepData.id + ":outputs",
-                    ProcessViewRole: "ArtifactWorkPackage",
-                    StepId: stepData.id,
-                    ArtifactDirection: "OutputGroup",
-                    SourceDocument: CONST.SourceMarkdownPath
-                },
-                "Work package container for output artefacts of " + getStepDisplayTitle(stepData.name) + "."
-            );
-            var outputArtifactVisual = addStyledVisual(
-                view,
-                outputWorkPackageConcept,
-                getStepOutputsX(),
-                CONST.Layout.MainY + currentStepY,
-                CONST.Layout.StepArtifactWidth,
-                estimateStepArtifactContainerHeight(outputPackageName, stepData.outputs),
-                CONST.Style.ArtifactWorkPackageFill
-            );
-            tryApplyLabelExpression(outputArtifactVisual, "${name}");
-            tryApplyTextPosition(outputArtifactVisual, 0);
-
-            var outputPackageEntry = {
-                concept: outputWorkPackageConcept,
-                visual: outputArtifactVisual,
-                packageName: outputPackageName,
-                representations: stepData.outputs,
-                representationVisuals: []
-            };
-
-            stepData.outputs.forEach(function (artifactData) {
-                var artifactConceptId = getStepArtifactConceptId(artifactData);
-            var artifactConcept = ensureConcept(
-                "representation",
-                artifactData.name,
-                "artifact:" + artifactData.id,
-                {
-                    id: artifactConceptId,
-                    ProcessViewRole: "Artifact",
-                    SourceDocument: CONST.SourceMarkdownPath
-                },
-                artifactData.description
-            );
-            ensureRelationship(
-                "aggregation-relationship",
-                outputWorkPackageConcept,
-                artifactConcept,
-                "work-package-representation:" + stepData.id + ":output:" + artifactData.id,
-                {
-                    ProcessViewRelationRole: "WorkPackageToRepresentation",
-                    SourceDocument: CONST.SourceMarkdownPath
-                }
-            );
-            stats.relationships++;
-            var representationVisual = addStyledVisual(
-                outputArtifactVisual,
-                artifactConcept,
-                CONST.Layout.StepArtifactInnerX,
-                CONST.Layout.StepArtifactInnerY,
-                getStepArtifactRepresentationWidth(),
-                estimateStepArtifactRepresentationHeight(artifactData),
-                CONST.Style.ArtifactRepresentationFill
-            );
-            tryApplyLabelExpression(representationVisual, "${name}");
-            tryApplyTextPosition(representationVisual, 1);
-            var accessRelationship = ensureRelationship(
-                "access-relationship",
-                stepConcept,
-                artifactConcept,
-                "step-output-access:" + stepData.id + ":" + artifactData.id,
-                {
-                    ProcessViewRelationRole: "OutputAccess",
-                    AccessMode: "Write",
-                    SourceDocument: CONST.SourceMarkdownPath
-                }
-            );
-
-            addConnection(view, accessRelationship, stepVisual, representationVisual);
-            stats.artifacts++;
-            stats.relationships++;
-            outputPackageEntry.representationVisuals.push({
-                concept: artifactConcept,
-                visual: representationVisual,
-                data: artifactData
-            });
-            });
-
-            stepEntry.outputPackages.push(outputPackageEntry);
-        }
 
         stepData.subprocesses.forEach(function (subprocessName, subprocessIndex) {
             var subprocessId = slugify(stepData.id + "-" + subprocessName);
