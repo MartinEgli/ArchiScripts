@@ -10,45 +10,28 @@
       "name": "SABSA Business Attributes Profile (BAP)",
       "description": "Prioritised profile of business attributes with metrics and measures from the contextual layer.",
       "origin": "Inherited from the preceding 'Develop Contextual Security Architecture' process, especially from the contextual WHAT view and the prioritised business attributes profile.",
-      "moscow": "Must",
-      "references": [
-        "SABSA Blue Book Ch. 4-5",
-        "SABSA Matrix R1/C1",
-        "SABSA SCF F1"
-      ]
+      "moscow": "Must"
     },
     {
       "id": "business-risk-context",
       "name": "Business Risk Context",
       "description": "Business-level threats, vulnerabilities, and impacts as the basis for the WHY dimension.",
       "origin": "Inherited from the contextual risk and threat baseline of the preceding process, consolidated from business impact, threat, and vulnerability analysis.",
-      "moscow": "Must",
-      "references": [
-        "ISO/IEC 27005:2022 Cl. 5-6",
-        "SABSA Blue Book Ch. 6"
-      ]
+      "moscow": "Must"
     },
     {
       "id": "business-drivers-and-constraints",
       "name": "Business Drivers & Constraints",
       "description": "Strategic drivers, organisational constraints, and business vision.",
       "origin": "Inherited from business vision, stakeholder goals, guiding constraints, and architecture principles from the strategic and contextual setup.",
-      "moscow": "Should",
-      "references": [
-        "TOGAF ADM Phase A",
-        "SABSA Blue Book Ch. 3"
-      ]
+      "moscow": "Should"
     },
     {
       "id": "compliance-and-regulatory-requirements",
       "name": "Compliance & Regulatory Requirements",
       "description": "Relevant legal, regulatory, and contractual requirements.",
       "origin": "Inherited from the compliance baseline, regulatory obligations, contractual requirements, and external obligations in the enterprise context.",
-      "moscow": "Should",
-      "references": [
-        "ISO/IEC 27001:2022 Cl. 4.2",
-        "NIST CSF 2.0 GV.PO-01"
-      ]
+      "moscow": "Should"
     }
   ],
   "outputs": [
@@ -57,60 +40,42 @@
       "name": "WHAT: Business Attributes Taxonomy & Profile with integrated performance targets",
       "description": "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets.",
       "moscow": "Must",
-      "origin": "Consolidated output of Step 1 'Synthesize Business Value & Knowledge Strategy'.",
-      "references": [
-        "SABSA Matrix R2/C1"
-      ]
+      "origin": "Consolidated output of Step 1 'Synthesize Business Value & Knowledge Strategy'."
     },
     {
       "id": "conceptual-architecture-motivation-why",
       "name": "WHY: Enablement & Control Objectives; Policy Architecture; Risk Categories; Risk Management Strategies; Risk Modelling Framework; Assurance Framework",
       "description": "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance.",
       "moscow": "Must",
-      "origin": "Consolidated output of Step 2 'Develop Risk Management Strategy & Objectives'.",
-      "references": [
-        "SABSA Matrix R2/C2"
-      ]
+      "origin": "Consolidated output of Step 2 'Develop Risk Management Strategy & Objectives'."
     },
     {
       "id": "conceptual-architecture-process-how",
       "name": "HOW: Inventory of all Operational Processes; Process Mapping Framework; Architectural Strategies for IT used in Process Support",
       "description": "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability.",
       "moscow": "Must",
-      "origin": "Consolidated output of Step 3 'Define Strategies for Process Assurance'.",
-      "references": [
-        "SABSA Matrix R2/C3"
-      ]
+      "origin": "Consolidated output of Step 3 'Define Strategies for Process Assurance'."
     },
     {
       "id": "conceptual-architecture-location-where",
       "name": "WHERE: Security Domain Concepts & Framework",
       "description": "Conceptual layer WHERE artefact defining security domains and their interactions.",
       "moscow": "Must",
-      "origin": "Consolidated output of Step 4 'Synthesize Domain Framework'.",
-      "references": [
-        "SABSA Matrix R2/C5"
-      ]
+      "origin": "Consolidated output of Step 4 'Synthesize Domain Framework'."
     },
     {
       "id": "conceptual-architecture-people-who",
       "name": "WHO: Owners, Custodians & Users; Service Providers & Customers; Trust Modelling Framework",
       "description": "Conceptual layer WHO artefacts for entities, accountability, and trust.",
       "moscow": "Must",
-      "origin": "Consolidated output of Step 5 'Develop Security & Risk Governance; Trust Framework'.",
-      "references": [
-        "SABSA Matrix R2/C4"
-      ]
+      "origin": "Consolidated output of Step 5 'Develop Security & Risk Governance; Trust Framework'."
     },
     {
       "id": "conceptual-architecture-time-when",
       "name": "WHEN: Through-Life Risk Management Framework; Attribute Performance Targets",
       "description": "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability.",
       "moscow": "Should",
-      "origin": "Consolidated output of Step 6 'Define Time Management Framework'.",
-      "references": [
-        "SABSA Matrix R2/C6"
-      ]
+      "origin": "Consolidated output of Step 6 'Define Time Management Framework'."
     }
   ],
   "steps": [
@@ -124,33 +89,21 @@
           "name": "SABSA Business Attributes Profile (BAP)",
           "description": "Validated business attributes profile from the contextual layer.",
           "moscow": "Must",
-          "origin": "Inherited from Develop Contextual Security Architecture and its contextual WHAT view.",
-          "references": [
-            "SABSA Blue Book Ch. 4-5",
-            "SABSA Matrix R1/C1",
-            "SABSA SCF F1"
-          ]
+          "origin": "Inherited from Develop Contextual Security Architecture and its contextual WHAT view."
         },
         {
           "id": "stakeholder-expectations-and-business-strategy",
           "name": "Stakeholder Expectations & Business Strategy",
           "description": "Stakeholder goals, vision, and performance expectations relevant for the conceptual WHAT perspective.",
           "moscow": "Should",
-          "origin": "Inherited from stakeholder goals, business strategy, and performance expectations.",
-          "references": [
-            "TOGAF ADM Phase A",
-            "SABSA Blue Book Ch. 3"
-          ]
+          "origin": "Inherited from stakeholder goals, business strategy, and performance expectations."
         },
         {
           "id": "sabsa-generic-attributes-library",
           "name": "SABSA Generic Attributes Library",
           "description": "Reference taxonomy used to validate completeness and consistency of the business attributes profile.",
           "moscow": "Should",
-          "origin": "Taken from the SABSA Generic Attributes Library as reference taxonomy.",
-          "references": [
-            "sabsa.org - Generic Attributes Library"
-          ]
+          "origin": "Taken from the SABSA Generic Attributes Library as reference taxonomy."
         }
       ],
       "outputs": [
@@ -159,10 +112,7 @@
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets.",
           "moscow": "Must",
-          "origin": "Produced across Sub-processes 1.1 to 1.4 and finalised through stakeholder validation.",
-          "references": [
-            "SABSA Matrix R2/C1"
-          ]
+          "origin": "Produced across Sub-processes 1.1 to 1.4 and finalised through stakeholder validation."
         }
       ],
       "subprocesses": [
@@ -176,19 +126,13 @@
               "id": "draft-bap-contextual-layer",
               "name": "Draft BAP from Contextual Layer",
               "moscow": "Must",
-              "origin": "Inherited from the contextual predecessor process.",
-              "references": [
-                "SABSA Blue Book Ch. 4"
-              ]
+              "origin": "Inherited from the contextual predecessor process."
             },
             {
               "id": "sabsa-generic-attributes-library",
               "name": "SABSA Generic Attributes Library",
               "moscow": "Should",
-              "origin": "Reference taxonomy from SABSA.",
-              "references": [
-                "sabsa.org - Generic Attributes Library"
-              ]
+              "origin": "Reference taxonomy from SABSA."
             }
           ],
           "outputs": [
@@ -196,10 +140,7 @@
               "id": "validated-complete-attribute-list",
               "name": "Validated, complete attribute list",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 1.1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Produced by Sub-process 1.1."
             }
           ]
         },
@@ -213,19 +154,13 @@
               "id": "validated-complete-attribute-list",
               "name": "Validated attribute list (from 1.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 1.1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Output of Sub-process 1.1."
             },
             {
               "id": "stakeholder-performance-expectations",
               "name": "Stakeholder performance expectations",
               "moscow": "Should",
-              "origin": "Inherited from stakeholder and business strategy context.",
-              "references": [
-                "SABSA Blue Book Ch. 5"
-              ]
+              "origin": "Inherited from stakeholder and business strategy context."
             }
           ],
           "outputs": [
@@ -233,11 +168,7 @@
               "id": "attributes-with-quantified-performance-targets",
               "name": "Attributes with quantified performance targets",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 1.2.",
-              "references": [
-                "SABSA Matrix R2/C1",
-                "SABSA Blue Book Ch. 5"
-              ]
+              "origin": "Produced by Sub-process 1.2."
             }
           ]
         },
@@ -257,11 +188,7 @@
               "id": "business-information-architecture-context",
               "name": "Business Information Architecture Context",
               "moscow": "Should",
-              "origin": "Inherited from TOGAF business architecture context.",
-              "references": [
-                "TOGAF ADM Phase B",
-                "TOGAF Content Framework"
-              ]
+              "origin": "Inherited from TOGAF business architecture context."
             }
           ],
           "outputs": [
@@ -269,11 +196,7 @@
               "id": "information-protection-requirements-mapped-to-attributes",
               "name": "Information protection requirements (mapped to attributes)",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 1.3.",
-              "references": [
-                "TOGAF ADM Phase B",
-                "SABSA Blue Book Ch. 5"
-              ]
+              "origin": "Produced by Sub-process 1.3."
             }
           ]
         },
@@ -287,19 +210,13 @@
               "id": "draft-tailored-bap",
               "name": "Draft Tailored BAP (from 1.2 + 1.3)",
               "moscow": "Must",
-              "origin": "Combined outputs of Sub-processes 1.2 and 1.3.",
-              "references": [
-                "Outputs 1.2 + 1.3"
-              ]
+              "origin": "Combined outputs of Sub-processes 1.2 and 1.3."
             },
             {
               "id": "stakeholder-register",
               "name": "Stakeholder Register",
               "moscow": "Should",
-              "origin": "Inherited from TOGAF stakeholder management artefacts.",
-              "references": [
-                "TOGAF ADM Phase A: Stakeholder Map"
-              ]
+              "origin": "Inherited from TOGAF stakeholder management artefacts."
             }
           ],
           "outputs": [
@@ -307,10 +224,7 @@
               "id": "approved-tailored-bap",
               "name": "Approved Tailored BAP",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 1.4.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Produced by Sub-process 1.4."
             }
           ]
         }
@@ -327,43 +241,28 @@
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Output from Step 1 and the basis for deriving control objectives.",
           "moscow": "Must",
-          "origin": "Output of Step 1.",
-          "references": [
-            "SABSA Matrix R2/C1"
-          ]
+          "origin": "Output of Step 1."
         },
         {
           "id": "business-risk-context",
           "name": "Business Risk Context",
           "description": "Contextual threats, vulnerabilities, and impacts used for the conceptual WHY perspective.",
           "moscow": "Must",
-          "origin": "Inherited from contextual risk and threat analysis.",
-          "references": [
-            "ISO/IEC 27005:2022 Cl. 5-6",
-            "SABSA Blue Book Ch. 6"
-          ]
+          "origin": "Inherited from contextual risk and threat analysis."
         },
         {
           "id": "compliance-and-regulatory-requirements",
           "name": "Compliance & Regulatory Requirements",
           "description": "Relevant regulatory and contractual obligations shaping conceptual policy architecture.",
           "moscow": "Should",
-          "origin": "Inherited from compliance baseline and regulatory obligations.",
-          "references": [
-            "ISO/IEC 27001:2022 Cl. 4.2",
-            "NIST CSF 2.0 GV.PO-01"
-          ]
+          "origin": "Inherited from compliance baseline and regulatory obligations."
         },
         {
           "id": "threat-intelligence-conceptual",
           "name": "Threat Intelligence (conceptual)",
           "description": "High-level threat landscape used to support conceptual risk categorisation.",
           "moscow": "Could",
-          "origin": "Derived from conceptual threat intelligence and high-level threat landscape analysis.",
-          "references": [
-            "NIST SP 800-30 Rev.1",
-            "NIST CSF 2.0 ID.RA"
-          ]
+          "origin": "Derived from conceptual threat intelligence and high-level threat landscape analysis."
         }
       ],
       "outputs": [
@@ -372,65 +271,42 @@
           "name": "Enablement & Control Objectives",
           "description": "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective.",
           "moscow": "Must",
-          "origin": "Produced by Sub-process 2.1.",
-          "references": [
-            "SABSA Matrix R2/C2"
-          ]
+          "origin": "Produced by Sub-process 2.1."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy hierarchy linking control objectives, requirements, and governance intent.",
           "moscow": "Must",
-          "origin": "Produced by Sub-process 2.4.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "SABSA Blue Book Ch. 7"
-          ]
+          "origin": "Produced by Sub-process 2.4."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories",
           "name": "Risk Categories",
           "description": "Conceptual risk categories mapped to business attributes and control objectives.",
           "moscow": "Must",
-          "origin": "Produced by Sub-process 2.2.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27005:2022"
-          ]
+          "origin": "Produced by Sub-process 2.2."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
           "name": "Risk Management Strategies",
           "description": "Conceptual risk treatment strategies aligned to risk appetite and policy direction.",
           "moscow": "Must",
-          "origin": "Produced by Sub-process 2.3.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27005:2022 Cl. 9"
-          ]
+          "origin": "Produced by Sub-process 2.3."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
           "name": "Risk Modelling Framework",
           "description": "Shared conceptual evaluation framework for assessing and comparing risk across layers.",
           "moscow": "Should",
-          "origin": "Produced by Sub-process 2.5.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "SABSA Blue Book Ch. 6"
-          ]
+          "origin": "Produced by Sub-process 2.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
           "name": "Assurance Framework",
           "description": "Conceptual assurance framework mapping evidence and assurance activities to objectives.",
           "moscow": "Should",
-          "origin": "Produced by Sub-process 2.6.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27001:2022 Cl. 9.1"
-          ]
+          "origin": "Produced by Sub-process 2.6."
         }
       ],
       "subprocesses": [
@@ -444,10 +320,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile (from Step 1)",
               "moscow": "Must",
-              "origin": "Output of Step 1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Output of Step 1."
             }
           ],
           "outputs": [
@@ -455,10 +328,7 @@
               "id": "draft-enablement-and-control-objectives",
               "name": "Draft Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 2.1.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Produced by Sub-process 2.1."
             }
           ]
         },
@@ -472,20 +342,13 @@
               "id": "draft-enablement-and-control-objectives",
               "name": "Draft Control Objectives (from 2.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.1.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Sub-process 2.1."
             },
             {
               "id": "business-risk-context",
               "name": "Business Risk Context",
               "moscow": "Must",
-              "origin": "Inherited from contextual risk analysis.",
-              "references": [
-                "ISO/IEC 27005:2022 Cl. 5-6",
-                "SABSA Blue Book Ch. 6"
-              ]
+              "origin": "Inherited from contextual risk analysis."
             }
           ],
           "outputs": [
@@ -493,11 +356,7 @@
               "id": "risk-categories-taxonomy",
               "name": "Risk Categories Taxonomy",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 2.2.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022"
-              ]
+              "origin": "Produced by Sub-process 2.2."
             }
           ]
         },
@@ -511,21 +370,13 @@
               "id": "risk-categories-taxonomy",
               "name": "Risk Categories Taxonomy (from 2.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.2.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022"
-              ]
+              "origin": "Output of Sub-process 2.2."
             },
             {
               "id": "management-risk-appetite-directives",
               "name": "Management directives on risk appetite",
               "moscow": "Must",
-              "origin": "Provided by management and enterprise governance context.",
-              "references": [
-                "ISO/IEC 27005:2022 Cl. 7",
-                "NIST SP 800-39 Sec. 2"
-              ]
+              "origin": "Provided by management and enterprise governance context."
             }
           ],
           "outputs": [
@@ -533,20 +384,13 @@
               "id": "risk-appetite-statement",
               "name": "Risk Appetite Statement",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 2.3.",
-              "references": [
-                "ISO/IEC 27005:2022 Cl. 7"
-              ]
+              "origin": "Produced by Sub-process 2.3."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
               "name": "Risk Management Strategies",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 2.3.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022 Cl. 9"
-              ]
+              "origin": "Produced by Sub-process 2.3."
             }
           ]
         },
@@ -560,30 +404,19 @@
               "id": "draft-enablement-and-control-objectives",
               "name": "Draft Control Objectives (from 2.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.1.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Sub-process 2.1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
               "name": "Risk Management Strategies (from 2.3)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.3.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022 Cl. 9"
-              ]
+              "origin": "Output of Sub-process 2.3."
             },
             {
               "id": "compliance-and-regulatory-requirements",
               "name": "Compliance & Regulatory Requirements",
               "moscow": "Should",
-              "origin": "Inherited from the compliance baseline.",
-              "references": [
-                "ISO/IEC 27001:2022 Cl. 4.2",
-                "NIST CSF 2.0 GV.PO-01"
-              ]
+              "origin": "Inherited from the compliance baseline."
             }
           ],
           "outputs": [
@@ -591,11 +424,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
               "name": "Policy Architecture",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 2.4.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "SABSA Blue Book Ch. 7"
-              ]
+              "origin": "Produced by Sub-process 2.4."
             }
           ]
         },
@@ -609,21 +438,13 @@
               "id": "risk-categories-taxonomy",
               "name": "Risk Categories Taxonomy (from 2.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.2.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022"
-              ]
+              "origin": "Output of Sub-process 2.2."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
               "name": "Risk Management Strategies (from 2.3)",
               "moscow": "Should",
-              "origin": "Output of Sub-process 2.3.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022 Cl. 9"
-              ]
+              "origin": "Output of Sub-process 2.3."
             }
           ],
           "outputs": [
@@ -631,11 +452,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
               "name": "Risk Modelling Framework",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 2.5.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "SABSA Blue Book Ch. 6"
-              ]
+              "origin": "Produced by Sub-process 2.5."
             }
           ]
         },
@@ -649,30 +466,19 @@
               "id": "draft-enablement-and-control-objectives",
               "name": "Draft Control Objectives (from 2.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.1.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Sub-process 2.1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
               "name": "Policy Architecture (from 2.4)",
               "moscow": "Should",
-              "origin": "Output of Sub-process 2.4.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "SABSA Blue Book Ch. 7"
-              ]
+              "origin": "Output of Sub-process 2.4."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
               "name": "Risk Modelling Framework (from 2.5)",
               "moscow": "Should",
-              "origin": "Output of Sub-process 2.5.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "SABSA Blue Book Ch. 6"
-              ]
+              "origin": "Output of Sub-process 2.5."
             }
           ],
           "outputs": [
@@ -680,11 +486,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
               "name": "Assurance Framework",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 2.6.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27001:2022 Cl. 9.1"
-              ]
+              "origin": "Produced by Sub-process 2.6."
             }
           ]
         }
@@ -701,41 +503,28 @@
           "name": "Enablement & Control Objectives",
           "description": "Conceptual control objectives determining which operational processes matter most.",
           "moscow": "Must",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping.",
           "moscow": "Must",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "SABSA Blue Book Ch. 7"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "business-process-inventory-contextual-layer",
           "name": "Business Process Inventory (Contextual Layer)",
           "description": "Existing list of business processes used as the starting point for operational process analysis.",
           "moscow": "Must",
-          "origin": "Inherited from the contextual layer business process inventory.",
-          "references": [
-            "ITIL 4: Service Value Chain"
-          ]
+          "origin": "Inherited from the contextual layer business process inventory."
         },
         {
           "id": "technology-context",
           "name": "Technology Context",
           "description": "High-level technology architecture context supporting the derivation of process-support strategies.",
           "moscow": "Could",
-          "origin": "Inherited from TOGAF technology architecture context.",
-          "references": [
-            "TOGAF ADM Phase C"
-          ]
+          "origin": "Inherited from TOGAF technology architecture context."
         }
       ],
       "outputs": [
@@ -744,32 +533,21 @@
           "name": "Inventory of all Operational Processes (IT, industrial & manual)",
           "description": "Classified inventory of operational processes across IT, industrial, and manual contexts.",
           "moscow": "Must",
-          "origin": "Built in Sub-processes 3.1 and 3.2, then validated in Sub-process 3.5.",
-          "references": [
-            "SABSA Matrix R2/C3"
-          ]
+          "origin": "Built in Sub-processes 3.1 and 3.2, then validated in Sub-process 3.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
           "name": "Process Mapping Framework",
           "description": "Traceability framework linking processes to control objectives and business attributes.",
           "moscow": "Must",
-          "origin": "Produced in Sub-process 3.3 and confirmed in Sub-process 3.5.",
-          "references": [
-            "SABSA Matrix R2/C3",
-            "SABSA Blue Book Ch. 8"
-          ]
+          "origin": "Produced in Sub-process 3.3 and confirmed in Sub-process 3.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
           "name": "Architectural Strategies for IT used in Process Support",
           "description": "Conceptual IT architecture strategies used to support and secure operational processes.",
           "moscow": "Should",
-          "origin": "Produced by Sub-process 3.4.",
-          "references": [
-            "SABSA Matrix R2/C3",
-            "TOGAF ADM Phase C"
-          ]
+          "origin": "Produced by Sub-process 3.4."
         }
       ],
       "subprocesses": [
@@ -783,20 +561,13 @@
               "id": "business-process-inventory-contextual-layer",
               "name": "Business Process Inventory (Contextual Layer)",
               "moscow": "Must",
-              "origin": "Inherited from the contextual layer.",
-              "references": [
-                "ITIL 4: Service Value Chain"
-              ]
+              "origin": "Inherited from the contextual layer."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
               "name": "Assurance Framework (from 2.6)",
               "moscow": "Should",
-              "origin": "Output of Sub-process 2.6.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27001:2022 Cl. 9.1"
-              ]
+              "origin": "Output of Sub-process 2.6."
             }
           ],
           "outputs": [
@@ -804,11 +575,7 @@
               "id": "raw-inventory-of-all-operational-processes",
               "name": "Raw inventory of all operational processes",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 3.1.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "IEC 62443"
-              ]
+              "origin": "Produced by Sub-process 3.1."
             }
           ]
         },
@@ -822,29 +589,19 @@
               "id": "raw-inventory-of-all-operational-processes",
               "name": "Raw inventory of all operational processes (from 3.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 3.1.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "IEC 62443"
-              ]
+              "origin": "Output of Sub-process 3.1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile",
               "moscow": "Must",
-              "origin": "Output of Step 1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Output of Step 1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             }
           ],
           "outputs": [
@@ -852,11 +609,7 @@
               "id": "classified-process-list-with-criticality-assessment",
               "name": "Classified process list with criticality assessment",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 3.2.",
-              "references": [
-                "COBIT 2019 BAI",
-                "ISO/IEC 27002:2022 Cl. 5"
-              ]
+              "origin": "Produced by Sub-process 3.2."
             }
           ]
         },
@@ -870,21 +623,13 @@
               "id": "classified-process-list-with-criticality-assessment",
               "name": "Classified process list (from 3.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 3.2.",
-              "references": [
-                "COBIT 2019 BAI",
-                "ISO/IEC 27002:2022 Cl. 5"
-              ]
+              "origin": "Output of Sub-process 3.2."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
               "name": "Policy Architecture (from 2.4)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.4.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "SABSA Blue Book Ch. 7"
-              ]
+              "origin": "Output of Sub-process 2.4."
             }
           ],
           "outputs": [
@@ -892,11 +637,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
               "name": "Process Mapping Framework",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 3.3.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "SABSA Blue Book Ch. 8"
-              ]
+              "origin": "Produced by Sub-process 3.3."
             }
           ]
         },
@@ -910,29 +651,19 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
               "name": "Process Mapping Framework (from 3.3)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 3.3.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "SABSA Blue Book Ch. 8"
-              ]
+              "origin": "Output of Sub-process 3.3."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             },
             {
               "id": "technology-context",
               "name": "Technology Context (TOGAF)",
               "moscow": "Should",
-              "origin": "Inherited from TOGAF technology architecture context.",
-              "references": [
-                "TOGAF ADM Phase C"
-              ]
+              "origin": "Inherited from TOGAF technology architecture context."
             }
           ],
           "outputs": [
@@ -940,11 +671,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
               "name": "Architectural Strategies for IT used in Process Support",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 3.4.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "TOGAF ADM Phase C"
-              ]
+              "origin": "Produced by Sub-process 3.4."
             }
           ]
         },
@@ -958,19 +685,13 @@
               "id": "all-outputs-from-3-1-to-3-4",
               "name": "All outputs from 3.1 to 3.4",
               "moscow": "Must",
-              "origin": "Combined outputs of the preceding Sub-processes 3.1 to 3.4.",
-              "references": [
-                "Outputs 3.1-3.4"
-              ]
+              "origin": "Combined outputs of the preceding Sub-processes 3.1 to 3.4."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             }
           ],
           "outputs": [
@@ -978,19 +699,13 @@
               "id": "validated-inventory-of-all-operational-processes",
               "name": "Validated Inventory of all Operational Processes",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 3.5.",
-              "references": [
-                "SABSA Matrix R2/C3"
-              ]
+              "origin": "Produced by Sub-process 3.5."
             },
             {
               "id": "confirmed-process-mapping-framework",
               "name": "Confirmed Process Mapping Framework",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 3.5.",
-              "references": [
-                "SABSA Matrix R2/C3"
-              ]
+              "origin": "Produced by Sub-process 3.5."
             }
           ]
         }
@@ -1007,41 +722,28 @@
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Business attributes and performance targets defining domain protection needs.",
           "moscow": "Must",
-          "origin": "Output of Step 1.",
-          "references": [
-            "SABSA Matrix R2/C1"
-          ]
+          "origin": "Output of Step 1."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Conceptual objectives shaping the scope and intent of security domains.",
           "moscow": "Must",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy structure influencing domain boundaries and control expectations.",
           "moscow": "Should",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "SABSA Blue Book Ch. 7"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "organisation-structure-and-locations",
           "name": "Organisation Structure & Locations",
           "description": "Organisational and geographical structure used to identify conceptual security domains.",
           "moscow": "Should",
-          "origin": "Inherited from organisational structure and location context.",
-          "references": [
-            "TOGAF ADM Phase B"
-          ]
+          "origin": "Inherited from organisational structure and location context."
         }
       ],
       "outputs": [
@@ -1050,11 +752,7 @@
           "name": "Security Domain Concepts & Framework",
           "description": "Conceptual domain framework with domain boundaries, interactions, and attribute mappings.",
           "moscow": "Must",
-          "origin": "Produced across Sub-processes 4.1 to 4.4 and finalised in Sub-process 4.4.",
-          "references": [
-            "SABSA Matrix R2/C5",
-            "SABSA Blue Book Ch. 10"
-          ]
+          "origin": "Produced across Sub-processes 4.1 to 4.4 and finalised in Sub-process 4.4."
         }
       ],
       "subprocesses": [
@@ -1068,19 +766,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile",
               "moscow": "Must",
-              "origin": "Output of Step 1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Output of Step 1."
             },
             {
               "id": "organisation-structure-and-locations",
               "name": "Organisation Structure & Locations",
               "moscow": "Should",
-              "origin": "Inherited from organisational and location context.",
-              "references": [
-                "TOGAF ADM Phase B"
-              ]
+              "origin": "Inherited from organisational and location context."
             }
           ],
           "outputs": [
@@ -1088,10 +780,7 @@
               "id": "preliminary-domain-list",
               "name": "Preliminary domain list",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 4.1.",
-              "references": [
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Produced by Sub-process 4.1."
             }
           ]
         },
@@ -1105,19 +794,13 @@
               "id": "preliminary-domain-list",
               "name": "Preliminary domain list (from 4.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 4.1.",
-              "references": [
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Sub-process 4.1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Control Objectives (from Step 2)",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             }
           ],
           "outputs": [
@@ -1125,10 +808,7 @@
               "id": "domain-to-attribute-mapping",
               "name": "Domain-to-attribute mapping",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 4.2.",
-              "references": [
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Produced by Sub-process 4.2."
             }
           ]
         },
@@ -1142,29 +822,19 @@
               "id": "domain-to-attribute-mapping",
               "name": "Domain-to-attribute mapping (from 4.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 4.2.",
-              "references": [
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Sub-process 4.2."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
               "name": "Process Mapping Framework (from Step 3)",
               "moscow": "Should",
-              "origin": "Output of Step 3.",
-              "references": [
-                "SABSA Matrix R2/C3",
-                "SABSA Blue Book Ch. 8"
-              ]
+              "origin": "Output of Step 3."
             },
             {
               "id": "business-architecture-context",
               "name": "Business Architecture Context (TOGAF)",
               "moscow": "Could",
-              "origin": "Inherited from TOGAF business architecture context.",
-              "references": [
-                "TOGAF ADM Phase B"
-              ]
+              "origin": "Inherited from TOGAF business architecture context."
             }
           ],
           "outputs": [
@@ -1172,11 +842,7 @@
               "id": "defined-domain-boundaries-and-interaction-points",
               "name": "Defined domain boundaries and interaction points",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 4.3.",
-              "references": [
-                "SABSA Blue Book Ch. 10",
-                "NIST SP 800-207"
-              ]
+              "origin": "Produced by Sub-process 4.3."
             }
           ]
         },
@@ -1190,20 +856,13 @@
               "id": "defined-domain-boundaries-and-interaction-points",
               "name": "Domain boundaries (from 4.3)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 4.3.",
-              "references": [
-                "SABSA Blue Book Ch. 10",
-                "NIST SP 800-207"
-              ]
+              "origin": "Output of Sub-process 4.3."
             },
             {
               "id": "domain-to-attribute-mapping",
               "name": "Domain-to-attribute mapping (from 4.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 4.2.",
-              "references": [
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Sub-process 4.2."
             }
           ],
           "outputs": [
@@ -1211,11 +870,7 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework (finalised)",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 4.4.",
-              "references": [
-                "SABSA Matrix R2/C5",
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Produced by Sub-process 4.4."
             }
           ]
         }
@@ -1232,42 +887,28 @@
           "name": "Security Domain Concepts & Framework",
           "description": "Conceptual domain model providing the structure for governance and trust allocation.",
           "moscow": "Must",
-          "origin": "Output of Step 4.",
-          "references": [
-            "SABSA Matrix R2/C5",
-            "SABSA Blue Book Ch. 10"
-          ]
+          "origin": "Output of Step 4."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Objectives that need explicit governance ownership and accountability.",
           "moscow": "Must",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
           "name": "Assurance Framework",
           "description": "Assurance responsibilities used to support entity and governance assignments.",
           "moscow": "Should",
-          "origin": "Output of Sub-process 2.6.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27001:2022 Cl. 9.1"
-          ]
+          "origin": "Output of Sub-process 2.6."
         },
         {
           "id": "business-entity-structure",
           "name": "Business Entity Structure",
           "description": "Stakeholders, partners, customers, and organisational entities relevant for classification.",
           "moscow": "Should",
-          "origin": "Inherited from business entity and stakeholder context.",
-          "references": [
-            "TOGAF ADM Phase B"
-          ]
+          "origin": "Inherited from business entity and stakeholder context."
         }
       ],
       "outputs": [
@@ -1276,32 +917,21 @@
           "name": "Owners, Custodians & Users",
           "description": "Conceptual entity register with role classification and accountability.",
           "moscow": "Must",
-          "origin": "Built in Sub-process 5.1 and validated in Sub-process 5.5.",
-          "references": [
-            "SABSA Matrix R2/C4"
-          ]
+          "origin": "Built in Sub-process 5.1 and validated in Sub-process 5.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers",
           "name": "Service Providers & Customers",
           "description": "Conceptual provider and customer map including security responsibilities in the service chain.",
           "moscow": "Should",
-          "origin": "Built in Sub-process 5.2 and validated in Sub-process 5.5.",
-          "references": [
-            "SABSA Matrix R2/C4",
-            "ITIL 4"
-          ]
+          "origin": "Built in Sub-process 5.2 and validated in Sub-process 5.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework",
           "name": "Trust Modelling Framework",
           "description": "Conceptual trust model defining trust relationships, levels, and boundaries.",
           "moscow": "Must",
-          "origin": "Built in Sub-process 5.4 and finalised in Sub-process 5.5.",
-          "references": [
-            "SABSA Matrix R2/C4",
-            "SABSA Blue Book Ch. 9"
-          ]
+          "origin": "Built in Sub-process 5.4 and finalised in Sub-process 5.5."
         }
       ],
       "subprocesses": [
@@ -1315,20 +945,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
-              "origin": "Output of Step 4.",
-              "references": [
-                "SABSA Matrix R2/C5",
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Step 4."
             },
             {
               "id": "business-entity-structure",
               "name": "Business Entity Structure",
               "moscow": "Should",
-              "origin": "Inherited from stakeholder, partner, and customer context.",
-              "references": [
-                "TOGAF ADM Phase B"
-              ]
+              "origin": "Inherited from stakeholder, partner, and customer context."
             }
           ],
           "outputs": [
@@ -1336,10 +959,7 @@
               "id": "entity-register-draft",
               "name": "Entity Register (Owners, Custodians, Users - draft)",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 5.1.",
-              "references": [
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Produced by Sub-process 5.1."
             }
           ]
         },
@@ -1353,19 +973,13 @@
               "id": "entity-register-draft",
               "name": "Entity Register (from 5.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 5.1.",
-              "references": [
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Output of Sub-process 5.1."
             },
             {
               "id": "service-catalogue-context",
               "name": "Service Catalogue Context",
               "moscow": "Should",
-              "origin": "Inherited from ITIL service management context.",
-              "references": [
-                "ITIL 4: Supplier Management"
-              ]
+              "origin": "Inherited from ITIL service management context."
             }
           ],
           "outputs": [
@@ -1373,11 +987,7 @@
               "id": "service-provider-and-customer-map",
               "name": "Service-Provider-&-Customer-Map",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 5.2.",
-              "references": [
-                "SABSA Matrix R2/C4",
-                "ITIL 4"
-              ]
+              "origin": "Produced by Sub-process 5.2."
             }
           ]
         },
@@ -1391,29 +1001,19 @@
               "id": "entity-register-draft",
               "name": "Entity Register (from 5.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 5.1.",
-              "references": [
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Output of Sub-process 5.1."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
-              "origin": "Output of Step 4.",
-              "references": [
-                "SABSA Matrix R2/C5",
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Step 4."
             }
           ],
           "outputs": [
@@ -1421,11 +1021,7 @@
               "id": "governance-accountability-assignments",
               "name": "Governance accountability assignments (conceptual)",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 5.3.",
-              "references": [
-                "COBIT 2019 EDM",
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Produced by Sub-process 5.3."
             }
           ]
         },
@@ -1439,30 +1035,19 @@
               "id": "entity-register-draft",
               "name": "Entity Register (from 5.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 5.1.",
-              "references": [
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Output of Sub-process 5.1."
             },
             {
               "id": "service-provider-and-customer-map",
               "name": "Service-Provider-&-Customer-Map (from 5.2)",
               "moscow": "Should",
-              "origin": "Output of Sub-process 5.2.",
-              "references": [
-                "SABSA Matrix R2/C4",
-                "ITIL 4"
-              ]
+              "origin": "Output of Sub-process 5.2."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
-              "origin": "Output of Step 4.",
-              "references": [
-                "SABSA Matrix R2/C5",
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Step 4."
             }
           ],
           "outputs": [
@@ -1470,11 +1055,7 @@
               "id": "trust-modelling-framework-draft",
               "name": "Trust Modelling Framework (draft)",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 5.4.",
-              "references": [
-                "SABSA Matrix R2/C4",
-                "SABSA Blue Book Ch. 9"
-              ]
+              "origin": "Produced by Sub-process 5.4."
             }
           ]
         },
@@ -1488,19 +1069,13 @@
               "id": "all-outputs-from-5-1-to-5-4",
               "name": "All outputs from 5.1 to 5.4",
               "moscow": "Must",
-              "origin": "Combined outputs of the preceding Sub-processes 5.1 to 5.4.",
-              "references": [
-                "Outputs 5.1-5.4"
-              ]
+              "origin": "Combined outputs of the preceding Sub-processes 5.1 to 5.4."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2"
-              ]
+              "origin": "Output of Step 2."
             }
           ],
           "outputs": [
@@ -1508,28 +1083,19 @@
               "id": "validated-entity-register-owners-custodians-and-users",
               "name": "Validated Entity Register: Owners, Custodians & Users",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 5.5.",
-              "references": [
-                "SABSA Matrix R2/C4"
-              ]
+              "origin": "Produced by Sub-process 5.5."
             },
             {
               "id": "validated-service-providers-and-customers",
               "name": "Validated Service Providers & Customers",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 5.5.",
-              "references": [
-                "SABSA Matrix R2/C4"
-              ]
+              "origin": "Produced by Sub-process 5.5."
             },
             {
               "id": "finalised-trust-modelling-framework",
               "name": "Finalised Trust Modelling Framework",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 5.5.",
-              "references": [
-                "SABSA Matrix R2/C4"
-              ]
+              "origin": "Produced by Sub-process 5.5."
             }
           ]
         }
@@ -1546,42 +1112,28 @@
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Performance targets that need to be anchored across time and lifecycle perspectives.",
           "moscow": "Must",
-          "origin": "Output of Step 1.",
-          "references": [
-            "SABSA Matrix R2/C1"
-          ]
+          "origin": "Output of Step 1."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
           "name": "Risk Management Strategies",
           "description": "Conceptual risk strategies that need to be sustained through lifecycle planning.",
           "moscow": "Must",
-          "origin": "Output of Step 2.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27005:2022 Cl. 9"
-          ]
+          "origin": "Output of Step 2."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
           "name": "Assurance Framework",
           "description": "Assurance activities that need a conceptual timing and review structure.",
           "moscow": "Should",
-          "origin": "Output of Sub-process 2.6.",
-          "references": [
-            "SABSA Matrix R2/C2",
-            "ISO/IEC 27001:2022 Cl. 9.1"
-          ]
+          "origin": "Output of Sub-process 2.6."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
           "name": "Inventory of all Operational Processes",
           "description": "Operational processes used to anchor lifecycle and timing concepts.",
           "moscow": "Should",
-          "origin": "Output of Step 3.",
-          "references": [
-            "SABSA Matrix R2/C3"
-          ]
+          "origin": "Output of Step 3."
         }
       ],
       "outputs": [
@@ -1590,21 +1142,14 @@
           "name": "Through-Life Risk Management Framework",
           "description": "Conceptual lifecycle framework for risk management including reviews and trigger events.",
           "moscow": "Must",
-          "origin": "Built in Sub-process 6.2 and validated in Sub-process 6.5.",
-          "references": [
-            "SABSA Matrix R2/C6",
-            "ISO/IEC 27005:2022 Cl. 10"
-          ]
+          "origin": "Built in Sub-process 6.2 and validated in Sub-process 6.5."
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets",
           "name": "Attribute Performance Targets",
           "description": "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring.",
           "moscow": "Should",
-          "origin": "Built in Sub-process 6.3 and finalised in Sub-process 6.5.",
-          "references": [
-            "SABSA Matrix R2/C6"
-          ]
+          "origin": "Built in Sub-process 6.3 and finalised in Sub-process 6.5."
         }
       ],
       "subprocesses": [
@@ -1618,20 +1163,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
               "name": "Inventory of all Operational Processes",
               "moscow": "Should",
-              "origin": "Output of Step 3.",
-              "references": [
-                "SABSA Matrix R2/C3"
-              ]
+              "origin": "Output of Step 3."
             },
             {
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Should",
-              "origin": "Output of Step 4.",
-              "references": [
-                "SABSA Matrix R2/C5",
-                "SABSA Blue Book Ch. 10"
-              ]
+              "origin": "Output of Step 4."
             }
           ],
           "outputs": [
@@ -1639,10 +1177,7 @@
               "id": "through-life-security-lifecycle-model-draft",
               "name": "Through-Life Security Lifecycle Model (draft)",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 6.1.",
-              "references": [
-                "SABSA Blue Book Ch. 11"
-              ]
+              "origin": "Produced by Sub-process 6.1."
             }
           ]
         },
@@ -1656,20 +1191,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
               "name": "Risk Management Strategies (from Step 2)",
               "moscow": "Must",
-              "origin": "Output of Step 2.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27005:2022 Cl. 9"
-              ]
+              "origin": "Output of Step 2."
             },
             {
               "id": "through-life-security-lifecycle-model-draft",
               "name": "Through-Life Security Lifecycle Model (from 6.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 6.1.",
-              "references": [
-                "SABSA Blue Book Ch. 11"
-              ]
+              "origin": "Output of Sub-process 6.1."
             }
           ],
           "outputs": [
@@ -1691,19 +1219,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes with Performance Targets",
               "moscow": "Must",
-              "origin": "Output of Step 1.",
-              "references": [
-                "SABSA Matrix R2/C1"
-              ]
+              "origin": "Output of Step 1."
             },
             {
               "id": "through-life-security-lifecycle-model-draft",
               "name": "Through-Life Security Lifecycle Model (from 6.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 6.1.",
-              "references": [
-                "SABSA Blue Book Ch. 11"
-              ]
+              "origin": "Output of Sub-process 6.1."
             }
           ],
           "outputs": [
@@ -1711,10 +1233,7 @@
               "id": "time-anchored-attribute-performance-targets",
               "name": "Time-anchored Attribute Performance Targets",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 6.3.",
-              "references": [
-                "SABSA Matrix R2/C6"
-              ]
+              "origin": "Produced by Sub-process 6.3."
             }
           ]
         },
@@ -1728,20 +1247,13 @@
               "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
               "name": "Assurance Framework (from 2.6)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 2.6.",
-              "references": [
-                "SABSA Matrix R2/C2",
-                "ISO/IEC 27001:2022 Cl. 9.1"
-              ]
+              "origin": "Output of Sub-process 2.6."
             },
             {
               "id": "through-life-security-lifecycle-model-draft",
               "name": "Through-Life Security Lifecycle Model (from 6.1)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 6.1.",
-              "references": [
-                "SABSA Blue Book Ch. 11"
-              ]
+              "origin": "Output of Sub-process 6.1."
             }
           ],
           "outputs": [
@@ -1749,11 +1261,7 @@
               "id": "assurance-timing-model",
               "name": "Assurance Timing Model",
               "moscow": "Could",
-              "origin": "Produced by Sub-process 6.4.",
-              "references": [
-                "ISO/IEC 27001:2022 Cl. 9",
-                "NIST SP 800-137"
-              ]
+              "origin": "Produced by Sub-process 6.4."
             }
           ]
         },
@@ -1767,10 +1275,7 @@
               "id": "all-deliverables-from-steps-1-to-5",
               "name": "All Deliverables from Steps 1 to 5",
               "moscow": "Must",
-              "origin": "Combined outputs of Steps 1 through 5.",
-              "references": [
-                "Outputs Steps 1-5"
-              ]
+              "origin": "Combined outputs of Steps 1 through 5."
             },
             {
               "id": "through-life-risk-management-framework-draft",
@@ -1784,19 +1289,13 @@
               "id": "validated-through-life-risk-management-framework",
               "name": "Validated Through-Life Risk Management Framework",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 6.5.",
-              "references": [
-                "SABSA Matrix R2/C6"
-              ]
+              "origin": "Produced by Sub-process 6.5."
             },
             {
               "id": "finalised-attribute-performance-targets",
               "name": "Finalised Attribute Performance Targets",
               "moscow": "Should",
-              "origin": "Produced by Sub-process 6.5.",
-              "references": [
-                "SABSA Matrix R2/C6"
-              ]
+              "origin": "Produced by Sub-process 6.5."
             }
           ]
         }
