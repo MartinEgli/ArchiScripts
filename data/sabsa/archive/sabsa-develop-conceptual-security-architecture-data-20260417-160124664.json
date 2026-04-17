@@ -162,13 +162,7 @@
           "origin": "Produced across Sub-processes 1.1 to 1.4 and finalised through stakeholder validation.",
           "references": [
             "SABSA Matrix R2/C1"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-assets-what",
-            "name": "Business Value & Knowledge Strategy",
-            "row_id": "conceptual-architecture",
-            "column_id": "assets-what"
-          }
+          ]
         }
       ],
       "subprocesses": [
@@ -381,13 +375,7 @@
           "origin": "Produced by Sub-process 2.1.",
           "references": [
             "SABSA Matrix R2/C2"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
@@ -398,13 +386,7 @@
           "references": [
             "SABSA Matrix R2/C2",
             "SABSA Blue Book Ch. 7"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories",
@@ -415,13 +397,7 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27005:2022"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
@@ -432,13 +408,7 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27005:2022 Cl. 9"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
@@ -449,13 +419,7 @@
           "references": [
             "SABSA Matrix R2/C2",
             "SABSA Blue Book Ch. 6"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
@@ -466,13 +430,7 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27001:2022 Cl. 9.1"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-motivation-why",
-            "name": "Risk Management Strategy & Objectives",
-            "row_id": "conceptual-architecture",
-            "column_id": "motivation-why"
-          }
+          ]
         }
       ],
       "subprocesses": [
@@ -588,13 +546,7 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022 Cl. 9"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-motivation-why",
-                "name": "Risk Management Strategy & Objectives",
-                "row_id": "conceptual-architecture",
-                "column_id": "motivation-why"
-              }
+              ]
             }
           ]
         },
@@ -643,13 +595,7 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "SABSA Blue Book Ch. 7"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-motivation-why",
-                "name": "Risk Management Strategy & Objectives",
-                "row_id": "conceptual-architecture",
-                "column_id": "motivation-why"
-              }
+              ]
             }
           ]
         },
@@ -689,13 +635,7 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "SABSA Blue Book Ch. 6"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-motivation-why",
-                "name": "Risk Management Strategy & Objectives",
-                "row_id": "conceptual-architecture",
-                "column_id": "motivation-why"
-              }
+              ]
             }
           ]
         },
@@ -744,13 +684,7 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27001:2022 Cl. 9.1"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-motivation-why",
-                "name": "Risk Management Strategy & Objectives",
-                "row_id": "conceptual-architecture",
-                "column_id": "motivation-why"
-              }
+              ]
             }
           ]
         }
@@ -813,13 +747,7 @@
           "origin": "Built in Sub-processes 3.1 and 3.2, then validated in Sub-process 3.5.",
           "references": [
             "SABSA Matrix R2/C3"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-process-how",
-            "name": "Strategies for Process Assurance",
-            "row_id": "conceptual-architecture",
-            "column_id": "process-how"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
@@ -830,13 +758,7 @@
           "references": [
             "SABSA Matrix R2/C3",
             "SABSA Blue Book Ch. 8"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-process-how",
-            "name": "Strategies for Process Assurance",
-            "row_id": "conceptual-architecture",
-            "column_id": "process-how"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
@@ -847,13 +769,7 @@
           "references": [
             "SABSA Matrix R2/C3",
             "TOGAF ADM Phase C"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-process-how",
-            "name": "Strategies for Process Assurance",
-            "row_id": "conceptual-architecture",
-            "column_id": "process-how"
-          }
+          ]
         }
       ],
       "subprocesses": [
@@ -980,13 +896,7 @@
               "references": [
                 "SABSA Matrix R2/C3",
                 "SABSA Blue Book Ch. 8"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-process-how",
-                "name": "Strategies for Process Assurance",
-                "row_id": "conceptual-architecture",
-                "column_id": "process-how"
-              }
+              ]
             }
           ]
         },
@@ -1034,13 +944,7 @@
               "references": [
                 "SABSA Matrix R2/C3",
                 "TOGAF ADM Phase C"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-process-how",
-                "name": "Strategies for Process Assurance",
-                "row_id": "conceptual-architecture",
-                "column_id": "process-how"
-              }
+              ]
             }
           ]
         },
@@ -1150,13 +1054,7 @@
           "references": [
             "SABSA Matrix R2/C5",
             "SABSA Blue Book Ch. 10"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-location-where",
-            "name": "Domain Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "location-where"
-          }
+          ]
         }
       ],
       "subprocesses": [
@@ -1317,13 +1215,7 @@
               "references": [
                 "SABSA Matrix R2/C5",
                 "SABSA Blue Book Ch. 10"
-              ],
-              "work_package": {
-                "id": "conceptual-architecture-location-where",
-                "name": "Domain Framework",
-                "row_id": "conceptual-architecture",
-                "column_id": "location-where"
-              }
+              ]
             }
           ]
         }
@@ -1387,13 +1279,7 @@
           "origin": "Built in Sub-process 5.1 and validated in Sub-process 5.5.",
           "references": [
             "SABSA Matrix R2/C4"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-people-who",
-            "name": "Security & Risk Governance; Trust Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "people-who"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers",
@@ -1404,13 +1290,7 @@
           "references": [
             "SABSA Matrix R2/C4",
             "ITIL 4"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-people-who",
-            "name": "Security & Risk Governance; Trust Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "people-who"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework",
@@ -1421,13 +1301,7 @@
           "references": [
             "SABSA Matrix R2/C4",
             "SABSA Blue Book Ch. 9"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-people-who",
-            "name": "Security & Risk Governance; Trust Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "people-who"
-          }
+          ]
         }
       ],
       "subprocesses": [
@@ -1720,13 +1594,7 @@
           "references": [
             "SABSA Matrix R2/C6",
             "ISO/IEC 27005:2022 Cl. 10"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-time-when",
-            "name": "Time Management Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "time-when"
-          }
+          ]
         },
         {
           "id": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets",
@@ -1736,13 +1604,7 @@
           "origin": "Built in Sub-process 6.3 and finalised in Sub-process 6.5.",
           "references": [
             "SABSA Matrix R2/C6"
-          ],
-          "work_package": {
-            "id": "conceptual-architecture-time-when",
-            "name": "Time Management Framework",
-            "row_id": "conceptual-architecture",
-            "column_id": "time-when"
-          }
+          ]
         }
       ],
       "subprocesses": [
