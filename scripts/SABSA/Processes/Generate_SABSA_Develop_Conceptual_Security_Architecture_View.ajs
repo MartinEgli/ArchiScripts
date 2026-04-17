@@ -589,6 +589,7 @@ function estimateMainProcessHeight() {
 function buildInputDocumentation(inputData) {
     return inputData.description +
         "\n\nOrigin: " + safeString(inputData.origin) +
+        "\nOrigin frameworks: " + safeString((inputData.origin_frameworks || []).join("; ")) +
         "\nMoSCoW: " + safeString(inputData.moscow);
 }
 
@@ -602,6 +603,10 @@ function buildArtifactDocumentation(artifactData) {
     if (safeString(artifactData && artifactData.origin)) {
         lines.push("");
         lines.push("Origin: " + safeString(artifactData.origin));
+    }
+
+    if (artifactData && artifactData.origin_frameworks && artifactData.origin_frameworks.length) {
+        lines.push("Origin frameworks: " + artifactData.origin_frameworks.join("; "));
     }
 
     if (safeString(artifactData && artifactData.moscow)) {
@@ -647,6 +652,7 @@ function ensureProcessArtifactConcept(artifactData) {
         ProcessViewRole: "Artifact",
         MoSCoW: safeString(artifactData && artifactData.moscow),
         ArtifactOrigin: safeString(artifactData && artifactData.origin),
+        OriginFrameworks: safeString(((artifactData && artifactData.origin_frameworks) || []).join("; ")),
         SourceDocument: CONST.SourceMarkdownPath
     };
 
@@ -1059,6 +1065,7 @@ function createView() {
                 id: "sabsa-process:input:" + inputData.id,
                 ProcessViewRole: "InputArtifact",
                 InputOrigin: inputData.origin,
+                OriginFrameworks: safeString((inputData.origin_frameworks || []).join("; ")),
                 MoSCoW: inputData.moscow,
                 SourceDocument: CONST.SourceMarkdownPath
             },
