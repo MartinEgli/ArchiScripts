@@ -55,6 +55,7 @@ var CONST = {
         ColumnFill: "#ff9a69",
         CellFill: "#ffff64",
         RepresentationFill: "#ffffcc",
+        ActivityFill: "#e8f7d3",
         NoteFill: "#fff7cc",
         RowFillById: {
             "contextual-overlay": "#ff9aff",
@@ -328,6 +329,35 @@ function findRepresentationConcept(rowData, cellData, itemData, index) {
     }).first();
 }
 
+function findActivityConcept(rowData, cellData, itemData, index) {
+    var itemOrder = String(index + 1);
+    var itemId = safeString(itemData && itemData.id);
+    var itemText = safeString(itemData && itemData.text);
+
+    if (itemId) {
+        return $("business-function").filter(function (concept) {
+            return safeString(concept.prop("ItemId")) === itemId;
+        }).first();
+    }
+
+    return $("business-function").filter(function (concept) {
+        var sameKeyData =
+            safeString(concept.prop("SabsaMatrixKind")) === "Activity" &&
+            safeString(concept.prop("RowId")) === safeString(rowData.id) &&
+            safeString(concept.prop("ColumnId")) === safeString(cellData.columnId) &&
+            safeString(concept.prop("CellTitle")) === safeString(cellData.title) &&
+            safeString(concept.prop("ItemOrder")) === itemOrder;
+
+        if (sameKeyData) {
+            return true;
+        }
+
+        return safeString(concept.name) === safeString(itemText) &&
+            safeString(concept.prop("RowId")) === safeString(rowData.id) &&
+            safeString(concept.prop("ColumnId")) === safeString(cellData.columnId);
+    }).first();
+}
+
 function ensureRelationship(preferredType, source, target, key, properties) {
     var relationship = $("relationship").filter(function (candidate) {
         return safeString(candidate.prop("SabsaMatrixKey")) === safeString(key);
@@ -530,21 +560,41 @@ function buildLegacyCellPropertyId(matrixData, rowId, columnId) {
     return [getLegacyRowNamespace(matrixData, rowId), "cell", safeString(rowId), safeString(columnId)].join(":");
 }
 
-function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
+function getItemConceptType(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? "representation" : "business-function";
+}
+
+function getItemKind(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? "Representation" : "Activity";
+}
+
+function getItemFill(rowData) {
+    return safeString(rowData.id) === "management-architecture" ? CONST.Style.RepresentationFill : CONST.Style.ActivityFill;
+}
+
+function findItemConcept(rowData, cellData, itemData, index) {
+    return getItemConceptType(rowData) === "representation"
+        ? findRepresentationConcept(rowData, cellData, itemData, index)
+        : findActivityConcept(rowData, cellData, itemData, index);
+}
+
+function createItemVisuals(cellVisual, rowData, cellData, startY) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var currentY = startY;
 
     cellData.items.forEach(function (itemData, index) {
         var itemText = itemData.text;
+        var itemConceptType = getItemConceptType(rowData);
+        var itemKind = getItemKind(rowData);
         var representationKey = safeString(itemData.id) || [
             "representation",
             rowData.id,
             cellData.columnId,
             index + 1
         ].join(":");
-        var representationConcept = ensureConcept("representation", itemText, representationKey, {
+        var itemConcept = ensureConcept(itemConceptType, itemText, representationKey, {
             id: safeString(itemData.id) || representationKey,
-            SabsaMatrixKind: "Representation",
+            SabsaMatrixKind: itemKind,
             ItemId: safeString(itemData.id) || representationKey,
             RowId: rowData.id,
             RowTitle: rowData.title,
@@ -553,42 +603,43 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
             CellTitle: cellData.title,
             ItemOrder: String(index + 1)
         }, itemText, function () {
-            return findRepresentationConcept(rowData, cellData, itemData, index);
+            return findItemConcept(rowData, cellData, itemData, index);
         });
         var representationHeight = estimateRepresentationHeight(itemText, availableWidth);
 
-        ensureRelationship("aggregation-relationship", cellData.concept, representationConcept, [
+        ensureRelationship("aggregation-relationship", cellData.concept, itemConcept, [
             "aggregation",
             cellData.key,
             representationKey
         ].join(":"), {
-            SabsaMatrixKind: "CellToRepresentation"
+            SabsaMatrixKind: itemKind === "Representation" ? "CellToRepresentation" : "CellToActivity"
         });
 
-        var representationVisual = addStyledVisual(
+        var itemVisual = addStyledVisual(
             cellVisual,
-            representationConcept,
+            itemConcept,
             CONST.Layout.CellInnerX,
             currentY,
             availableWidth,
             representationHeight,
-            CONST.Style.RepresentationFill
+            getItemFill(rowData)
         );
-        tryApplyLabelExpression(representationVisual, "${name}");
-        tryApplyTextPosition(representationVisual, 1);
+        tryApplyLabelExpression(itemVisual, "${name}");
+        tryApplyTextPosition(itemVisual, 1);
 
-        representationConcept.documentation = itemText;
+        itemConcept.documentation = itemText;
         currentY += representationHeight + CONST.Layout.RepresentationGap;
         stats.representations++;
         stats.relationships++;
     });
 
-    logger.debug("Prepared cell representations.", {
+    logger.debug("Prepared cell items.", {
         row_id: rowData.id,
         column_id: cellData.columnId,
         cell_title: cellData.title,
-        representation_count: cellData.items.length
-    }, "sabsa.matrix.cell.representations");
+        item_count: cellData.items.length,
+        item_kind: getItemKind(rowData)
+    }, "sabsa.matrix.cell.items");
 }
 
 function createMatrixView(matrixData) {
@@ -599,7 +650,7 @@ function createMatrixView(matrixData) {
     var view = model.createArchimateView(viewName);
     var rowY = CONST.Layout.RowStartY;
 
-    view.documentation = "Generated from sabsa-management-matrix-data.json. English labels only. Cell groups contain representation elements for each bullet item.";
+    view.documentation = "Generated from sabsa-management-matrix-data.json. The first row reuses representation elements from Layer 6; the overlay rows below create business functions for each activity item.";
 
     matrixData.columns.forEach(function (column, index) {
         var columnKey = safeString(column.conceptKey) || ("column:" + column.id);
@@ -712,7 +763,7 @@ function createMatrixView(matrixData) {
                 stats.relationships++;
             }
 
-            createRepresentationVisuals(
+            createItemVisuals(
                 cellVisual,
                 rowData,
                 cellData,
@@ -803,7 +854,7 @@ function main() {
         rows_created_or_reused: stats.rows,
         columns_created_or_reused: stats.columns,
         cells_created_or_reused: stats.cells,
-        representations_created_or_reused: stats.representations,
+        items_created_or_reused: stats.representations,
         relationships_created_or_reused: stats.relationships,
         concepts_created: stats.conceptsCreated,
         concepts_reused: stats.conceptsReused,
@@ -816,7 +867,7 @@ function main() {
         "\nRows: " + stats.rows +
         "\nColumns: " + stats.columns +
         "\nCells: " + stats.cells +
-        "\nRepresentations: " + stats.representations,
+        "\nItems: " + stats.representations,
         "SABSA Management Matrix View"
     );
 }
