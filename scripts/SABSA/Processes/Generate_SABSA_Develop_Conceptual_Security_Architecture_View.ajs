@@ -18,7 +18,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 
 var CONST = {
     SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-develop-conceptual-security-architecture-data.json").getCanonicalPath(),
-    SourceMarkdownPath: new File(__DIR__ + "../../../../analyse/sabsa/SABSA_Develop_Conceptual_Security_Architecture.md").getCanonicalPath(),
+    SourceMarkdownPath: new File(__DIR__ + "../../../../analyse/sabsa/develop-conceptual-security-architecture/SABSA_Develop_Conceptual_Security_Architecture.md").getCanonicalPath(),
     ViewName: "SABSA - Develop Conceptual Security Architecture",
     Folder: {
         Root: "SABSA",
