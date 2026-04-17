@@ -297,10 +297,6 @@
               "origin": "Output of Sub-process 1.2.",
               "origin_frameworks": [
                 "SABSA"
-              ],
-              "references": [
-                "SABSA Matrix R2/C1",
-                "SABSA Blue Book Ch. 5"
               ]
             },
             {
@@ -2311,11 +2307,7 @@
               "id": "through-life-risk-management-framework-draft",
               "name": "Through-Life Risk Management Framework (draft)",
               "moscow": "Must",
-              "origin": "Produced by Sub-process 6.2.",
-              "references": [
-                "SABSA Matrix R2/C6",
-                "ISO/IEC 27005:2022 Cl. 10"
-              ]
+              "origin": "Produced by Sub-process 6.2."
             }
           ]
         },
@@ -2445,10 +2437,6 @@
               "origin": "Output of Sub-process 6.2.",
               "origin_frameworks": [
                 "SABSA"
-              ],
-              "references": [
-                "SABSA Matrix R2/C6",
-                "ISO/IEC 27005:2022 Cl. 10"
               ]
             }
           ],
