@@ -69,6 +69,7 @@ var CONST = {
         MainProcessFill: "#ffcc64",
         StepFill: "#ffff9a",
         SubprocessFill: "#fff6bf",
+        ArtifactRepresentationFill: "#ffffcc",
         InputFill: "#ccffff",
         OutputFill: "#ccff9a",
         NoteFill: "#f3f3f3",
@@ -277,7 +278,7 @@ var DATA = {
             outputs: [
                 {
                     id: "inventory-of-all-operational-processes",
-                    name: "Inventory of all Operational Processes",
+                    name: "Inventory of all Operational Processes (IT, industrial & manual)",
                     description: "Classified inventory of operational processes across IT, industrial, and manual contexts."
                 },
                 {
@@ -561,6 +562,10 @@ function resolveConceptPlacement(conceptType, properties) {
         return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Subprocesses]) };
     }
 
+    if (conceptType === "representation") {
+        return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
+    }
+
     if (conceptType === "business-object") {
         if (role === "Artifact") {
             return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Artifacts]) };
@@ -735,6 +740,28 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
     return connection;
 }
 
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.process.label_expression.skipped");
+    }
+}
+
+function tryApplyTextPosition(visual, position) {
+    try {
+        visual.textPosition = position;
+    } catch (error) {
+        logger.debug("Could not apply text position.", {
+            position: position,
+            error: String(error)
+        }, "sabsa.process.text_position.skipped");
+    }
+}
+
 function setVisualBounds(visual, x, y, width, height) {
     var bounds = visual.bounds;
 
@@ -842,6 +869,31 @@ function buildInputDocumentation(inputData) {
     return inputData.description +
         "\n\nOrigin: " + safeString(inputData.origin) +
         "\nMoSCoW: " + safeString(inputData.moscow);
+}
+
+var MATRIX_ARTIFACT_IDS = {
+    "business-attributes-taxonomy-and-profile-with-integrated-performance-targets": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+    "enablement-and-control-objectives": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+    "policy-architecture": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+    "risk-categories": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories",
+    "risk-management-strategies": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+    "risk-modelling-framework": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
+    "assurance-framework": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+    "inventory-of-all-operational-processes": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
+    "process-mapping-framework": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
+    "architectural-strategies-for-it-used-in-process-support": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
+    "owners-custodians-and-users": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:owners-custodians-and-users",
+    "service-providers-and-customers": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers",
+    "trust-modelling-framework": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework",
+    "security-domain-concepts-and-framework": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+    "through-life-risk-management-framework": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:through-life-risk-management-framework",
+    "attribute-performance-targets": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets"
+};
+
+function getStepArtifactConceptId(artifactData) {
+    var artifactId = safeString(artifactData && artifactData.id);
+
+    return MATRIX_ARTIFACT_IDS[artifactId] || ("sabsa-process:artifact:" + artifactId);
 }
 
 function optimizeGeneratedLayout(layout) {
@@ -1180,12 +1232,13 @@ function createView() {
         stepVisuals.push(stepEntry);
 
         (stepData.inputs || []).forEach(function (artifactData, artifactIndex) {
+            var artifactConceptId = getStepArtifactConceptId(artifactData);
             var artifactConcept = ensureConcept(
-                "business-object",
+                "representation",
                 artifactData.name,
                 "artifact:" + artifactData.id,
                 {
-                    id: "sabsa-process:artifact:" + artifactData.id,
+                    id: artifactConceptId,
                     ProcessViewRole: "Artifact",
                     SourceDocument: CONST.SourceMarkdownPath
                 },
@@ -1202,8 +1255,10 @@ function createView() {
                     CONST.Layout.StepArtifactWidth,
                     CONST.Layout.StepArtifactMinHeight
                 ),
-                CONST.Style.InputFill
+                CONST.Style.ArtifactRepresentationFill
             );
+            tryApplyLabelExpression(artifactVisual, "${name}");
+            tryApplyTextPosition(artifactVisual, 1);
             var accessRelationship = ensureRelationship(
                 "access-relationship",
                 stepConcept,
@@ -1227,12 +1282,13 @@ function createView() {
         });
 
         (stepData.outputs || []).forEach(function (artifactData, artifactIndex) {
+            var artifactConceptId = getStepArtifactConceptId(artifactData);
             var artifactConcept = ensureConcept(
-                "business-object",
+                "representation",
                 artifactData.name,
                 "artifact:" + artifactData.id,
                 {
-                    id: "sabsa-process:artifact:" + artifactData.id,
+                    id: artifactConceptId,
                     ProcessViewRole: "Artifact",
                     SourceDocument: CONST.SourceMarkdownPath
                 },
@@ -1249,8 +1305,10 @@ function createView() {
                     CONST.Layout.StepArtifactWidth,
                     CONST.Layout.StepArtifactMinHeight
                 ),
-                CONST.Style.OutputFill
+                CONST.Style.ArtifactRepresentationFill
             );
+            tryApplyLabelExpression(artifactVisual, "${name}");
+            tryApplyTextPosition(artifactVisual, 1);
             var accessRelationship = ensureRelationship(
                 "access-relationship",
                 stepConcept,
