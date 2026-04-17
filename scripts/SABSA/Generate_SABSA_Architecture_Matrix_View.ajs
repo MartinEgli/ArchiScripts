@@ -119,34 +119,56 @@ function readUtf8Text(absolutePath) {
 
 function parseMatrixFromJson(jsonText) {
     var data = JSON.parse(jsonText);
+    var generationNamespace = safeString(
+        (data.source && data.source.generation_namespace) ||
+        data.generation_namespace
+    );
     logger.info("Parsed SABSA matrix JSON source.", {
         columns: (data.columns || []).length,
-        rows: (data.rows || []).length
+        rows: (data.rows || []).length,
+        generation_namespace: generationNamespace
     }, "sabsa.matrix.source.parsed");
 
     return {
+        generationNamespace: generationNamespace,
         columns: (data.columns || []).map(function (column) {
             return {
                 id: safeString(column.id),
-                title: safeString(column.english_title || column.title)
+                title: safeString(column.english_title || column.title),
+                conceptKey: safeString(column.archimate_key || column.concept_key || ("column:" + safeString(column.id)))
             };
         }),
         rows: (data.rows || []).map(function (row) {
             return {
                 id: safeString(row.id || slugify(row.english_title || row.title)),
                 title: safeString(row.english_title || row.title),
+                conceptKey: safeString(row.archimate_key || row.concept_key || ("row:" + safeString(row.id || slugify(row.english_title || row.title)))),
                 cells: (row.cells || []).map(function (cell) {
                     return {
                         key: safeString(cell.key || slugify((row.english_title || row.title) + "-" + (cell.english_title || cell.title))),
                         columnId: safeString(cell.column_id || cell.columnId),
                         columnTitle: "",
                         title: safeString(cell.english_title || cell.title),
+                        conceptKey: safeString(
+                            cell.archimate_key ||
+                            cell.concept_key ||
+                            ("cell:" +
+                                safeString(row.id || slugify(row.english_title || row.title)) +
+                                ":" +
+                                safeString(cell.column_id || cell.columnId))
+                        ),
                         items: (cell.items || []).map(function (item) {
                             if (typeof item === "string") {
-                                return safeString(item);
+                                return {
+                                    id: "",
+                                    text: safeString(item)
+                                };
                             }
 
-                            return safeString(item.english_text || item.text || item.name);
+                            return {
+                                id: safeString(item.archimate_key || item.id || item.concept_key),
+                                text: safeString(item.english_text || item.text || item.name)
+                            };
                         })
                     };
                 })
@@ -213,8 +235,16 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     return concept;
 }
 
-function findRepresentationConcept(rowData, cellData, itemText, index) {
+function findRepresentationConcept(rowData, cellData, itemData, index) {
     var itemOrder = String(index + 1);
+    var itemId = safeString(itemData && itemData.id);
+    var itemText = safeString(itemData && itemData.text);
+
+    if (itemId) {
+        return $("representation").filter(function (concept) {
+            return safeString(concept.prop("ItemId")) === itemId;
+        }).first();
+    }
 
     return $("representation").filter(function (concept) {
         var sameKeyData =
@@ -395,8 +425,8 @@ function getCellHeight(cellData) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var contentHeight = getCellContentStartY(cellData) + CONST.Layout.CellInnerY;
 
-    cellData.items.forEach(function (itemText, index) {
-        contentHeight += estimateRepresentationHeight(itemText, availableWidth);
+    cellData.items.forEach(function (itemData, index) {
+        contentHeight += estimateRepresentationHeight(itemData.text, availableWidth);
 
         if (index < cellData.items.length - 1) {
             contentHeight += CONST.Layout.RepresentationGap;
@@ -412,8 +442,9 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var currentY = startY;
 
-    cellData.items.forEach(function (itemText, index) {
-        var representationKey = [
+    cellData.items.forEach(function (itemData, index) {
+        var itemText = itemData.text;
+        var representationKey = safeString(itemData.id) || [
             "representation",
             rowData.id,
             cellData.columnId,
@@ -421,6 +452,7 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
         ].join(":");
         var representationConcept = ensureConcept("representation", itemText, representationKey, {
             SabsaMatrixKind: "Representation",
+            ItemId: safeString(itemData.id) || representationKey,
             RowId: rowData.id,
             RowTitle: rowData.title,
             ColumnId: cellData.columnId,
@@ -428,7 +460,7 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
             CellTitle: cellData.title,
             ItemOrder: String(index + 1)
         }, itemText, function () {
-            return findRepresentationConcept(rowData, cellData, itemText, index);
+            return findRepresentationConcept(rowData, cellData, itemData, index);
         });
         var representationHeight = estimateRepresentationHeight(itemText, availableWidth);
 
@@ -477,9 +509,10 @@ function createMatrixView(matrixData) {
     view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell groups contain representation elements for each bullet item.";
 
     matrixData.columns.forEach(function (column, index) {
-        var columnKey = "column:" + column.id;
+        var columnKey = safeString(column.conceptKey) || ("column:" + column.id);
         var columnConcept = ensureConcept("grouping", column.title, columnKey, {
             SabsaMatrixKind: "Column",
+            ConceptId: columnKey,
             ColumnId: column.id,
             ColumnTitle: column.title
         }, column.title);
@@ -501,9 +534,10 @@ function createMatrixView(matrixData) {
     });
 
     matrixData.rows.forEach(function (rowData) {
-        var rowKey = "row:" + rowData.id;
+        var rowKey = safeString(rowData.conceptKey) || ("row:" + rowData.id);
         var rowConcept = ensureConcept("grouping", rowData.title, rowKey, {
             SabsaMatrixKind: "Row",
+            ConceptId: rowKey,
             RowId: rowData.id,
             RowTitle: rowData.title
         }, rowData.title);
@@ -533,11 +567,12 @@ function createMatrixView(matrixData) {
         }, "sabsa.matrix.row.render");
 
         rowData.cells.forEach(function (cellData, columnIndex) {
-            var cellKey = "cell:" + rowData.id + ":" + cellData.columnId;
-            var columnKey = "column:" + cellData.columnId;
+            var cellKey = safeString(cellData.conceptKey) || ("cell:" + rowData.id + ":" + cellData.columnId);
+            var columnKey = safeString(cellData.columnConceptKey) || ("column:" + cellData.columnId);
             var columnConcept = findConceptByTypeAndKey("grouping", columnKey);
             var cellConcept = ensureConcept("grouping", cellData.title, cellKey, {
                 SabsaMatrixKind: "Cell",
+                ConceptId: cellKey,
                 RowId: rowData.id,
                 RowTitle: rowData.title,
                 ColumnId: cellData.columnId,
@@ -623,6 +658,7 @@ function validateMatrixData(matrixData) {
             }
 
             cellData.columnTitle = matchingColumn.title;
+            cellData.columnConceptKey = matchingColumn.conceptKey;
         });
     });
 
