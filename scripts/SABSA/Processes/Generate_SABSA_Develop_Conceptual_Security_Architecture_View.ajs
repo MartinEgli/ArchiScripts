@@ -713,9 +713,23 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
     var relationshipCreated = false;
 
     if (!relationship) {
-        relationship = model.createRelationship(relationshipType, "", sourceConcept, targetConcept);
-        relationshipCreated = true;
-        stats.relationshipsCreated++;
+        try {
+            relationship = model.createRelationship(relationshipType, "", sourceConcept, targetConcept);
+            relationshipCreated = true;
+            stats.relationshipsCreated++;
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", "", sourceConcept, targetConcept);
+            relationshipCreated = true;
+            stats.relationshipsCreated++;
+            logger.debug("Preferred relationship type is not valid. Falling back.", {
+                preferred_type: relationshipType,
+                fallback_type: "association-relationship",
+                key: key,
+                source_name: safeString(sourceConcept && sourceConcept.name),
+                target_name: safeString(targetConcept && targetConcept.name),
+                error: String(error)
+            }, "sabsa.process.relationship.fallback");
+        }
     } else {
         stats.relationshipsReused++;
     }
