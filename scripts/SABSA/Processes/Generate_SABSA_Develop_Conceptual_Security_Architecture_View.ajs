@@ -84,6 +84,7 @@ var CONST = {
         StepInputFill: "#dff7ff",
         StepOutputWorkPackageFill: "#ffff64",
         StepOutputFill: "#fff0a6",
+        StepTransferredOutputFill: "#d8ffb5",
         NoteFill: "#f3f3f3",
         LineColor: "#111111",
         FontColor: "#111111"
@@ -690,6 +691,38 @@ function ensureProcessOutputWorkPackageConcept(workPackageData) {
     );
 }
 
+function buildStepCarryOverIndex(steps) {
+    var carryOverByStepId = {};
+
+    (steps || []).forEach(function (stepData, index) {
+        var previousStep;
+        var previousOutputIds;
+
+        carryOverByStepId[stepData.id] = {};
+
+        if (index === 0) {
+            return;
+        }
+
+        previousStep = steps[index - 1];
+        previousOutputIds = {};
+
+        (previousStep.outputs || []).forEach(function (outputData) {
+            previousOutputIds[safeString(outputData.id)] = true;
+        });
+
+        (stepData.inputs || []).forEach(function (inputData) {
+            var inputId = safeString(inputData.id);
+
+            if (previousOutputIds[inputId]) {
+                carryOverByStepId[stepData.id][inputId] = true;
+            }
+        });
+    });
+
+    return carryOverByStepId;
+}
+
 function findVisualForConcept(visualEntries, concept) {
     var conceptInternalId = safeString(concept && concept.id);
     var match = null;
@@ -990,9 +1023,11 @@ function buildResultMessage(view) {
 }
 
 function createView() {
+    var carryOverByStepId = buildStepCarryOverIndex(DATA.steps);
     var inputVisuals = [];
     var outputVisuals = [];
     var stepVisuals = [];
+    var stepEntriesById = {};
     var allSubprocessVisuals = [];
     var viewName = buildUniqueViewName(CONST.ViewName);
     var view = model.createArchimateView(viewName);
@@ -1133,14 +1168,45 @@ function createView() {
             visual: stepVisual,
             data: stepData,
             stepInputVisuals: [],
+            stepCarryOverInputVisuals: [],
             stepOutputVisuals: [],
             stepOutputLayoutEntries: [],
             subprocessVisuals: []
         };
 
         stepVisuals.push(stepEntry);
+        stepEntriesById[stepData.id] = stepEntry;
 
         (stepData.inputs || []).forEach(function (artifactData) {
+            var isCarryOver = !!(carryOverByStepId[stepData.id] && carryOverByStepId[stepData.id][safeString(artifactData.id)]);
+            var previousStepEntry = stepIndex > 0 ? stepEntriesById[DATA.steps[stepIndex - 1].id] : null;
+            var previousOutputEntry = previousStepEntry && previousStepEntry.stepOutputVisuals.filter(function (entry) {
+                return safeString(entry.data && entry.data.id) === safeString(artifactData.id);
+            })[0];
+
+            if (isCarryOver && previousOutputEntry) {
+                styleVisual(previousOutputEntry.visual, CONST.Style.StepTransferredOutputFill);
+                var handoverRelationship = ensureRelationship(
+                    "association-relationship",
+                    previousOutputEntry.concept,
+                    stepConcept,
+                    "step-handover:" + DATA.steps[stepIndex - 1].id + ":" + stepData.id + ":" + safeString(artifactData.id),
+                    {
+                        ProcessViewRelationRole: "InputAccess",
+                        SourceDocument: CONST.SourceMarkdownPath
+                    }
+                );
+
+                addConnection(view, handoverRelationship, previousOutputEntry.visual, stepVisual);
+                stepEntry.stepCarryOverInputVisuals.push({
+                    concept: previousOutputEntry.concept,
+                    visual: previousOutputEntry.visual,
+                    data: artifactData
+                });
+                stats.relationships++;
+                return;
+            }
+
             var artifactConcept = ensureProcessArtifactConcept(artifactData);
             var artifactVisual = addStyledVisual(
                 view,
@@ -1352,7 +1418,7 @@ function createView() {
                 subprocessConcept,
                 subVisual,
                 subprocessData,
-                stepEntry.stepInputVisuals.concat(inputVisuals),
+                stepEntry.stepInputVisuals.concat(stepEntry.stepCarryOverInputVisuals).concat(inputVisuals),
                 stepEntry.stepOutputVisuals.concat(outputVisuals)
             );
             allSubprocessVisuals.push({
