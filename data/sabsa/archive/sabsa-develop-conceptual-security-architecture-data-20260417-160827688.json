@@ -15,9 +15,6 @@
         "SABSA Blue Book Ch. 4-5",
         "SABSA Matrix R1/C1",
         "SABSA SCF F1"
-      ],
-      "origin_frameworks": [
-        "SABSA"
       ]
     },
     {
@@ -29,10 +26,6 @@
       "references": [
         "ISO/IEC 27005:2022 Cl. 5-6",
         "SABSA Blue Book Ch. 6"
-      ],
-      "origin_frameworks": [
-        "SABSA",
-        "ISO"
       ]
     },
     {
@@ -44,10 +37,6 @@
       "references": [
         "TOGAF ADM Phase A",
         "SABSA Blue Book Ch. 3"
-      ],
-      "origin_frameworks": [
-        "SABSA",
-        "TOGAF"
       ]
     },
     {
@@ -59,10 +48,6 @@
       "references": [
         "ISO/IEC 27001:2022 Cl. 4.2",
         "NIST CSF 2.0 GV.PO-01"
-      ],
-      "origin_frameworks": [
-        "NIST",
-        "ISO"
       ]
     }
   ],
@@ -144,9 +129,6 @@
             "SABSA Blue Book Ch. 4-5",
             "SABSA Matrix R1/C1",
             "SABSA SCF F1"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -158,10 +140,6 @@
           "references": [
             "TOGAF ADM Phase A",
             "SABSA Blue Book Ch. 3"
-          ],
-          "origin_frameworks": [
-            "SABSA",
-            "TOGAF"
           ]
         },
         {
@@ -172,9 +150,6 @@
           "origin": "Taken from the SABSA Generic Attributes Library as reference taxonomy.",
           "references": [
             "sabsa.org - Generic Attributes Library"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         }
       ],
@@ -210,9 +185,6 @@
               "origin": "Inherited from the contextual predecessor process.",
               "references": [
                 "SABSA Blue Book Ch. 4"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -222,9 +194,6 @@
               "origin": "Reference taxonomy from SABSA.",
               "references": [
                 "sabsa.org - Generic Attributes Library"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -253,9 +222,6 @@
               "origin": "Output of Sub-process 1.1.",
               "references": [
                 "SABSA Matrix R2/C1"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -265,9 +231,6 @@
               "origin": "Inherited from stakeholder and business strategy context.",
               "references": [
                 "SABSA Blue Book Ch. 5"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -294,10 +257,7 @@
               "id": "attributes-with-performance-targets",
               "name": "Attributes with Performance Targets (from 1.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 1.2.",
-              "origin_frameworks": [
-                "SABSA"
-              ]
+              "origin": "Output of Sub-process 1.2."
             },
             {
               "id": "business-information-architecture-context",
@@ -307,9 +267,6 @@
               "references": [
                 "TOGAF ADM Phase B",
                 "TOGAF Content Framework"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -339,9 +296,6 @@
               "origin": "Combined outputs of Sub-processes 1.2 and 1.3.",
               "references": [
                 "Outputs 1.2 + 1.3"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -351,9 +305,6 @@
               "origin": "Inherited from TOGAF stakeholder management artefacts.",
               "references": [
                 "TOGAF ADM Phase A: Stakeholder Map"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -385,9 +336,6 @@
           "origin": "Output of Step 1.",
           "references": [
             "SABSA Matrix R2/C1"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -399,10 +347,6 @@
           "references": [
             "ISO/IEC 27005:2022 Cl. 5-6",
             "SABSA Blue Book Ch. 6"
-          ],
-          "origin_frameworks": [
-            "SABSA",
-            "ISO"
           ]
         },
         {
@@ -414,10 +358,6 @@
           "references": [
             "ISO/IEC 27001:2022 Cl. 4.2",
             "NIST CSF 2.0 GV.PO-01"
-          ],
-          "origin_frameworks": [
-            "NIST",
-            "ISO"
           ]
         },
         {
@@ -429,9 +369,6 @@
           "references": [
             "NIST SP 800-30 Rev.1",
             "NIST CSF 2.0 ID.RA"
-          ],
-          "origin_frameworks": [
-            "NIST"
           ]
         }
       ],
@@ -552,9 +489,6 @@
               "origin": "Output of Step 1.",
               "references": [
                 "SABSA Matrix R2/C1"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -583,9 +517,6 @@
               "origin": "Output of Sub-process 2.1.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -596,10 +527,6 @@
               "references": [
                 "ISO/IEC 27005:2022 Cl. 5-6",
                 "SABSA Blue Book Ch. 6"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             }
           ],
@@ -630,10 +557,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             },
             {
@@ -644,10 +567,6 @@
               "references": [
                 "ISO/IEC 27005:2022 Cl. 7",
                 "NIST SP 800-39 Sec. 2"
-              ],
-              "origin_frameworks": [
-                "NIST",
-                "ISO"
               ]
             }
           ],
@@ -692,9 +611,6 @@
               "origin": "Output of Sub-process 2.1.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -705,10 +621,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022 Cl. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             },
             {
@@ -719,10 +631,6 @@
               "references": [
                 "ISO/IEC 27001:2022 Cl. 4.2",
                 "NIST CSF 2.0 GV.PO-01"
-              ],
-              "origin_frameworks": [
-                "NIST",
-                "ISO"
               ]
             }
           ],
@@ -759,10 +667,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             },
             {
@@ -773,10 +677,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022 Cl. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             }
           ],
@@ -812,9 +712,6 @@
               "origin": "Output of Sub-process 2.1.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -825,9 +722,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "SABSA Blue Book Ch. 7"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -838,9 +732,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "SABSA Blue Book Ch. 6"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -879,9 +770,6 @@
           "origin": "Output of Step 2.",
           "references": [
             "SABSA Matrix R2/C2"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -893,9 +781,6 @@
           "references": [
             "SABSA Matrix R2/C2",
             "SABSA Blue Book Ch. 7"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -906,9 +791,6 @@
           "origin": "Inherited from the contextual layer business process inventory.",
           "references": [
             "ITIL 4: Service Value Chain"
-          ],
-          "origin_frameworks": [
-            "ITIL"
           ]
         },
         {
@@ -919,9 +801,6 @@
           "origin": "Inherited from TOGAF technology architecture context.",
           "references": [
             "TOGAF ADM Phase C"
-          ],
-          "origin_frameworks": [
-            "TOGAF"
           ]
         }
       ],
@@ -991,9 +870,6 @@
               "origin": "Inherited from the contextual layer.",
               "references": [
                 "ITIL 4: Service Value Chain"
-              ],
-              "origin_frameworks": [
-                "ITIL"
               ]
             },
             {
@@ -1004,10 +880,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27001:2022 Cl. 9.1"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             }
           ],
@@ -1038,9 +910,6 @@
               "references": [
                 "SABSA Matrix R2/C3",
                 "IEC 62443"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1050,9 +919,6 @@
               "origin": "Output of Step 1.",
               "references": [
                 "SABSA Matrix R2/C1"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1062,9 +928,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1095,10 +958,6 @@
               "references": [
                 "COBIT 2019 BAI",
                 "ISO/IEC 27002:2022 Cl. 5"
-              ],
-              "origin_frameworks": [
-                "ISO",
-                "COBIT"
               ]
             },
             {
@@ -1109,9 +968,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "SABSA Blue Book Ch. 7"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1148,9 +1004,6 @@
               "references": [
                 "SABSA Matrix R2/C3",
                 "SABSA Blue Book Ch. 8"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1160,9 +1013,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1172,9 +1022,6 @@
               "origin": "Inherited from TOGAF technology architecture context.",
               "references": [
                 "TOGAF ADM Phase C"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -1210,9 +1057,6 @@
               "origin": "Combined outputs of the preceding Sub-processes 3.1 to 3.4.",
               "references": [
                 "Outputs 3.1-3.4"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1222,9 +1066,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1265,9 +1106,6 @@
           "origin": "Output of Step 1.",
           "references": [
             "SABSA Matrix R2/C1"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1278,9 +1116,6 @@
           "origin": "Output of Step 2.",
           "references": [
             "SABSA Matrix R2/C2"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1292,9 +1127,6 @@
           "references": [
             "SABSA Matrix R2/C2",
             "SABSA Blue Book Ch. 7"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1305,9 +1137,6 @@
           "origin": "Inherited from organisational structure and location context.",
           "references": [
             "TOGAF ADM Phase B"
-          ],
-          "origin_frameworks": [
-            "TOGAF"
           ]
         }
       ],
@@ -1344,9 +1173,6 @@
               "origin": "Output of Step 1.",
               "references": [
                 "SABSA Matrix R2/C1"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1356,9 +1182,6 @@
               "origin": "Inherited from organisational and location context.",
               "references": [
                 "TOGAF ADM Phase B"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -1387,9 +1210,6 @@
               "origin": "Output of Sub-process 4.1.",
               "references": [
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1399,9 +1219,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1430,9 +1247,6 @@
               "origin": "Output of Sub-process 4.2.",
               "references": [
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1443,9 +1257,6 @@
               "references": [
                 "SABSA Matrix R2/C3",
                 "SABSA Blue Book Ch. 8"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1455,9 +1266,6 @@
               "origin": "Inherited from TOGAF business architecture context.",
               "references": [
                 "TOGAF ADM Phase B"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -1488,10 +1296,6 @@
               "references": [
                 "SABSA Blue Book Ch. 10",
                 "NIST SP 800-207"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "NIST"
               ]
             },
             {
@@ -1501,9 +1305,6 @@
               "origin": "Output of Sub-process 4.2.",
               "references": [
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1543,9 +1344,6 @@
           "references": [
             "SABSA Matrix R2/C5",
             "SABSA Blue Book Ch. 10"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1556,9 +1354,6 @@
           "origin": "Output of Step 2.",
           "references": [
             "SABSA Matrix R2/C2"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1570,10 +1365,6 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27001:2022 Cl. 9.1"
-          ],
-          "origin_frameworks": [
-            "SABSA",
-            "ISO"
           ]
         },
         {
@@ -1584,9 +1375,6 @@
           "origin": "Inherited from business entity and stakeholder context.",
           "references": [
             "TOGAF ADM Phase B"
-          ],
-          "origin_frameworks": [
-            "TOGAF"
           ]
         }
       ],
@@ -1657,9 +1445,6 @@
               "references": [
                 "SABSA Matrix R2/C5",
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1669,9 +1454,6 @@
               "origin": "Inherited from stakeholder, partner, and customer context.",
               "references": [
                 "TOGAF ADM Phase B"
-              ],
-              "origin_frameworks": [
-                "TOGAF"
               ]
             }
           ],
@@ -1700,9 +1482,6 @@
               "origin": "Output of Sub-process 5.1.",
               "references": [
                 "SABSA Blue Book Ch. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1712,9 +1491,6 @@
               "origin": "Inherited from ITIL service management context.",
               "references": [
                 "ITIL 4: Supplier Management"
-              ],
-              "origin_frameworks": [
-                "ITIL"
               ]
             }
           ],
@@ -1744,9 +1520,6 @@
               "origin": "Output of Sub-process 5.1.",
               "references": [
                 "SABSA Blue Book Ch. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1756,9 +1529,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1769,9 +1539,6 @@
               "references": [
                 "SABSA Matrix R2/C5",
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1801,9 +1568,6 @@
               "origin": "Output of Sub-process 5.1.",
               "references": [
                 "SABSA Blue Book Ch. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1814,10 +1578,6 @@
               "references": [
                 "SABSA Matrix R2/C4",
                 "ITIL 4"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ITIL"
               ]
             },
             {
@@ -1828,9 +1588,6 @@
               "references": [
                 "SABSA Matrix R2/C5",
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1860,9 +1617,6 @@
               "origin": "Combined outputs of the preceding Sub-processes 5.1 to 5.4.",
               "references": [
                 "Outputs 5.1-5.4"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -1872,9 +1626,6 @@
               "origin": "Output of Step 2.",
               "references": [
                 "SABSA Matrix R2/C2"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -1924,9 +1675,6 @@
           "origin": "Output of Step 1.",
           "references": [
             "SABSA Matrix R2/C1"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         },
         {
@@ -1938,10 +1686,6 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27005:2022 Cl. 9"
-          ],
-          "origin_frameworks": [
-            "SABSA",
-            "ISO"
           ]
         },
         {
@@ -1953,10 +1697,6 @@
           "references": [
             "SABSA Matrix R2/C2",
             "ISO/IEC 27001:2022 Cl. 9.1"
-          ],
-          "origin_frameworks": [
-            "SABSA",
-            "ISO"
           ]
         },
         {
@@ -1967,9 +1707,6 @@
           "origin": "Output of Step 3.",
           "references": [
             "SABSA Matrix R2/C3"
-          ],
-          "origin_frameworks": [
-            "SABSA"
           ]
         }
       ],
@@ -2022,9 +1759,6 @@
               "origin": "Output of Step 3.",
               "references": [
                 "SABSA Matrix R2/C3"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -2035,9 +1769,6 @@
               "references": [
                 "SABSA Matrix R2/C5",
                 "SABSA Blue Book Ch. 10"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -2067,10 +1798,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27005:2022 Cl. 9"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             },
             {
@@ -2080,9 +1807,6 @@
               "origin": "Output of Sub-process 6.1.",
               "references": [
                 "SABSA Blue Book Ch. 11"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -2108,9 +1832,6 @@
               "origin": "Output of Step 1.",
               "references": [
                 "SABSA Matrix R2/C1"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
@@ -2120,9 +1841,6 @@
               "origin": "Output of Sub-process 6.1.",
               "references": [
                 "SABSA Blue Book Ch. 11"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -2152,10 +1870,6 @@
               "references": [
                 "SABSA Matrix R2/C2",
                 "ISO/IEC 27001:2022 Cl. 9.1"
-              ],
-              "origin_frameworks": [
-                "SABSA",
-                "ISO"
               ]
             },
             {
@@ -2165,9 +1879,6 @@
               "origin": "Output of Sub-process 6.1.",
               "references": [
                 "SABSA Blue Book Ch. 11"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             }
           ],
@@ -2197,19 +1908,13 @@
               "origin": "Combined outputs of Steps 1 through 5.",
               "references": [
                 "Outputs Steps 1-5"
-              ],
-              "origin_frameworks": [
-                "SABSA"
               ]
             },
             {
               "id": "through-life-risk-management-framework-draft",
               "name": "Through-Life Risk Management Framework (from 6.2)",
               "moscow": "Must",
-              "origin": "Output of Sub-process 6.2.",
-              "origin_frameworks": [
-                "SABSA"
-              ]
+              "origin": "Output of Sub-process 6.2."
             }
           ],
           "outputs": [
