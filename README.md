@@ -34,7 +34,7 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
 - `data/nist/`
   aus dem NIST-PDF abgeleitete Datensaetze fuer die automatische Generierung detaillierter NIST-Control-Strukturen
 - `data/sabsa/`
-  gespiegelte JSON-Daten aus `../analyse/sabsa/architecture-matrix/` fuer die Weiterverarbeitung in Deliverables
+  gespiegelte JSON-Daten aus `../analyse/sabsa/` fuer die Weiterverarbeitung in Deliverables
 - `scripts/Diverses/`
   Kleine allgemeine Hilfs- und Beispielskripte
 - `scripts/Diverses/NIST/`
@@ -48,7 +48,7 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
 
 ## Datenabgleich
 
-Der vollstaendige Analyse-Ordner liegt bewusst im Superrepo unter `../analyse/`, aktuell mit SABSA-Daten unter `../analyse/sabsa/architecture-matrix/` und einer vorbereiteten Struktur unter `../analyse/sabsa/management-matrix/`.
+Der vollstaendige Analyse-Ordner liegt bewusst im Superrepo unter `../analyse/`, aktuell mit SABSA-Daten unter `../analyse/sabsa/`.
 
 Nur JSON-Dateien werden nach `data/sabsa/` gespiegelt. Fuer den Abgleich steht im Superrepo das Skript `../scripts/update-archiscripts-data.ps1` bereit. Wenn beim Kopieren bereits eine Zieldatei vorhanden ist, wird sie zuerst mit Zeitstempel nach `data/sabsa/archive/` verschoben.
 

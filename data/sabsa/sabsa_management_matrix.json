@@ -1,0 +1,624 @@
+{
+  "source": {
+    "markdown_path": "analyse/sabsa/management-matrix/SABSA_Management_Matrix_DE.md",
+    "generated_at": "2026-04-17T00:00:00Z",
+    "language": "bilingual",
+    "view_default_language": "english"
+  },
+  "columns": [
+    {
+      "id": "assets-what",
+      "english_title": "Assets (What)",
+      "german_title": "Werte (Was)"
+    },
+    {
+      "id": "motivation-why",
+      "english_title": "Motivation (Why)",
+      "german_title": "Motivation (Warum)"
+    },
+    {
+      "id": "process-how",
+      "english_title": "Process (How)",
+      "german_title": "Prozess (Wie)"
+    },
+    {
+      "id": "people-who",
+      "english_title": "People (Who)",
+      "german_title": "Personen (Wer)"
+    },
+    {
+      "id": "location-where",
+      "english_title": "Location (Where)",
+      "german_title": "Ort (Wo)"
+    },
+    {
+      "id": "time-when",
+      "english_title": "Time (When)",
+      "german_title": "Zeit (Wann)"
+    }
+  ],
+  "rows": [
+    {
+      "id": "management-architecture",
+      "english_title": "Management Architecture",
+      "german_title": "Management-Architektur",
+      "cells": [
+        {
+          "key": "management-architecture-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Delivery and Continuity Management",
+          "german_title": "Bereitstellungs- und Kontinuitätsmanagement",
+          "items": [
+            {
+              "english_text": "Assurance of Operational Excellence & Continuity",
+              "german_text": "Assurance operativer Exzellenz und Kontinuität"
+            }
+          ]
+        },
+        {
+          "key": "management-architecture-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Operational Risk Management",
+          "german_title": "Operatives Risikomanagement",
+          "items": [
+            {
+              "english_text": "Risk Assessment",
+              "german_text": "Risikobewertung"
+            },
+            {
+              "english_text": "Risk Monitoring & Reporting",
+              "german_text": "Risikoüberwachung und Berichterstattung"
+            },
+            {
+              "english_text": "Risk Treatment",
+              "german_text": "Risikobehandlung"
+            }
+          ]
+        },
+        {
+          "key": "management-architecture-process-how",
+          "column_id": "process-how",
+          "english_title": "Process Delivery Management",
+          "german_title": "Management der Prozessbereitstellung",
+          "items": [
+            {
+              "english_text": "Management & Support of Systems, Applications & Services",
+              "german_text": "Management und Unterstützung von Systemen, Anwendungen und Services"
+            }
+          ]
+        },
+        {
+          "key": "management-architecture-people-who",
+          "column_id": "people-who",
+          "english_title": "Governance, Relationship & Personnel Management",
+          "german_title": "Governance-, Beziehungs- und Personalmanagement",
+          "items": [
+            {
+              "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
+              "german_text": "Management und Unterstützung unternehmensweiter sowie erweiterter Unternehmensbeziehungen"
+            }
+          ]
+        },
+        {
+          "key": "management-architecture-location-where",
+          "column_id": "location-where",
+          "english_title": "Environment Management",
+          "german_title": "Umgebungsmanagement",
+          "items": [
+            {
+              "english_text": "Management of Buildings, Sites, Platforms & Networks",
+              "german_text": "Management von Gebäuden, Standorten, Plattformen und Netzwerken"
+            }
+          ]
+        },
+        {
+          "key": "management-architecture-time-when",
+          "column_id": "time-when",
+          "english_title": "Time & Performance Management",
+          "german_title": "Zeit- und Leistungsmanagement",
+          "items": [
+            {
+              "english_text": "Management of Calendar and Timetable",
+              "german_text": "Management von Kalender und Zeitplan"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contextual-overlay",
+      "english_title": "Contextual Architecture",
+      "german_title": "Kontextuelle Architektur",
+      "cells": [
+        {
+          "key": "contextual-overlay-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Business Driver Development",
+          "german_title": "Business-Driver-Entwicklung",
+          "items": [
+            {
+              "english_text": "Business Benchmarking & Identification of Business Drivers",
+              "german_text": "Business Benchmarking und Identifikation von Business Drivers"
+            }
+          ]
+        },
+        {
+          "key": "contextual-overlay-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Business Risk Assessment",
+          "german_title": "Business Risk Assessment",
+          "items": [
+            {
+              "english_text": "Analysis of Internal & External Risk Factors",
+              "german_text": "Analyse interner und externer Risikofaktoren"
+            }
+          ]
+        },
+        {
+          "key": "contextual-overlay-process-how",
+          "column_id": "process-how",
+          "english_title": "Capability Management",
+          "german_title": "Capability Management",
+          "items": [
+            {
+              "english_text": "Managing Processes and Capabilities for Providing Value to Stakeholders",
+              "german_text": "Management von Prozessen und Capabilities zur Werterbringung für Stakeholder"
+            }
+          ]
+        },
+        {
+          "key": "contextual-overlay-people-who",
+          "column_id": "people-who",
+          "english_title": "Relationship Management",
+          "german_title": "Relationship Management",
+          "items": [
+            {
+              "english_text": "Managing Suppliers, Service Providers, Customers; Business Partners & Employees",
+              "german_text": "Management von Lieferanten, Service Providern, Kunden; Business Partnern und Mitarbeitenden"
+            },
+            {
+              "english_text": "Contract Management",
+              "german_text": "Vertragsmanagement"
+            }
+          ]
+        },
+        {
+          "key": "contextual-overlay-location-where",
+          "column_id": "location-where",
+          "english_title": "Supply Chain Management",
+          "german_title": "Supply Chain Management",
+          "items": [
+            {
+              "english_text": "Demand & Supply Management (upstream and downstream)",
+              "german_text": "Nachfrage- und Versorgungsmanagement, vor- und nachgelagert"
+            },
+            {
+              "english_text": "Deployment & Consumption",
+              "german_text": "Deployment und Nutzung"
+            }
+          ]
+        },
+        {
+          "key": "contextual-overlay-time-when",
+          "column_id": "time-when",
+          "english_title": "Performance Management",
+          "german_title": "Performance Management",
+          "items": [
+            {
+              "english_text": "Defining Business-Driven Performance Targets",
+              "german_text": "Definition geschäftsgetriebener Performance-Ziele"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conceptual-overlay",
+      "english_title": "Conceptual Architecture",
+      "german_title": "Konzeptuelle Architektur",
+      "cells": [
+        {
+          "key": "conceptual-overlay-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Proxy Asset Development",
+          "german_title": "Proxy-Asset-Entwicklung",
+          "items": [
+            {
+              "english_text": "Defining Business Attributes Profile with Performance Criteria, KPIs & KRIs",
+              "german_text": "Definition des Business-Attributes-Profils mit Performance-Kriterien, KPIs und KRIs"
+            }
+          ]
+        },
+        {
+          "key": "conceptual-overlay-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Developing Risk Objectives",
+          "german_title": "Entwicklung von Risikozielen",
+          "items": [
+            {
+              "english_text": "Maintaining Risk Modelling Framework",
+              "german_text": "Pflege des Risiko-Modellierungs-Frameworks"
+            },
+            {
+              "english_text": "Risk Analysis on Business Attributes Profile",
+              "german_text": "Risikoanalyse auf dem Business-Attributes-Profil"
+            }
+          ]
+        },
+        {
+          "key": "conceptual-overlay-process-how",
+          "column_id": "process-how",
+          "english_title": "Delivery Planning",
+          "german_title": "Delivery Planning",
+          "items": [
+            {
+              "english_text": "SLA Planning",
+              "german_text": "SLA-Planung"
+            },
+            {
+              "english_text": "BCP",
+              "german_text": "Business Continuity Planning"
+            },
+            {
+              "english_text": "Financial Planning",
+              "german_text": "Finanzplanung"
+            },
+            {
+              "english_text": "Transition Planning",
+              "german_text": "Transition Planning"
+            },
+            {
+              "english_text": "Planning and Maintaining the Inventory of Processes and Services Catalogue",
+              "german_text": "Planung und Pflege des Inventars von Prozessen und Servicekatalog"
+            }
+          ]
+        },
+        {
+          "key": "conceptual-overlay-people-who",
+          "column_id": "people-who",
+          "english_title": "Role Management",
+          "german_title": "Role Management",
+          "items": [
+            {
+              "english_text": "Maintaining Trust Modelling Framework",
+              "german_text": "Pflege des Trust-Modelling-Frameworks"
+            },
+            {
+              "english_text": "Defining Roles, Responsibilities, Liabilities & Cultural Values",
+              "german_text": "Definition von Rollen, Verantwortlichkeiten, Haftungen und Cultural Values"
+            }
+          ]
+        },
+        {
+          "key": "conceptual-overlay-location-where",
+          "column_id": "location-where",
+          "english_title": "Business Portfolio Management",
+          "german_title": "Business-Portfolio-Management",
+          "items": [
+            {
+              "english_text": "Planning & Maintaining the Business Footprint: Points of Supply and Access",
+              "german_text": "Planung und Pflege des Business Footprint: Versorgungs- und Zugangspunkte"
+            }
+          ]
+        },
+        {
+          "key": "conceptual-overlay-time-when",
+          "column_id": "time-when",
+          "english_title": "Service Level Definition",
+          "german_title": "Service-Level-Definition",
+          "items": [
+            {
+              "english_text": "Managing Performance Criteria and Targets",
+              "german_text": "Management von Performance-Kriterien und Zielen"
+            },
+            {
+              "english_text": "Abstracting Attribute Performance Targets",
+              "german_text": "Ableitung von Attribute-Performance-Targets"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "logical-overlay",
+      "english_title": "Logical Architecture",
+      "german_title": "Logische Architektur",
+      "cells": [
+        {
+          "key": "logical-overlay-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Logical Asset Management",
+          "german_title": "Logical Asset Management",
+          "items": [
+            {
+              "english_text": "Knowledge Management",
+              "german_text": "Knowledge Management"
+            },
+            {
+              "english_text": "Release & Deployment Management",
+              "german_text": "Release- und Deployment-Management"
+            }
+          ]
+        },
+        {
+          "key": "logical-overlay-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Policy Management",
+          "german_title": "Policy Management",
+          "items": [
+            {
+              "english_text": "Risk Modelling",
+              "german_text": "Risikomodellierung"
+            },
+            {
+              "english_text": "Management of Policy Development & Maintenance",
+              "german_text": "Management der Policy-Entwicklung und -Pflege"
+            },
+            {
+              "english_text": "Policy Publication & Compliance Management",
+              "german_text": "Policy-Veröffentlichung und Compliance-Management"
+            }
+          ]
+        },
+        {
+          "key": "logical-overlay-process-how",
+          "column_id": "process-how",
+          "english_title": "Delivery Management",
+          "german_title": "Delivery Management",
+          "items": [
+            {
+              "english_text": "SLA Management",
+              "german_text": "SLA Management"
+            },
+            {
+              "english_text": "Supply Chain Management",
+              "german_text": "Supply Chain Management"
+            },
+            {
+              "english_text": "BCM",
+              "german_text": "Business Continuity Management"
+            },
+            {
+              "english_text": "Financial Management",
+              "german_text": "Finanzmanagement"
+            },
+            {
+              "english_text": "Transition Management",
+              "german_text": "Transition Management"
+            }
+          ]
+        },
+        {
+          "key": "logical-overlay-people-who",
+          "column_id": "people-who",
+          "english_title": "Enterprise-wide User Management",
+          "german_title": "Unternehmensweites User Management",
+          "items": [
+            {
+              "english_text": "Trust Modelling",
+              "german_text": "Trust Modelling"
+            },
+            {
+              "english_text": "Identity & Access Management",
+              "german_text": "Identitäts- und Zugriffsmanagement"
+            },
+            {
+              "english_text": "Management of User Privileges, Account Administration & Provisioning",
+              "german_text": "Management von User Privileges, Kontoverwaltung und Provisioning"
+            }
+          ]
+        },
+        {
+          "key": "logical-overlay-location-where",
+          "column_id": "location-where",
+          "english_title": "Service Catalogue Management",
+          "german_title": "Service-Catalogue-Management",
+          "items": [
+            {
+              "english_text": "Configuration (CMDB) Management",
+              "german_text": "Konfigurations- und CMDB-Management"
+            },
+            {
+              "english_text": "Capacity Planning",
+              "german_text": "Capacity Planning"
+            },
+            {
+              "english_text": "Availability Management",
+              "german_text": "Availability Management"
+            }
+          ]
+        },
+        {
+          "key": "logical-overlay-time-when",
+          "column_id": "time-when",
+          "english_title": "Evaluation Management",
+          "german_title": "Evaluation Management",
+          "items": [
+            {
+              "english_text": "Monitoring & Reporting Performance against KPIs and KRIs",
+              "german_text": "Monitoring und Reporting der Performance gegen KPIs und KRIs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "physical-overlay",
+      "english_title": "Physical Architecture",
+      "german_title": "Physische Architektur",
+      "cells": [
+        {
+          "key": "physical-overlay-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Physical Asset Management",
+          "german_title": "Physical Asset Management",
+          "items": [
+            {
+              "english_text": "Change Management",
+              "german_text": "Change Management"
+            },
+            {
+              "english_text": "Platform & Data Storage Management",
+              "german_text": "Plattform- und Datenspeicher-Management"
+            }
+          ]
+        },
+        {
+          "key": "physical-overlay-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Risk Data Management",
+          "german_title": "Risikodaten-Management",
+          "items": [
+            {
+              "english_text": "Risk Procedure Management",
+              "german_text": "Risikoverfahrens-Management"
+            },
+            {
+              "english_text": "Risk Metadata Management",
+              "german_text": "Risiko-Metadaten-Management"
+            }
+          ]
+        },
+        {
+          "key": "physical-overlay-process-how",
+          "column_id": "process-how",
+          "english_title": "Operations Management",
+          "german_title": "Operations Management",
+          "items": [
+            {
+              "english_text": "Job, Incident, Event, and Disaster Recovery Management",
+              "german_text": "Job-, Incident-, Event- und Disaster-Recovery-Management"
+            }
+          ]
+        },
+        {
+          "key": "physical-overlay-people-who",
+          "column_id": "people-who",
+          "english_title": "User Support",
+          "german_title": "User Support",
+          "items": [
+            {
+              "english_text": "Service Desk, Problem, and Request Management",
+              "german_text": "Service-Desk-, Problem- und Request-Management"
+            }
+          ]
+        },
+        {
+          "key": "physical-overlay-location-where",
+          "column_id": "location-where",
+          "english_title": "Resources Management",
+          "german_title": "Ressourcenmanagement",
+          "items": [
+            {
+              "english_text": "Physical & Environmental Security Management",
+              "german_text": "Management physischer und umgebungsbezogener Sicherheit"
+            },
+            {
+              "english_text": "Real Estate and Facilities Management",
+              "german_text": "Immobilien- und Facilities-Management"
+            }
+          ]
+        },
+        {
+          "key": "physical-overlay-time-when",
+          "column_id": "time-when",
+          "english_title": "Performance Data Collection",
+          "german_title": "Performance-Datenerhebung",
+          "items": [
+            {
+              "english_text": "Business Systems Monitoring Procedure Management",
+              "german_text": "Management der Monitoring-Verfahren für Business Systems"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "component-overlay",
+      "english_title": "Component Architecture",
+      "german_title": "Komponentenarchitektur",
+      "cells": [
+        {
+          "key": "component-overlay-assets-what",
+          "column_id": "assets-what",
+          "english_title": "Component Management",
+          "german_title": "Component Management",
+          "items": [
+            {
+              "english_text": "Product & Component Standards Management",
+              "german_text": "Produkt- und Komponenten-Standards-Management"
+            }
+          ]
+        },
+        {
+          "key": "component-overlay-motivation-why",
+          "column_id": "motivation-why",
+          "english_title": "Risk Management Components",
+          "german_title": "Risikomanagement-Komponenten",
+          "items": [
+            {
+              "english_text": "Risk Analysis, Monitoring & Reporting Components, Systems and Standards Management",
+              "german_text": "Management von Risikoanalyse-, Monitoring- und Reporting-Komponenten, Systemen und Standards"
+            }
+          ]
+        },
+        {
+          "key": "component-overlay-process-how",
+          "column_id": "process-how",
+          "english_title": "Component Deployment",
+          "german_title": "Component Deployment",
+          "items": [
+            {
+              "english_text": "Product & Component Selection, Procurement",
+              "german_text": "Produkt- und Komponentenauswahl, Beschaffung"
+            },
+            {
+              "english_text": "Project and Standards Management",
+              "german_text": "Projekt- und Standards-Management"
+            }
+          ]
+        },
+        {
+          "key": "component-overlay-people-who",
+          "column_id": "people-who",
+          "english_title": "Personnel Component Management",
+          "german_title": "Personal-Komponenten-Management",
+          "items": [
+            {
+              "english_text": "Recruitment, Disciplinary, Training & Awareness Delivery",
+              "german_text": "Recruiting, Disziplinar-, Training- und Awareness-Massnahmen"
+            },
+            {
+              "english_text": "Component and Standards Management",
+              "german_text": "Komponenten- und Standards-Management"
+            }
+          ]
+        },
+        {
+          "key": "component-overlay-location-where",
+          "column_id": "location-where",
+          "english_title": "Component Environment Management",
+          "german_title": "Komponenten-Umgebungsmanagement",
+          "items": [
+            {
+              "english_text": "Physical and Environmental Security Component and Standards Management",
+              "german_text": "Management von physischen und umgebungsbezogenen Sicherheitskomponenten und Standards"
+            }
+          ]
+        },
+        {
+          "key": "component-overlay-time-when",
+          "column_id": "time-when",
+          "english_title": "Monitoring Components",
+          "german_title": "Monitoring-Komponenten",
+          "items": [
+            {
+              "english_text": "Analysis, Monitoring & Reporting Component and Standards Management",
+              "german_text": "Management von Analyse-, Monitoring- und Reporting-Komponenten und Standards"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
