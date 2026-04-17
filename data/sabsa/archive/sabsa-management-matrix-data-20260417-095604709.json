@@ -261,7 +261,7 @@
           "german_title": "Entwicklung von Proxy-Assets",
           "items": [
             {
-              "english_text": "Defining Business Attributes Profile with Performance Criteria, Key Performance Indicators (KPIs) & Key Risk Indicators (KRIs)",
+              "english_text": "Defining Business Attributes Profile with Performance Criteria, Key Performance Indicators & Key Risk Indicators",
               "german_text": "Definition des Business-Attribute-Profils mit Leistungskriterien, Leistungsindikatoren und Risikoindikatoren",
               "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:assets-what:defining-business-attributes-profile-with-performance-criteria-key-performance-indicators-and-key-risk-indicators"
             }
@@ -294,12 +294,12 @@
           "german_title": "Planung der Leistungserbringung",
           "items": [
             {
-              "english_text": "Service Level Agreement (SLA) Planning",
+              "english_text": "Service Level Agreement Planning",
               "german_text": "Planung von Service Level Agreements",
               "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:service-level-agreement-planning"
             },
             {
-              "english_text": "Business Continuity Planning (BCP)",
+              "english_text": "Business Continuity Planning",
               "german_text": "Notfallvorsorge- und Kontinuitätsplanung",
               "archimate_key": "sabsa-management-matrix:item:conceptual-overlay:process-how:business-continuity-planning"
             },
@@ -431,7 +431,7 @@
           "german_title": "Steuerung der Leistungserbringung",
           "items": [
             {
-              "english_text": "Service Level Agreement (SLA) Management",
+              "english_text": "Service Level Agreement Management",
               "german_text": "Steuerung von Service Level Agreements",
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:service-level-agreement-management"
             },
@@ -441,7 +441,7 @@
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:supply-chain-management"
             },
             {
-              "english_text": "Business Continuity Management (BCM)",
+              "english_text": "Business Continuity Management",
               "german_text": "Kontinuitätsmanagement",
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:process-how:business-continuity-management"
             },
@@ -470,7 +470,7 @@
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:people-who:trust-modelling"
             },
             {
-              "english_text": "Identity & Access Management (IAM)",
+              "english_text": "Identity & Access Management",
               "german_text": "Identitäts- und Zugriffsmanagement",
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:people-who:identity-and-access-management"
             },
@@ -513,7 +513,7 @@
           "german_title": "Leistungsbewertung und -überwachung",
           "items": [
             {
-              "english_text": "Monitoring & Reporting Performance against Key Performance Indicators (KPIs) and Key Risk Indicators (KRIs)",
+              "english_text": "Monitoring & Reporting Performance against Key Performance Indicators and Key Risk Indicators",
               "german_text": "Überwachung und Berichterstattung zur Leistung anhand von Leistungs- und Risikoindikatoren",
               "archimate_key": "sabsa-management-matrix:item:logical-overlay:time-when:monitoring-and-reporting-performance-against-key-performance-indicators-and-key-risk-indicators"
             }
