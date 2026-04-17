@@ -197,9 +197,27 @@ function findConceptByTypeAndKey(conceptType, key) {
     }).first();
 }
 
+function findConceptByTypeAndPropertyId(conceptType, propertyId) {
+    var normalizedId = safeString(propertyId);
+
+    if (!normalizedId) {
+        return null;
+    }
+
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("id")) === normalizedId;
+    }).first();
+}
+
 function ensureConcept(conceptType, name, key, properties, documentation, fallbackFinder) {
+    var conceptId = safeString((properties && properties.id) || key);
     var concept = findConceptByTypeAndKey(conceptType, key);
     var reuseReason = "key";
+
+    if (!concept && conceptId) {
+        concept = findConceptByTypeAndPropertyId(conceptType, conceptId);
+        reuseReason = concept ? "property-id" : reuseReason;
+    }
 
     if (!concept && typeof fallbackFinder === "function") {
         concept = fallbackFinder();
@@ -227,6 +245,9 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     concept.name = name;
     concept.documentation = documentation || "";
     concept.prop("SabsaMatrixKey", key);
+    if (conceptId) {
+        concept.prop("id", conceptId);
+    }
 
     Object.keys(properties || {}).forEach(function (propertyName) {
         concept.prop(propertyName, safeString(properties[propertyName]));
