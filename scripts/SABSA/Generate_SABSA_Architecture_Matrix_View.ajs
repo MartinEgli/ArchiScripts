@@ -135,27 +135,29 @@ function parseMatrixFromJson(jsonText) {
             return {
                 id: safeString(column.id),
                 title: safeString(column.english_title || column.title),
-                conceptKey: safeString(column.archimate_key || column.concept_key || ("column:" + safeString(column.id)))
+                conceptKey: safeString(column.concept_id || column.conceptKey || column.archimate_key || column.concept_key || ("column:" + safeString(column.id)))
             };
         }),
         rows: (data.rows || []).map(function (row) {
             return {
                 id: safeString(row.id || slugify(row.english_title || row.title)),
                 title: safeString(row.english_title || row.title),
-                conceptKey: safeString(row.archimate_key || row.concept_key || ("row:" + safeString(row.id || slugify(row.english_title || row.title)))),
+                conceptKey: safeString(row.concept_id || row.conceptKey || row.archimate_key || row.concept_key || ("row:" + safeString(row.id || slugify(row.english_title || row.title)))),
                 cells: (row.cells || []).map(function (cell) {
+                    var cellKey = safeString(cell.key || slugify((row.english_title || row.title) + "-" + (cell.english_title || cell.title)));
+                    var cellId = safeString(cell.id || cellKey);
                     return {
-                        key: safeString(cell.key || slugify((row.english_title || row.title) + "-" + (cell.english_title || cell.title))),
+                        key: cellKey,
+                        id: cellId,
                         columnId: safeString(cell.column_id || cell.columnId),
                         columnTitle: "",
                         title: safeString(cell.english_title || cell.title),
                         conceptKey: safeString(
+                            cell.concept_id ||
+                            cell.conceptKey ||
                             cell.archimate_key ||
                             cell.concept_key ||
-                            ("cell:" +
-                                safeString(row.id || slugify(row.english_title || row.title)) +
-                                ":" +
-                                safeString(cell.column_id || cell.columnId))
+                            ("cell:" + cellId)
                         ),
                         items: (cell.items || []).map(function (item) {
                             if (typeof item === "string") {
@@ -166,7 +168,7 @@ function parseMatrixFromJson(jsonText) {
                             }
 
                             return {
-                                id: safeString(item.archimate_key || item.id || item.concept_key),
+                                id: safeString(item.id || item.archimate_key || item.concept_key),
                                 text: safeString(item.english_text || item.text || item.name)
                             };
                         })
@@ -209,14 +211,49 @@ function findConceptByTypeAndPropertyId(conceptType, propertyId) {
     }).first();
 }
 
+function findConceptByTypeAndAnyPropertyId(conceptType, propertyIds) {
+    var ids = (propertyIds || []).map(function (propertyId) {
+        return safeString(propertyId);
+    }).filter(function (propertyId, index, allIds) {
+        return !!propertyId && allIds.indexOf(propertyId) === index;
+    });
+    var concept;
+
+    if (!ids.length) {
+        return null;
+    }
+
+    for (var index = 0; index < ids.length; index++) {
+        concept = findConceptByTypeAndPropertyId(conceptType, ids[index]);
+
+        if (concept) {
+            return concept;
+        }
+    }
+
+    return null;
+}
+
 function ensureConcept(conceptType, name, key, properties, documentation, fallbackFinder) {
-    var conceptId = safeString((properties && properties.id) || key);
+    var conceptId = safeString(properties && properties.id);
+    var legacyPropertyId = safeString(key);
+    var extraLegacyPropertyIds = properties && properties.__legacyPropertyIds;
     var concept = findConceptByTypeAndKey(conceptType, key);
     var reuseReason = "key";
 
     if (!concept && conceptId) {
         concept = findConceptByTypeAndPropertyId(conceptType, conceptId);
         reuseReason = concept ? "property-id" : reuseReason;
+    }
+
+    if (!concept && legacyPropertyId && legacyPropertyId !== conceptId) {
+        concept = findConceptByTypeAndPropertyId(conceptType, legacyPropertyId);
+        reuseReason = concept ? "legacy-property-id" : reuseReason;
+    }
+
+    if (!concept && extraLegacyPropertyIds && extraLegacyPropertyIds.length) {
+        concept = findConceptByTypeAndAnyPropertyId(conceptType, extraLegacyPropertyIds);
+        reuseReason = concept ? "legacy-property-id-list" : reuseReason;
     }
 
     if (!concept && typeof fallbackFinder === "function") {
@@ -245,11 +282,14 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     concept.name = name;
     concept.documentation = documentation || "";
     concept.prop("SabsaMatrixKey", key);
-    if (conceptId) {
-        concept.prop("id", conceptId);
+    if (conceptId || legacyPropertyId) {
+        concept.prop("id", conceptId || legacyPropertyId);
     }
 
     Object.keys(properties || {}).forEach(function (propertyName) {
+        if (propertyName === "__legacyPropertyIds") {
+            return;
+        }
         concept.prop(propertyName, safeString(properties[propertyName]));
     });
 
@@ -459,6 +499,27 @@ function getCellHeight(cellData) {
     return Math.max(CONST.Layout.CellMinHeight, contentHeight);
 }
 
+function getLegacyRowNamespace(matrixData, rowId) {
+    if (safeString(matrixData.generationNamespace) === "sabsa-management-matrix" &&
+        safeString(rowId) === "management-architecture") {
+        return "sabsa-architecture-matrix";
+    }
+
+    return safeString(matrixData.generationNamespace);
+}
+
+function buildLegacyColumnPropertyId(matrixData, columnId) {
+    return [safeString(matrixData.generationNamespace), "column", safeString(columnId)].join(":");
+}
+
+function buildLegacyRowPropertyId(matrixData, rowId) {
+    return [getLegacyRowNamespace(matrixData, rowId), "row", safeString(rowId)].join(":");
+}
+
+function buildLegacyCellPropertyId(matrixData, rowId, columnId) {
+    return [getLegacyRowNamespace(matrixData, rowId), "cell", safeString(rowId), safeString(columnId)].join(":");
+}
+
 function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var currentY = startY;
@@ -472,6 +533,7 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
             index + 1
         ].join(":");
         var representationConcept = ensureConcept("representation", itemText, representationKey, {
+            id: safeString(itemData.id) || representationKey,
             SabsaMatrixKind: "Representation",
             ItemId: safeString(itemData.id) || representationKey,
             RowId: rowData.id,
@@ -532,6 +594,8 @@ function createMatrixView(matrixData) {
     matrixData.columns.forEach(function (column, index) {
         var columnKey = safeString(column.conceptKey) || ("column:" + column.id);
         var columnConcept = ensureConcept("grouping", column.title, columnKey, {
+            id: column.id,
+            __legacyPropertyIds: [buildLegacyColumnPropertyId(matrixData, column.id)],
             SabsaMatrixKind: "Column",
             ConceptId: columnKey,
             ColumnId: column.id,
@@ -557,6 +621,8 @@ function createMatrixView(matrixData) {
     matrixData.rows.forEach(function (rowData) {
         var rowKey = safeString(rowData.conceptKey) || ("row:" + rowData.id);
         var rowConcept = ensureConcept("grouping", rowData.title, rowKey, {
+            id: rowData.id,
+            __legacyPropertyIds: [buildLegacyRowPropertyId(matrixData, rowData.id)],
             SabsaMatrixKind: "Row",
             ConceptId: rowKey,
             RowId: rowData.id,
@@ -592,6 +658,8 @@ function createMatrixView(matrixData) {
             var columnKey = safeString(cellData.columnConceptKey) || ("column:" + cellData.columnId);
             var columnConcept = findConceptByTypeAndKey("grouping", columnKey);
             var cellConcept = ensureConcept("grouping", cellData.title, cellKey, {
+                id: safeString(cellData.id || cellData.key),
+                __legacyPropertyIds: [buildLegacyCellPropertyId(matrixData, rowData.id, cellData.columnId)],
                 SabsaMatrixKind: "Cell",
                 ConceptId: cellKey,
                 RowId: rowData.id,
