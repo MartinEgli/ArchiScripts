@@ -28,7 +28,12 @@ var CONST = {
         Columns: "Columns",
         Rows: "Rows",
         WorkPackages: "Work Packages",
-        Representations: "Representations"
+        Representations: "Representations",
+        Relations: {
+            RowToWorkPackages: "Row to Work Packages",
+            ColumnToWorkPackages: "Column to Work Packages",
+            CellToRepresentations: "Cell to Representations"
+        }
     },
     Layout: {
         StartX: 54,
@@ -133,6 +138,7 @@ function getTopLevelFolder(rootName) {
         "Business": ["Business"],
         "Other": ["Other", "Connectors"],
         "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"],
         "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"]
     };
     var candidateNames = aliasesByFolderName[rootName] || [rootName];
@@ -249,6 +255,47 @@ function moveConceptToSabsaFolder(concept, conceptType, properties) {
 
 function moveViewToSabsaFolder(viewObject) {
     return moveObjectToFolder("Views", getMatrixFolderSegments(), viewObject);
+}
+
+function getRelationFolderSegments(extraSegments) {
+    return getMatrixFolderSegments(extraSegments);
+}
+
+function resolveRelationshipFolderPlacement(properties) {
+    var kind = safeString(properties && properties.SabsaMatrixKind);
+
+    if (kind === "RowToWorkPackage") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments([CONST.Folder.Relations.RowToWorkPackages])
+        };
+    }
+
+    if (kind === "ColumnToWorkPackage") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments([CONST.Folder.Relations.ColumnToWorkPackages])
+        };
+    }
+
+    if (kind === "CellToRepresentation") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments([CONST.Folder.Relations.CellToRepresentations])
+        };
+    }
+
+    return null;
+}
+
+function moveRelationshipToSabsaFolder(relationship, properties) {
+    var placement = resolveRelationshipFolderPlacement(properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
 }
 
 function readUtf8Text(absolutePath) {
@@ -514,6 +561,8 @@ function ensureRelationship(preferredType, source, target, key, properties) {
         relationship.prop(propertyName, safeString(properties[propertyName]));
     });
 
+    moveRelationshipToSabsaFolder(relationship, properties);
+
     return relationship;
 }
 
@@ -708,7 +757,9 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
             cellData.key,
             representationKey
         ].join(":"), {
-            SabsaMatrixKind: "CellToRepresentation"
+            SabsaMatrixKind: "CellToRepresentation",
+            RowId: rowData.id,
+            ColumnId: cellData.columnId
         });
 
         var representationVisual = addStyledVisual(
@@ -846,7 +897,8 @@ function createMatrixView(matrixData) {
                 rowKey,
                 cellKey
             ].join(":"), {
-                SabsaMatrixKind: "RowToWorkPackage"
+                SabsaMatrixKind: "RowToWorkPackage",
+                RowId: rowData.id
             });
             stats.relationships++;
 
@@ -856,7 +908,9 @@ function createMatrixView(matrixData) {
                     columnKey,
                     cellKey
                 ].join(":"), {
-                    SabsaMatrixKind: "ColumnToWorkPackage"
+                    SabsaMatrixKind: "ColumnToWorkPackage",
+                    RowId: rowData.id,
+                    ColumnId: cellData.columnId
                 });
                 stats.relationships++;
             }

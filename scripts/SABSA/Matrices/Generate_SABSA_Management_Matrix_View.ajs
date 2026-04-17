@@ -31,7 +31,15 @@ var CONST = {
         WorkPackages: "Work Packages",
         Processes: "Processes",
         Representations: "Representations",
-        Activities: "Activities"
+        Activities: "Activities",
+        Relations: {
+            RowToWorkPackages: "Row to Work Packages",
+            ColumnToWorkPackages: "Column to Work Packages",
+            CellToRepresentations: "Cell to Representations",
+            RowToProcesses: "Row to Processes",
+            ColumnToProcesses: "Column to Processes",
+            CellToActivities: "Cell to Activities"
+        }
     },
     Layout: {
         StartX: 54,
@@ -141,6 +149,7 @@ function getTopLevelFolder(rootName) {
         "Business": ["Business"],
         "Other": ["Other", "Connectors"],
         "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"],
         "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"]
     };
     var candidateNames = aliasesByFolderName[rootName] || [rootName];
@@ -277,6 +286,75 @@ function moveConceptToSabsaFolder(concept, conceptType, properties) {
 
 function moveViewToSabsaFolder(viewObject) {
     return moveObjectToFolder("Views", getMatrixFolderSegments(CONST.Folder.MatrixName), viewObject);
+}
+
+function getRelationMatrixName(properties) {
+    return safeString(properties && properties.RowId) === "management-architecture"
+        ? CONST.Folder.SharedArchitectureMatrixName
+        : CONST.Folder.MatrixName;
+}
+
+function getRelationFolderSegments(matrixName, extraSegments) {
+    return getMatrixFolderSegments(matrixName, extraSegments);
+}
+
+function resolveRelationshipFolderPlacement(properties) {
+    var kind = safeString(properties && properties.SabsaMatrixKind);
+    var relationMatrixName = getRelationMatrixName(properties);
+
+    if (kind === "RowToWorkPackage") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.RowToWorkPackages])
+        };
+    }
+
+    if (kind === "ColumnToWorkPackage") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.ColumnToWorkPackages])
+        };
+    }
+
+    if (kind === "CellToRepresentation") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.CellToRepresentations])
+        };
+    }
+
+    if (kind === "RowToProcess") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.RowToProcesses])
+        };
+    }
+
+    if (kind === "ColumnToProcess") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.ColumnToProcesses])
+        };
+    }
+
+    if (kind === "CellToActivity") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments(relationMatrixName, [CONST.Folder.Relations.CellToActivities])
+        };
+    }
+
+    return null;
+}
+
+function moveRelationshipToSabsaFolder(relationship, properties) {
+    var placement = resolveRelationshipFolderPlacement(properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
 }
 
 function readUtf8Text(absolutePath) {
@@ -571,6 +649,8 @@ function ensureRelationship(preferredType, source, target, key, properties) {
         relationship.prop(propertyName, safeString(properties[propertyName]));
     });
 
+    moveRelationshipToSabsaFolder(relationship, properties);
+
     return relationship;
 }
 
@@ -796,7 +876,9 @@ function createItemVisuals(cellVisual, rowData, cellData, startY) {
             cellData.key,
             representationKey
         ].join(":"), {
-            SabsaMatrixKind: itemKind === "Representation" ? "CellToRepresentation" : "CellToActivity"
+            SabsaMatrixKind: itemKind === "Representation" ? "CellToRepresentation" : "CellToActivity",
+            RowId: rowData.id,
+            ColumnId: cellData.columnId
         });
 
         var itemVisual = addStyledVisual(
@@ -935,7 +1017,8 @@ function createMatrixView(matrixData) {
                 rowKey,
                 cellKey
             ].join(":"), {
-                SabsaMatrixKind: cellKind === "WorkPackage" ? "RowToWorkPackage" : "RowToProcess"
+                SabsaMatrixKind: cellKind === "WorkPackage" ? "RowToWorkPackage" : "RowToProcess",
+                RowId: rowData.id
             });
             stats.relationships++;
 
@@ -945,7 +1028,9 @@ function createMatrixView(matrixData) {
                     columnKey,
                     cellKey
                 ].join(":"), {
-                    SabsaMatrixKind: cellKind === "WorkPackage" ? "ColumnToWorkPackage" : "ColumnToProcess"
+                    SabsaMatrixKind: cellKind === "WorkPackage" ? "ColumnToWorkPackage" : "ColumnToProcess",
+                    RowId: rowData.id,
+                    ColumnId: cellData.columnId
                 });
                 stats.relationships++;
             }
