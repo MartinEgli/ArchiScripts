@@ -36,21 +36,26 @@ var CONST = {
         ViewMarginX: 40,
         ViewMarginY: 40,
         InputX: 40,
-        MainX: 430,
+        MainX: 520,
         OutputX: 1770,
         MainY: 40,
-        MainWidth: 340,
+        MainWidth: 420,
         MainHeight: 90,
         InputWidth: 310,
         OutputWidth: 360,
         ArtifactMinHeight: 58,
         ArtifactGap: 18,
         StepStartY: 190,
-        StepWidth: 250,
+        StepX: 520,
+        StepWidth: 460,
         StepMinHeight: 86,
-        StepGap: 24,
-        SubprocessStartGap: 22,
-        SubprocessWidth: 250,
+        StepGap: 28,
+        StepInnerX: 18,
+        StepInnerY: 52,
+        StepInnerRight: 18,
+        StepInnerBottom: 18,
+        SubprocessStartGap: 12,
+        SubprocessWidth: 424,
         SubprocessMinHeight: 56,
         SubprocessGap: 14
     },
@@ -506,6 +511,29 @@ function estimateTextHeight(text, width, minHeight) {
     return Math.max(minHeight, 18 + (lines * 16));
 }
 
+function estimateStepContainerHeight(stepData) {
+    var titleHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
+    var subprocessHeight = 0;
+
+    stepData.subprocesses.forEach(function (subprocessName, index) {
+        subprocessHeight += estimateTextHeight(
+            subprocessName,
+            CONST.Layout.SubprocessWidth,
+            CONST.Layout.SubprocessMinHeight
+        );
+
+        if (index < stepData.subprocesses.length - 1) {
+            subprocessHeight += CONST.Layout.SubprocessGap;
+        }
+    });
+
+    return titleHeight +
+        CONST.Layout.StepInnerY +
+        CONST.Layout.SubprocessStartGap +
+        subprocessHeight +
+        CONST.Layout.StepInnerBottom;
+}
+
 function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
@@ -554,6 +582,7 @@ function createView() {
         DATA.process.description
     );
     var mainVisual;
+    var currentStepY = CONST.Layout.StepStartY;
 
     view.documentation = "Generated from " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
     moveViewToFolder(view);
@@ -643,13 +672,13 @@ function createView() {
             },
             stepData.description
         );
-        var stepX = CONST.Layout.ViewMarginX + (stepIndex * (CONST.Layout.StepWidth + CONST.Layout.StepGap));
-        var stepHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
+        var stepX = CONST.Layout.StepX;
+        var stepHeight = estimateStepContainerHeight(stepData);
         var stepVisual = addStyledVisual(
             view,
             stepConcept,
             stepX,
-            CONST.Layout.StepStartY,
+            currentStepY,
             CONST.Layout.StepWidth,
             stepHeight,
             CONST.Style.StepFill
@@ -690,14 +719,23 @@ function createView() {
                 },
                 "Sub-process of " + stepData.name + " derived from " + CONST.SourceMarkdownPath + "."
             );
-            var subY = CONST.Layout.StepStartY + stepHeight + CONST.Layout.SubprocessStartGap +
-                (subprocessIndex * (CONST.Layout.SubprocessMinHeight + CONST.Layout.SubprocessGap));
+            var relativeSubY = CONST.Layout.StepInnerY + CONST.Layout.SubprocessStartGap;
+            var previousSubprocesses = stepData.subprocesses.slice(0, subprocessIndex);
             var subHeight = estimateTextHeight(subprocessName, CONST.Layout.SubprocessWidth, CONST.Layout.SubprocessMinHeight);
+
+            previousSubprocesses.forEach(function (previousName) {
+                relativeSubY += estimateTextHeight(
+                    previousName,
+                    CONST.Layout.SubprocessWidth,
+                    CONST.Layout.SubprocessMinHeight
+                ) + CONST.Layout.SubprocessGap;
+            });
+
             var subVisual = addStyledVisual(
-                view,
+                stepVisual,
                 subprocessConcept,
-                stepX,
-                subY,
+                CONST.Layout.StepInnerX,
+                relativeSubY,
                 CONST.Layout.SubprocessWidth,
                 subHeight,
                 CONST.Style.SubprocessFill
@@ -723,6 +761,8 @@ function createView() {
                 order: subprocessIndex + 1
             });
         });
+
+        currentStepY += stepHeight + CONST.Layout.StepGap;
     });
 
     stepVisuals.forEach(function (stepEntry, index) {
