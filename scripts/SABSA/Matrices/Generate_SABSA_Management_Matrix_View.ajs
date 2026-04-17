@@ -488,6 +488,7 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
     var concept = findConceptByTypeAndKey(conceptType, key);
     var reuseReason = "key";
     var placement = resolveConceptFolderPlacement(conceptType, properties);
+    var conceptCreated = false;
 
     if (!concept && conceptId) {
         concept = findConceptByTypeAndPropertyId(conceptType, conceptId);
@@ -515,6 +516,7 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
         } else {
             concept = model.createElement(conceptType, name);
         }
+        conceptCreated = true;
         stats.conceptsCreated++;
         logger.debug("Created concept.", {
             concept_type: conceptType,
@@ -545,7 +547,9 @@ function ensureConcept(conceptType, name, key, properties, documentation, fallba
         concept.prop(propertyName, safeString(properties[propertyName]));
     });
 
-    moveConceptToSabsaFolder(concept, conceptType, properties);
+    if (conceptCreated) {
+        moveConceptToSabsaFolder(concept, conceptType, properties);
+    }
 
     return concept;
 }
@@ -612,10 +616,12 @@ function ensureRelationship(preferredType, source, target, key, properties) {
     var relationship = $("relationship").filter(function (candidate) {
         return safeString(candidate.prop("SabsaMatrixKey")) === safeString(key);
     }).first();
+    var relationshipCreated = false;
 
     if (!relationship) {
         try {
             relationship = model.createRelationship(preferredType, "", source, target);
+            relationshipCreated = true;
             stats.relationshipsCreated++;
             logger.debug("Created relationship.", {
                 relationship_type: preferredType,
@@ -625,6 +631,7 @@ function ensureRelationship(preferredType, source, target, key, properties) {
             }, "sabsa.matrix.relationship.created");
         } catch (error) {
             relationship = model.createRelationship("association-relationship", "", source, target);
+            relationshipCreated = true;
             stats.relationshipsCreated++;
             logger.debug("Preferred relationship type is not valid. Falling back.", {
                 preferred_type: preferredType,
@@ -649,7 +656,9 @@ function ensureRelationship(preferredType, source, target, key, properties) {
         relationship.prop(propertyName, safeString(properties[propertyName]));
     });
 
-    moveRelationshipToSabsaFolder(relationship, properties);
+    if (relationshipCreated) {
+        moveRelationshipToSabsaFolder(relationship, properties);
+    }
 
     return relationship;
 }
