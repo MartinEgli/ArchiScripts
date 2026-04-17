@@ -507,6 +507,28 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
     return connection;
 }
 
+function setVisualBounds(visual, x, y, width, height) {
+    var bounds = visual.bounds;
+
+    if (typeof x !== "undefined" && x !== null) {
+        bounds.x = x;
+    }
+
+    if (typeof y !== "undefined" && y !== null) {
+        bounds.y = y;
+    }
+
+    if (typeof width !== "undefined" && width !== null) {
+        bounds.width = width;
+    }
+
+    if (typeof height !== "undefined" && height !== null) {
+        bounds.height = height;
+    }
+
+    visual.bounds = bounds;
+}
+
 function estimateTextHeight(text, width, minHeight) {
     var cleaned = trim(text);
     var lineLength = Math.max(16, Math.floor((width - 18) / 6.4));
@@ -575,6 +597,102 @@ function buildInputDocumentation(inputData) {
         "\nMoSCoW: " + safeString(inputData.moscow);
 }
 
+function optimizeGeneratedLayout(layout) {
+    var stepX = getStepXInMain();
+    var subprocessWidth = getSubprocessWidth();
+    var currentStepY = CONST.Layout.MainInnerY;
+    var mainBounds = layout.mainVisual.bounds;
+    var mainHeight;
+
+    layout.stepVisuals.forEach(function (stepEntry) {
+        var currentSubY = CONST.Layout.StepInnerY + CONST.Layout.SubprocessStartGap;
+        var titleHeight = estimateTextHeight(stepEntry.data.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
+
+        stepEntry.subprocessVisuals.forEach(function (subprocessEntry) {
+            var subHeight = estimateTextHeight(
+                subprocessEntry.data.name,
+                subprocessWidth,
+                CONST.Layout.SubprocessMinHeight
+            );
+
+            setVisualBounds(
+                subprocessEntry.visual,
+                CONST.Layout.StepInnerX,
+                currentSubY,
+                subprocessWidth,
+                subHeight
+            );
+
+            currentSubY += subHeight + CONST.Layout.SubprocessGap;
+        });
+
+        if (stepEntry.subprocessVisuals.length > 0) {
+            currentSubY -= CONST.Layout.SubprocessGap;
+        } else {
+            currentSubY = CONST.Layout.StepInnerY;
+        }
+
+        var stepHeight = Math.max(
+            CONST.Layout.StepMinHeight,
+            titleHeight + CONST.Layout.StepInnerY + CONST.Layout.StepInnerBottom,
+            currentSubY + CONST.Layout.StepInnerBottom
+        );
+
+        setVisualBounds(
+            stepEntry.visual,
+            stepX,
+            currentStepY,
+            CONST.Layout.StepWidth,
+            stepHeight
+        );
+
+        currentStepY += stepHeight + CONST.Layout.StepGap;
+    });
+
+    if (layout.stepVisuals.length > 0) {
+        currentStepY -= CONST.Layout.StepGap;
+    }
+
+    mainHeight = Math.max(
+        CONST.Layout.MainMinHeight,
+        currentStepY + CONST.Layout.MainInnerBottom
+    );
+
+    setVisualBounds(
+        layout.mainVisual,
+        mainBounds.x,
+        mainBounds.y,
+        CONST.Layout.MainWidth,
+        mainHeight
+    );
+
+    function alignArtifacts(artifactEntries, x, width) {
+        var totalHeight = 0;
+        var currentY;
+
+        artifactEntries.forEach(function (entry, index) {
+            var height = estimateTextHeight(entry.data.name, width, CONST.Layout.ArtifactMinHeight);
+            totalHeight += height;
+
+            if (index < artifactEntries.length - 1) {
+                totalHeight += CONST.Layout.ArtifactGap;
+            }
+        });
+
+        currentY = CONST.Layout.MainY + Math.max(0, Math.floor((mainHeight - totalHeight) / 2));
+
+        artifactEntries.forEach(function (entry) {
+            var height = estimateTextHeight(entry.data.name, width, CONST.Layout.ArtifactMinHeight);
+
+            setVisualBounds(entry.visual, x, currentY, width, height);
+            currentY += height + CONST.Layout.ArtifactGap;
+        });
+    }
+
+    alignArtifacts(layout.inputVisuals, CONST.Layout.InputX, CONST.Layout.InputWidth);
+    alignArtifacts(layout.outputVisuals, CONST.Layout.OutputX, CONST.Layout.OutputWidth);
+}
+
 function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
@@ -595,6 +713,7 @@ function confirmExecution() {
 
 function buildResultMessage(view) {
     return "Generated view: " + view.name +
+        "\nLayout optimization: applied" +
         "\nProcesses: " + stats.processes +
         "\nArtifacts: " + stats.artifacts +
         "\nRelationships: " + stats.relationships +
@@ -740,11 +859,14 @@ function createView() {
         addConnection(view, composition, mainVisual, stepVisual);
         stats.processes++;
         stats.relationships++;
-        stepVisuals.push({
+        var stepEntry = {
             concept: stepConcept,
             visual: stepVisual,
-            data: stepData
-        });
+            data: stepData,
+            subprocessVisuals: []
+        };
+
+        stepVisuals.push(stepEntry);
 
         stepData.subprocesses.forEach(function (subprocessName, subprocessIndex) {
             var subprocessId = slugify(stepData.id + "-" + subprocessName);
@@ -798,6 +920,15 @@ function createView() {
             addConnection(view, stepComposition, stepVisual, subVisual);
             stats.processes++;
             stats.relationships++;
+            stepEntry.subprocessVisuals.push({
+                concept: subprocessConcept,
+                visual: subVisual,
+                data: {
+                    id: subprocessId,
+                    name: subprocessName
+                },
+                order: subprocessIndex + 1
+            });
             allSubprocessVisuals.push({
                 concept: subprocessConcept,
                 visual: subVisual,
@@ -893,6 +1024,13 @@ function createView() {
         stats.relationships++;
     });
 
+    optimizeGeneratedLayout({
+        mainVisual: mainVisual,
+        inputVisuals: inputVisuals,
+        outputVisuals: outputVisuals,
+        stepVisuals: stepVisuals
+    });
+
     return view;
 }
 
@@ -918,6 +1056,7 @@ function main() {
 
     logger.finish("SABSA conceptual process generation finished.", {
         view_name: view.name,
+        layout_optimized: true,
         processes_created_or_reused: stats.processes,
         artifacts_created_or_reused: stats.artifacts,
         relationships_created_or_reused: stats.relationships,
