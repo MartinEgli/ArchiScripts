@@ -36,42 +36,42 @@
   ],
   "outputs": [
     {
-      "id": "conceptual-architecture-assets-what",
+      "id": "what-business-attributes-taxonomy-and-profile",
       "name": "WHAT: Business Attributes Taxonomy & Profile with integrated performance targets",
       "description": "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets.",
       "moscow": "Must",
       "origin": "Consolidated output of Step 1 'Synthesize Business Value & Knowledge Strategy'."
     },
     {
-      "id": "conceptual-architecture-motivation-why",
+      "id": "why-enablement-and-control-objectives",
       "name": "WHY: Enablement & Control Objectives; Policy Architecture; Risk Categories; Risk Management Strategies; Risk Modelling Framework; Assurance Framework",
       "description": "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance.",
       "moscow": "Must",
       "origin": "Consolidated output of Step 2 'Develop Risk Management Strategy & Objectives'."
     },
     {
-      "id": "conceptual-architecture-process-how",
+      "id": "how-inventory-and-process-mapping-framework",
       "name": "HOW: Inventory of all Operational Processes; Process Mapping Framework; Architectural Strategies for IT used in Process Support",
       "description": "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability.",
       "moscow": "Must",
       "origin": "Consolidated output of Step 3 'Define Strategies for Process Assurance'."
     },
     {
-      "id": "conceptual-architecture-location-where",
+      "id": "where-security-domain-concepts-and-framework",
       "name": "WHERE: Security Domain Concepts & Framework",
       "description": "Conceptual layer WHERE artefact defining security domains and their interactions.",
       "moscow": "Must",
       "origin": "Consolidated output of Step 4 'Synthesize Domain Framework'."
     },
     {
-      "id": "conceptual-architecture-people-who",
+      "id": "who-owners-custodians-users-and-trust-framework",
       "name": "WHO: Owners, Custodians & Users; Service Providers & Customers; Trust Modelling Framework",
       "description": "Conceptual layer WHO artefacts for entities, accountability, and trust.",
       "moscow": "Must",
       "origin": "Consolidated output of Step 5 'Develop Security & Risk Governance; Trust Framework'."
     },
     {
-      "id": "conceptual-architecture-time-when",
+      "id": "when-through-life-risk-management-framework",
       "name": "WHEN: Through-Life Risk Management Framework; Attribute Performance Targets",
       "description": "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability.",
       "moscow": "Should",
@@ -108,7 +108,7 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+          "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets.",
           "moscow": "Must",
@@ -237,7 +237,7 @@
       "description": "Builds conceptual risk management including objectives, policy architecture, risk categories, modelling, and assurance.",
       "inputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+          "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Output from Step 1 and the basis for deriving control objectives.",
           "moscow": "Must",
@@ -267,42 +267,42 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+          "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective.",
           "moscow": "Must",
           "origin": "Produced by Sub-process 2.1."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+          "id": "policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy hierarchy linking control objectives, requirements, and governance intent.",
           "moscow": "Must",
           "origin": "Produced by Sub-process 2.4."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-categories",
+          "id": "risk-categories",
           "name": "Risk Categories",
           "description": "Conceptual risk categories mapped to business attributes and control objectives.",
           "moscow": "Must",
           "origin": "Produced by Sub-process 2.2."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+          "id": "risk-management-strategies",
           "name": "Risk Management Strategies",
           "description": "Conceptual risk treatment strategies aligned to risk appetite and policy direction.",
           "moscow": "Must",
           "origin": "Produced by Sub-process 2.3."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
+          "id": "risk-modelling-framework",
           "name": "Risk Modelling Framework",
           "description": "Shared conceptual evaluation framework for assessing and comparing risk across layers.",
           "moscow": "Should",
           "origin": "Produced by Sub-process 2.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+          "id": "assurance-framework",
           "name": "Assurance Framework",
           "description": "Conceptual assurance framework mapping evidence and assurance activities to objectives.",
           "moscow": "Should",
@@ -317,7 +317,7 @@
           "moscow": "Must",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile (from Step 1)",
               "moscow": "Must",
               "origin": "Output of Step 1."
@@ -387,7 +387,7 @@
               "origin": "Produced by Sub-process 2.3."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+              "id": "risk-management-strategies",
               "name": "Risk Management Strategies",
               "moscow": "Must",
               "origin": "Produced by Sub-process 2.3."
@@ -407,7 +407,7 @@
               "origin": "Output of Sub-process 2.1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+              "id": "risk-management-strategies",
               "name": "Risk Management Strategies (from 2.3)",
               "moscow": "Must",
               "origin": "Output of Sub-process 2.3."
@@ -421,7 +421,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+              "id": "policy-architecture",
               "name": "Policy Architecture",
               "moscow": "Must",
               "origin": "Produced by Sub-process 2.4."
@@ -441,7 +441,7 @@
               "origin": "Output of Sub-process 2.2."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+              "id": "risk-management-strategies",
               "name": "Risk Management Strategies (from 2.3)",
               "moscow": "Should",
               "origin": "Output of Sub-process 2.3."
@@ -449,7 +449,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
+              "id": "risk-modelling-framework",
               "name": "Risk Modelling Framework",
               "moscow": "Should",
               "origin": "Produced by Sub-process 2.5."
@@ -469,13 +469,13 @@
               "origin": "Output of Sub-process 2.1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+              "id": "policy-architecture",
               "name": "Policy Architecture (from 2.4)",
               "moscow": "Should",
               "origin": "Output of Sub-process 2.4."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-modelling-framework",
+              "id": "risk-modelling-framework",
               "name": "Risk Modelling Framework (from 2.5)",
               "moscow": "Should",
               "origin": "Output of Sub-process 2.5."
@@ -483,7 +483,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+              "id": "assurance-framework",
               "name": "Assurance Framework",
               "moscow": "Should",
               "origin": "Produced by Sub-process 2.6."
@@ -499,14 +499,14 @@
       "description": "Inventories operational processes, classifies them, and defines process mapping and IT support strategies.",
       "inputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+          "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Conceptual control objectives determining which operational processes matter most.",
           "moscow": "Must",
           "origin": "Output of Step 2."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+          "id": "policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping.",
           "moscow": "Must",
@@ -529,21 +529,21 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
+          "id": "inventory-of-all-operational-processes",
           "name": "Inventory of all Operational Processes (IT, industrial & manual)",
           "description": "Classified inventory of operational processes across IT, industrial, and manual contexts.",
           "moscow": "Must",
           "origin": "Built in Sub-processes 3.1 and 3.2, then validated in Sub-process 3.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
+          "id": "process-mapping-framework",
           "name": "Process Mapping Framework",
           "description": "Traceability framework linking processes to control objectives and business attributes.",
           "moscow": "Must",
           "origin": "Produced in Sub-process 3.3 and confirmed in Sub-process 3.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
+          "id": "architectural-strategies-for-it-used-in-process-support",
           "name": "Architectural Strategies for IT used in Process Support",
           "description": "Conceptual IT architecture strategies used to support and secure operational processes.",
           "moscow": "Should",
@@ -564,7 +564,7 @@
               "origin": "Inherited from the contextual layer."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+              "id": "assurance-framework",
               "name": "Assurance Framework (from 2.6)",
               "moscow": "Should",
               "origin": "Output of Sub-process 2.6."
@@ -592,13 +592,13 @@
               "origin": "Output of Sub-process 3.1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile",
               "moscow": "Must",
               "origin": "Output of Step 1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -626,7 +626,7 @@
               "origin": "Output of Sub-process 3.2."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+              "id": "policy-architecture",
               "name": "Policy Architecture (from 2.4)",
               "moscow": "Must",
               "origin": "Output of Sub-process 2.4."
@@ -634,7 +634,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
+              "id": "process-mapping-framework",
               "name": "Process Mapping Framework",
               "moscow": "Must",
               "origin": "Produced by Sub-process 3.3."
@@ -648,13 +648,13 @@
           "moscow": "Should",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
+              "id": "process-mapping-framework",
               "name": "Process Mapping Framework (from 3.3)",
               "moscow": "Must",
               "origin": "Output of Sub-process 3.3."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -668,7 +668,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:architectural-strategies-for-it-used-in-process-support",
+              "id": "architectural-strategies-for-it-used-in-process-support",
               "name": "Architectural Strategies for IT used in Process Support",
               "moscow": "Should",
               "origin": "Produced by Sub-process 3.4."
@@ -688,7 +688,7 @@
               "origin": "Combined outputs of the preceding Sub-processes 3.1 to 3.4."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -718,21 +718,21 @@
       "description": "Identifies, maps, and formalises security domains and their boundaries.",
       "inputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+          "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Business attributes and performance targets defining domain protection needs.",
           "moscow": "Must",
           "origin": "Output of Step 1."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+          "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Conceptual objectives shaping the scope and intent of security domains.",
           "moscow": "Must",
           "origin": "Output of Step 2."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:policy-architecture",
+          "id": "policy-architecture",
           "name": "Policy Architecture",
           "description": "Conceptual policy structure influencing domain boundaries and control expectations.",
           "moscow": "Should",
@@ -748,7 +748,7 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+          "id": "security-domain-concepts-and-framework",
           "name": "Security Domain Concepts & Framework",
           "description": "Conceptual domain framework with domain boundaries, interactions, and attribute mappings.",
           "moscow": "Must",
@@ -763,7 +763,7 @@
           "moscow": "Must",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes Taxonomy & Profile",
               "moscow": "Must",
               "origin": "Output of Step 1."
@@ -797,7 +797,7 @@
               "origin": "Output of Sub-process 4.1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Control Objectives (from Step 2)",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -825,7 +825,7 @@
               "origin": "Output of Sub-process 4.2."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:process-mapping-framework",
+              "id": "process-mapping-framework",
               "name": "Process Mapping Framework (from Step 3)",
               "moscow": "Should",
               "origin": "Output of Step 3."
@@ -867,7 +867,7 @@
           ],
           "outputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+              "id": "security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework (finalised)",
               "moscow": "Must",
               "origin": "Produced by Sub-process 4.4."
@@ -883,21 +883,21 @@
       "description": "Defines entities, service-provider/customer mappings, accountability, and trust relationships.",
       "inputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+          "id": "security-domain-concepts-and-framework",
           "name": "Security Domain Concepts & Framework",
           "description": "Conceptual domain model providing the structure for governance and trust allocation.",
           "moscow": "Must",
           "origin": "Output of Step 4."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+          "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
           "description": "Objectives that need explicit governance ownership and accountability.",
           "moscow": "Must",
           "origin": "Output of Step 2."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+          "id": "assurance-framework",
           "name": "Assurance Framework",
           "description": "Assurance responsibilities used to support entity and governance assignments.",
           "moscow": "Should",
@@ -913,21 +913,21 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:owners-custodians-and-users",
+          "id": "owners-custodians-and-users",
           "name": "Owners, Custodians & Users",
           "description": "Conceptual entity register with role classification and accountability.",
           "moscow": "Must",
           "origin": "Built in Sub-process 5.1 and validated in Sub-process 5.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:service-providers-and-customers",
+          "id": "service-providers-and-customers",
           "name": "Service Providers & Customers",
           "description": "Conceptual provider and customer map including security responsibilities in the service chain.",
           "moscow": "Should",
           "origin": "Built in Sub-process 5.2 and validated in Sub-process 5.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:people-who:trust-modelling-framework",
+          "id": "trust-modelling-framework",
           "name": "Trust Modelling Framework",
           "description": "Conceptual trust model defining trust relationships, levels, and boundaries.",
           "moscow": "Must",
@@ -942,7 +942,7 @@
           "moscow": "Must",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+              "id": "security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
               "origin": "Output of Step 4."
@@ -1004,13 +1004,13 @@
               "origin": "Output of Sub-process 5.1."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
               "origin": "Output of Step 2."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+              "id": "security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
               "origin": "Output of Step 4."
@@ -1044,7 +1044,7 @@
               "origin": "Output of Sub-process 5.2."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+              "id": "security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Must",
               "origin": "Output of Step 4."
@@ -1072,7 +1072,7 @@
               "origin": "Combined outputs of the preceding Sub-processes 5.1 to 5.4."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:enablement-and-control-objectives",
+              "id": "enablement-and-control-objectives",
               "name": "Enablement & Control Objectives",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -1108,28 +1108,28 @@
       "description": "Defines lifecycle, timing, and traceability for risk management and performance targets.",
       "inputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+          "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
           "description": "Performance targets that need to be anchored across time and lifecycle perspectives.",
           "moscow": "Must",
           "origin": "Output of Step 1."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+          "id": "risk-management-strategies",
           "name": "Risk Management Strategies",
           "description": "Conceptual risk strategies that need to be sustained through lifecycle planning.",
           "moscow": "Must",
           "origin": "Output of Step 2."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+          "id": "assurance-framework",
           "name": "Assurance Framework",
           "description": "Assurance activities that need a conceptual timing and review structure.",
           "moscow": "Should",
           "origin": "Output of Sub-process 2.6."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
+          "id": "inventory-of-all-operational-processes",
           "name": "Inventory of all Operational Processes",
           "description": "Operational processes used to anchor lifecycle and timing concepts.",
           "moscow": "Should",
@@ -1138,14 +1138,14 @@
       ],
       "outputs": [
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:through-life-risk-management-framework",
+          "id": "through-life-risk-management-framework",
           "name": "Through-Life Risk Management Framework",
           "description": "Conceptual lifecycle framework for risk management including reviews and trigger events.",
           "moscow": "Must",
           "origin": "Built in Sub-process 6.2 and validated in Sub-process 6.5."
         },
         {
-          "id": "sabsa-architecture-matrix:item:conceptual-architecture:time-when:attribute-performance-targets",
+          "id": "attribute-performance-targets",
           "name": "Attribute Performance Targets",
           "description": "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring.",
           "moscow": "Should",
@@ -1160,13 +1160,13 @@
           "moscow": "Must",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:process-how:inventory-of-all-operational-processes-it-industriell-and-manuell",
+              "id": "inventory-of-all-operational-processes",
               "name": "Inventory of all Operational Processes",
               "moscow": "Should",
               "origin": "Output of Step 3."
             },
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:location-where:security-domain-concepts-and-framework",
+              "id": "security-domain-concepts-and-framework",
               "name": "Security Domain Concepts & Framework",
               "moscow": "Should",
               "origin": "Output of Step 4."
@@ -1188,7 +1188,7 @@
           "moscow": "Must",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:risk-management-strategies",
+              "id": "risk-management-strategies",
               "name": "Risk Management Strategies (from Step 2)",
               "moscow": "Must",
               "origin": "Output of Step 2."
@@ -1216,7 +1216,7 @@
           "moscow": "Should",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:assets-what:business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
               "name": "Business Attributes with Performance Targets",
               "moscow": "Must",
               "origin": "Output of Step 1."
@@ -1244,7 +1244,7 @@
           "moscow": "Could",
           "inputs": [
             {
-              "id": "sabsa-architecture-matrix:item:conceptual-architecture:motivation-why:assurance-framework",
+              "id": "assurance-framework",
               "name": "Assurance Framework (from 2.6)",
               "moscow": "Must",
               "origin": "Output of Sub-process 2.6."
