@@ -876,6 +876,31 @@ function validateMatrixData(matrixData) {
     }, "sabsa.matrix.source.validated");
 }
 
+function confirmExecution(matrixData) {
+    return dialogs.confirmInfo(
+        "This script will generate or update the SABSA Architecture Matrix view." +
+        "\n\nSource JSON: " + CONST.SourceJsonPath +
+        "\nColumns: " + matrixData.columns.length +
+        "\nRows: " + matrixData.rows.length +
+        "\n\nThe script will create or reuse folders, concepts, relationships, and the target view in the open Archi model." +
+        "\n\nDo you want to continue?",
+        "Run SABSA Architecture Matrix Generator"
+    );
+}
+
+function buildResultMessage(view) {
+    return "Generated view: " + view.name +
+        "\nRows: " + stats.rows +
+        "\nColumns: " + stats.columns +
+        "\nCells: " + stats.cells +
+        "\nRepresentations: " + stats.representations +
+        "\nRelationships: " + stats.relationships +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused;
+}
+
 function main() {
     var sourceText;
     var matrixData;
@@ -892,6 +917,14 @@ function main() {
     sourceText = readUtf8Text(CONST.SourceJsonPath);
     matrixData = parseMatrixFromJson(sourceText);
     validateMatrixData(matrixData);
+
+    if (!confirmExecution(matrixData)) {
+        logger.info("SABSA architecture matrix generation cancelled by user.", {
+            source_json: CONST.SourceJsonPath
+        }, "sabsa.matrix.generation.cancelled");
+        return;
+    }
+
     view = createMatrixView(matrixData);
 
     logger.finish("SABSA architecture matrix view generation finished.", {
@@ -907,14 +940,7 @@ function main() {
         relationships_reused: stats.relationshipsReused
     });
 
-    dialogs.showInfo(
-        "Generated view: " + view.name +
-        "\nRows: " + stats.rows +
-        "\nColumns: " + stats.columns +
-        "\nCells: " + stats.cells +
-        "\nRepresentations: " + stats.representations,
-        "SABSA Architecture Matrix View"
-    );
+    dialogs.showInfo(buildResultMessage(view), "SABSA Architecture Matrix View");
 }
 
 main();
