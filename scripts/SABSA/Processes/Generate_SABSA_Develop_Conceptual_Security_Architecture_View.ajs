@@ -500,19 +500,39 @@ function getSubprocessWidth() {
     return CONST.Layout.StepWidth - CONST.Layout.StepInnerX - CONST.Layout.StepInnerRight;
 }
 
+function getSubprocessEntries(stepData) {
+    return (stepData && stepData.subprocesses ? stepData.subprocesses : []).map(function (entry) {
+        if (typeof entry === "string") {
+            return {
+                id: slugify((stepData && stepData.id ? stepData.id + "-" : "") + entry),
+                name: entry,
+                description: "",
+                moscow: ""
+            };
+        }
+
+        return entry;
+    });
+}
+
+function getSubprocessName(entry) {
+    return safeString(entry && entry.name ? entry.name : entry);
+}
+
 function estimateStepContainerHeight(stepData) {
     var titleHeight = estimateTextHeight(stepData.name, CONST.Layout.StepWidth, CONST.Layout.StepMinHeight);
     var subprocessWidth = getSubprocessWidth();
     var subprocessHeight = 0;
+    var subprocesses = getSubprocessEntries(stepData);
 
-    stepData.subprocesses.forEach(function (subprocessName, index) {
+    subprocesses.forEach(function (subprocessData, index) {
         subprocessHeight += estimateTextHeight(
-            subprocessName,
+            getSubprocessName(subprocessData),
             subprocessWidth,
             CONST.Layout.SubprocessMinHeight
         );
 
-        if (index < stepData.subprocesses.length - 1) {
+        if (index < subprocesses.length - 1) {
             subprocessHeight += CONST.Layout.SubprocessGap;
         }
     });
@@ -736,6 +756,8 @@ function createView() {
             {
                 id: "sabsa-process:output:" + outputData.id,
                 ProcessViewRole: "OutputArtifact",
+                OutputOrigin: safeString(outputData.origin),
+                MoSCoW: safeString(outputData.moscow),
                 SourceDocument: CONST.SourceMarkdownPath
             },
             outputData.description
@@ -778,6 +800,7 @@ function createView() {
                 id: "sabsa-process:step:" + stepData.id,
                 ProcessViewRole: "StepProcess",
                 StepNumber: String(stepIndex + 1),
+                MoSCoW: safeString(stepData.moscow),
                 SourceDocument: CONST.SourceMarkdownPath
             },
             stepData.description
@@ -815,8 +838,9 @@ function createView() {
 
         stepVisuals.push(stepEntry);
 
-        stepData.subprocesses.forEach(function (subprocessName, subprocessIndex) {
-            var subprocessId = slugify(stepData.id + "-" + subprocessName);
+        getSubprocessEntries(stepData).forEach(function (subprocessData, subprocessIndex) {
+            var subprocessName = getSubprocessName(subprocessData);
+            var subprocessId = safeString(subprocessData.id) || slugify(stepData.id + "-" + subprocessName);
             var subprocessConcept = ensureConcept(
                 "business-process",
                 subprocessName,
@@ -826,19 +850,20 @@ function createView() {
                     ProcessViewRole: "Subprocess",
                     StepNumber: String(stepIndex + 1),
                     SubprocessOrder: String(subprocessIndex + 1),
+                    MoSCoW: safeString(subprocessData.moscow),
                     ParentStep: stepData.id,
                     SourceDocument: CONST.SourceMarkdownPath
                 },
-                "Sub-process of " + stepData.name + " derived from " + CONST.SourceMarkdownPath + "."
+                safeString(subprocessData.description) || ("Sub-process of " + stepData.name + " derived from " + CONST.SourceMarkdownPath + ".")
             );
             var relativeSubY = CONST.Layout.StepInnerY + CONST.Layout.SubprocessStartGap;
             var subprocessWidth = getSubprocessWidth();
-            var previousSubprocesses = stepData.subprocesses.slice(0, subprocessIndex);
+            var previousSubprocesses = getSubprocessEntries(stepData).slice(0, subprocessIndex);
             var subHeight = estimateTextHeight(subprocessName, subprocessWidth, CONST.Layout.SubprocessMinHeight);
 
-            previousSubprocesses.forEach(function (previousName) {
+            previousSubprocesses.forEach(function (previousSubprocess) {
                 relativeSubY += estimateTextHeight(
-                    previousName,
+                    getSubprocessName(previousSubprocess),
                     subprocessWidth,
                     CONST.Layout.SubprocessMinHeight
                 ) + CONST.Layout.SubprocessGap;
@@ -872,7 +897,8 @@ function createView() {
                 visual: subVisual,
                 data: {
                     id: subprocessId,
-                    name: subprocessName
+                    name: subprocessName,
+                    moscow: safeString(subprocessData.moscow)
                 },
                 order: subprocessIndex + 1
             });
