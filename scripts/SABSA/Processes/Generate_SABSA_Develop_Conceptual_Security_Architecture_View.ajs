@@ -590,6 +590,7 @@ function buildInputDocumentation(inputData) {
     return inputData.description +
         "\n\nOrigin: " + safeString(inputData.origin) +
         "\nOrigin frameworks: " + safeString((inputData.origin_frameworks || []).join("; ")) +
+        "\nReferences: " + safeString((inputData.references || []).join("; ")) +
         "\nMoSCoW: " + safeString(inputData.moscow);
 }
 
@@ -1116,6 +1117,7 @@ function createView() {
                 ProcessViewRole: "InputArtifact",
                 InputOrigin: inputData.origin,
                 OriginFrameworks: safeString((inputData.origin_frameworks || []).join("; ")),
+                InputReferences: safeString((inputData.references || []).join("; ")),
                 InputWorkPackageId: safeString(inputData.work_package && inputData.work_package.id),
                 InputWorkPackageName: safeString(inputData.work_package && inputData.work_package.name),
                 MoSCoW: inputData.moscow,
@@ -1154,10 +1156,11 @@ function createView() {
                 id: "sabsa-process:output:" + outputData.id,
                 ProcessViewRole: "OutputArtifact",
                 OutputOrigin: safeString(outputData.origin),
+                OutputReferences: safeString((outputData.references || []).join("; ")),
                 MoSCoW: safeString(outputData.moscow),
                 SourceDocument: CONST.SourceMarkdownPath
             },
-            outputData.description
+            buildArtifactDocumentation(outputData)
         );
         var visual = addStyledVisual(
             view,
