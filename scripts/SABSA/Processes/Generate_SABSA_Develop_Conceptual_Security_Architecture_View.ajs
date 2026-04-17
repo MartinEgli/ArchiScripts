@@ -70,7 +70,7 @@ var CONST = {
         StepFill: "#ffff9a",
         SubprocessFill: "#fff6bf",
         InputFill: "#ccffff",
-        OutputFill: "#ccff9a",
+        OutputFill: "#ffff64",
         NoteFill: "#f3f3f3",
         LineColor: "#111111",
         FontColor: "#111111"
@@ -240,6 +240,10 @@ function resolveConceptPlacement(conceptType, properties) {
         if (role === "OutputArtifact") {
             return { rootName: "Business", pathSegments: getProcessFolderSegments([CONST.Folder.Outputs]) };
         }
+    }
+
+    if (conceptType === "work-package" && role === "OutputArtifact") {
+        return { rootName: "Implementation & Migration", pathSegments: getProcessFolderSegments([CONST.Folder.Outputs]) };
     }
 
     return null;
@@ -726,7 +730,7 @@ function createView() {
 
     DATA.outputs.forEach(function (outputData, index) {
         var concept = ensureConcept(
-            "business-object",
+            "work-package",
             outputData.name,
             "output:" + outputData.id,
             {
@@ -952,13 +956,12 @@ function createView() {
 
     outputVisuals.forEach(function (entry) {
         var relationship = ensureRelationship(
-            "access-relationship",
+            "association-relationship",
             mainConcept,
             entry.concept,
             "output-access:" + DATA.process.id + ":" + entry.data.id,
             {
                 ProcessViewRelationRole: "OutputAccess",
-                AccessMode: "Write",
                 SourceDocument: CONST.SourceMarkdownPath
             }
         );
