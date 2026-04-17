@@ -52,3 +52,8 @@ Der vollstaendige Analyse-Ordner liegt bewusst im Superrepo unter `../analyse/`,
 
 Nur JSON-Dateien werden nach `data/sabsa/` gespiegelt. Fuer den Abgleich steht im Superrepo das Skript `../scripts/update-archiscripts-data.ps1` bereit. Wenn beim Kopieren bereits eine Zieldatei vorhanden ist, wird sie zuerst mit Zeitstempel nach `data/sabsa/archive/` verschoben.
 
+Aktuell werden dort insbesondere diese Dateien gespiegelt:
+
+- `data/sabsa/sabsa-architecture-matrix-data.json`
+- `data/sabsa/sabsa-management-matrix-data.json`
+
