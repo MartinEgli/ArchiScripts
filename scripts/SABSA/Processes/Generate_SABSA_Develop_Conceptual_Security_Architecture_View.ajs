@@ -39,25 +39,27 @@ var CONST = {
         MainX: 520,
         OutputX: 1770,
         MainY: 40,
-        MainWidth: 420,
-        MainHeight: 90,
+        MainWidth: 500,
+        MainMinHeight: 120,
+        MainInnerX: 18,
+        MainInnerY: 54,
+        MainInnerRight: 18,
+        MainInnerBottom: 20,
         InputWidth: 310,
         OutputWidth: 360,
         ArtifactMinHeight: 58,
         ArtifactGap: 18,
-        StepStartY: 190,
-        StepX: 520,
-        StepWidth: 460,
-        StepMinHeight: 86,
-        StepGap: 28,
+        StepWidth: 464,
+        StepMinHeight: 72,
+        StepGap: 18,
         StepInnerX: 18,
-        StepInnerY: 52,
+        StepInnerY: 40,
         StepInnerRight: 18,
-        StepInnerBottom: 18,
-        SubprocessStartGap: 12,
+        StepInnerBottom: 14,
+        SubprocessStartGap: 8,
         SubprocessWidth: 424,
-        SubprocessMinHeight: 56,
-        SubprocessGap: 14
+        SubprocessMinHeight: 42,
+        SubprocessGap: 10
     },
     Style: {
         MainProcessFill: "#ffcc64",
@@ -534,6 +536,20 @@ function estimateStepContainerHeight(stepData) {
         CONST.Layout.StepInnerBottom;
 }
 
+function estimateMainProcessHeight() {
+    var totalHeight = CONST.Layout.MainInnerY + CONST.Layout.MainInnerBottom;
+
+    DATA.steps.forEach(function (stepData, index) {
+        totalHeight += estimateStepContainerHeight(stepData);
+
+        if (index < DATA.steps.length - 1) {
+            totalHeight += CONST.Layout.StepGap;
+        }
+    });
+
+    return Math.max(CONST.Layout.MainMinHeight, totalHeight);
+}
+
 function confirmExecution() {
     var subprocessCount = DATA.steps.reduce(function (sum, step) {
         return sum + step.subprocesses.length;
@@ -582,7 +598,8 @@ function createView() {
         DATA.process.description
     );
     var mainVisual;
-    var currentStepY = CONST.Layout.StepStartY;
+    var currentStepY = CONST.Layout.MainInnerY;
+    var mainHeight = estimateMainProcessHeight();
 
     view.documentation = "Generated from " + CONST.SourceMarkdownPath + ". Shows the main process, step structure, and top-level inputs/outputs for Develop Conceptual Security Architecture.";
     moveViewToFolder(view);
@@ -654,7 +671,7 @@ function createView() {
         CONST.Layout.MainX,
         CONST.Layout.MainY,
         CONST.Layout.MainWidth,
-        CONST.Layout.MainHeight,
+        mainHeight,
         CONST.Style.MainProcessFill
     );
     stats.processes++;
@@ -672,12 +689,11 @@ function createView() {
             },
             stepData.description
         );
-        var stepX = CONST.Layout.StepX;
         var stepHeight = estimateStepContainerHeight(stepData);
         var stepVisual = addStyledVisual(
-            view,
+            mainVisual,
             stepConcept,
-            stepX,
+            CONST.Layout.MainInnerX,
             currentStepY,
             CONST.Layout.StepWidth,
             stepHeight,
