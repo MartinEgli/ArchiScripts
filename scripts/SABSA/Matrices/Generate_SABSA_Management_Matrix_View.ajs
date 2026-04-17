@@ -35,6 +35,8 @@ var CONST = {
         RowHeaderReserve: 22,
         CellHeaderMinReserve: 22,
         CellHeaderGap: 0,
+        InterRowNoteHeight: 34,
+        InterRowNoteGap: 8,
         RowInsetX: 2,
         RowRightInset: 12,
         RowInsetY: 6,
@@ -53,6 +55,7 @@ var CONST = {
         ColumnFill: "#ff9a69",
         CellFill: "#ffff64",
         RepresentationFill: "#ffffcc",
+        NoteFill: "#fff7cc",
         RowFillById: {
             "contextual-overlay": "#ff9aff",
             "conceptual-overlay": "#ccccff",
@@ -405,6 +408,13 @@ function addStyledVisual(container, concept, x, y, width, height, fillColor) {
     return visual;
 }
 
+function addNoteVisual(container, text, x, y, width, height, fillColor) {
+    var note = container.createObject("note", x, y, width, height);
+    note.text = text;
+    styleVisual(note, fillColor || CONST.Style.NoteFill);
+    return note;
+}
+
 function getRowFill(rowId) {
     return CONST.Style.RowFillById[rowId] || "#f0f0f0";
 }
@@ -618,7 +628,7 @@ function createMatrixView(matrixData) {
         stats.columns++;
     });
 
-    matrixData.rows.forEach(function (rowData) {
+    matrixData.rows.forEach(function (rowData, rowIndex) {
         var rowKey = safeString(rowData.conceptKey) || ("row:" + rowData.id);
         var rowConcept = ensureConcept("grouping", rowData.title, rowKey, {
             id: rowData.id,
@@ -719,6 +729,19 @@ function createMatrixView(matrixData) {
         });
 
         rowY += rowHeight + CONST.Layout.RowGap;
+
+        if (rowIndex === 0 && matrixData.rows.length > 1) {
+            addNoteVisual(
+                view,
+                "The row above is a repeat of Layer 6 of the main SABSA Matrix.",
+                CONST.Layout.StartX,
+                rowY,
+                CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + CONST.Layout.RowInsetX + CONST.Layout.RowRightInset,
+                CONST.Layout.InterRowNoteHeight,
+                CONST.Style.NoteFill
+            );
+            rowY += CONST.Layout.InterRowNoteHeight + CONST.Layout.InterRowNoteGap;
+        }
     });
 
     return view;
