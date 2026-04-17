@@ -708,6 +708,18 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
     relationship.name = "";
     relationship.prop("SabsaProcessKey", key);
 
+    if (relationshipType === "access-relationship" && properties && properties.AccessMode) {
+        try {
+            relationship.accessType = safeString(properties.AccessMode).toLowerCase();
+        } catch (error) {
+            logger.debug("Could not apply access type on relationship.", {
+                key: key,
+                access_mode: safeString(properties.AccessMode),
+                error: String(error)
+            }, "sabsa.process.relationship.access_type.skipped");
+        }
+    }
+
     Object.keys(properties || {}).forEach(function (propertyName) {
         relationship.prop(propertyName, safeString(properties[propertyName]));
     });
