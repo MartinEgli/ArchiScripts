@@ -38,32 +38,44 @@
     {
       "id": "what-business-attributes-taxonomy-and-profile",
       "name": "WHAT: Business Attributes Taxonomy & Profile with integrated performance targets",
-      "description": "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets."
+      "description": "Conceptual layer WHAT artefact with prioritised attributes and quantified KPI/KRI targets.",
+      "moscow": "Must",
+      "origin": "Consolidated output of Step 1 'Synthesize Business Value & Knowledge Strategy'."
     },
     {
       "id": "why-enablement-and-control-objectives",
       "name": "WHY: Enablement & Control Objectives; Policy Architecture; Risk Categories; Risk Management Strategies; Risk Modelling Framework; Assurance Framework",
-      "description": "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance."
+      "description": "Conceptual layer WHY artefacts for objectives, policy, risk, strategy, and assurance.",
+      "moscow": "Must",
+      "origin": "Consolidated output of Step 2 'Develop Risk Management Strategy & Objectives'."
     },
     {
       "id": "how-inventory-and-process-mapping-framework",
       "name": "HOW: Inventory of all Operational Processes; Process Mapping Framework; Architectural Strategies for IT used in Process Support",
-      "description": "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability."
+      "description": "Conceptual layer HOW artefacts for process assurance and process-to-objective traceability.",
+      "moscow": "Must",
+      "origin": "Consolidated output of Step 3 'Define Strategies for Process Assurance'."
     },
     {
       "id": "where-security-domain-concepts-and-framework",
       "name": "WHERE: Security Domain Concepts & Framework",
-      "description": "Conceptual layer WHERE artefact defining security domains and their interactions."
+      "description": "Conceptual layer WHERE artefact defining security domains and their interactions.",
+      "moscow": "Must",
+      "origin": "Consolidated output of Step 4 'Synthesize Domain Framework'."
     },
     {
       "id": "who-owners-custodians-users-and-trust-framework",
       "name": "WHO: Owners, Custodians & Users; Service Providers & Customers; Trust Modelling Framework",
-      "description": "Conceptual layer WHO artefacts for entities, accountability, and trust."
+      "description": "Conceptual layer WHO artefacts for entities, accountability, and trust.",
+      "moscow": "Must",
+      "origin": "Consolidated output of Step 5 'Develop Security & Risk Governance; Trust Framework'."
     },
     {
       "id": "when-through-life-risk-management-framework",
       "name": "WHEN: Through-Life Risk Management Framework; Attribute Performance Targets",
-      "description": "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability."
+      "description": "Conceptual layer WHEN artefacts for lifecycle timing and performance traceability.",
+      "moscow": "Should",
+      "origin": "Consolidated output of Step 6 'Define Time Management Framework'."
     }
   ],
   "steps": [
@@ -75,32 +87,149 @@
         {
           "id": "sabsa-business-attributes-profile-bap",
           "name": "SABSA Business Attributes Profile (BAP)",
-          "description": "Validated business attributes profile from the contextual layer."
+          "description": "Validated business attributes profile from the contextual layer.",
+          "moscow": "Must",
+          "origin": "Inherited from Develop Contextual Security Architecture and its contextual WHAT view."
         },
         {
           "id": "stakeholder-expectations-and-business-strategy",
           "name": "Stakeholder Expectations & Business Strategy",
-          "description": "Stakeholder goals, vision, and performance expectations relevant for the conceptual WHAT perspective."
+          "description": "Stakeholder goals, vision, and performance expectations relevant for the conceptual WHAT perspective.",
+          "moscow": "Should",
+          "origin": "Inherited from stakeholder goals, business strategy, and performance expectations."
         },
         {
           "id": "sabsa-generic-attributes-library",
           "name": "SABSA Generic Attributes Library",
-          "description": "Reference taxonomy used to validate completeness and consistency of the business attributes profile."
+          "description": "Reference taxonomy used to validate completeness and consistency of the business attributes profile.",
+          "moscow": "Should",
+          "origin": "Taken from the SABSA Generic Attributes Library as reference taxonomy."
         }
       ],
       "outputs": [
         {
           "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
-          "description": "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets."
+          "description": "Conceptual WHAT artefact with prioritised business attributes and integrated performance targets.",
+          "moscow": "Must",
+          "origin": "Produced across Sub-processes 1.1 to 1.4 and finalised through stakeholder validation."
         }
       ],
       "subprocesses": [
-        "Attribute Taxonomy Review",
-        "Performance Target Integration",
-        "Knowledge Strategy Alignment",
-        "Stakeholder Validation"
-      ]
+        {
+          "id": "attribute-taxonomy-review",
+          "name": "Attribute Taxonomy Review",
+          "description": "Checks the completeness and consistency of the business attributes profile, closes gaps against the SABSA Generic Attributes Library, and removes redundant or conflicting attributes.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "draft-bap-contextual-layer",
+              "name": "Draft BAP from Contextual Layer",
+              "moscow": "Must",
+              "origin": "Inherited from the contextual predecessor process."
+            },
+            {
+              "id": "sabsa-generic-attributes-library",
+              "name": "SABSA Generic Attributes Library",
+              "moscow": "Should",
+              "origin": "Reference taxonomy from SABSA."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "validated-complete-attribute-list",
+              "name": "Validated, complete attribute list",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 1.1."
+            }
+          ]
+        },
+        {
+          "id": "performance-target-integration",
+          "name": "Performance Target Integration",
+          "description": "Defines measurable performance targets for each business attribute and integrates KPI and KRI baselines into the attribute profile.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "validated-complete-attribute-list",
+              "name": "Validated attribute list (from 1.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 1.1."
+            },
+            {
+              "id": "stakeholder-performance-expectations",
+              "name": "Stakeholder performance expectations",
+              "moscow": "Should",
+              "origin": "Inherited from stakeholder and business strategy context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "attributes-with-quantified-performance-targets",
+              "name": "Attributes with quantified performance targets",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 1.2."
+            }
+          ]
+        },
+        {
+          "id": "knowledge-strategy-alignment",
+          "name": "Knowledge Strategy Alignment",
+          "description": "Derives information protection requirements and conceptual business information architecture needs from business attributes and performance targets.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "attributes-with-performance-targets",
+              "name": "Attributes with Performance Targets (from 1.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 1.2."
+            },
+            {
+              "id": "business-information-architecture-context",
+              "name": "Business Information Architecture Context",
+              "moscow": "Should",
+              "origin": "Inherited from TOGAF business architecture context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "information-protection-requirements-mapped-to-attributes",
+              "name": "Information protection requirements (mapped to attributes)",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 1.3."
+            }
+          ]
+        },
+        {
+          "id": "stakeholder-validation",
+          "name": "Stakeholder Validation",
+          "description": "Validates and formally approves the tailored business attributes profile together with business owners and governance stakeholders.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "draft-tailored-bap",
+              "name": "Draft Tailored BAP (from 1.2 + 1.3)",
+              "moscow": "Must",
+              "origin": "Combined outputs of Sub-processes 1.2 and 1.3."
+            },
+            {
+              "id": "stakeholder-register",
+              "name": "Stakeholder Register",
+              "moscow": "Should",
+              "origin": "Inherited from TOGAF stakeholder management artefacts."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "approved-tailored-bap",
+              "name": "Approved Tailored BAP",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 1.4."
+            }
+          ]
+        }
+      ],
+      "moscow": "Must"
     },
     {
       "id": "step-2",
@@ -110,64 +239,259 @@
         {
           "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
-          "description": "Output from Step 1 and the basis for deriving control objectives."
+          "description": "Output from Step 1 and the basis for deriving control objectives.",
+          "moscow": "Must",
+          "origin": "Output of Step 1."
         },
         {
           "id": "business-risk-context",
           "name": "Business Risk Context",
-          "description": "Contextual threats, vulnerabilities, and impacts used for the conceptual WHY perspective."
+          "description": "Contextual threats, vulnerabilities, and impacts used for the conceptual WHY perspective.",
+          "moscow": "Must",
+          "origin": "Inherited from contextual risk and threat analysis."
         },
         {
           "id": "compliance-and-regulatory-requirements",
           "name": "Compliance & Regulatory Requirements",
-          "description": "Relevant regulatory and contractual obligations shaping conceptual policy architecture."
+          "description": "Relevant regulatory and contractual obligations shaping conceptual policy architecture.",
+          "moscow": "Should",
+          "origin": "Inherited from compliance baseline and regulatory obligations."
         },
         {
           "id": "threat-intelligence-conceptual",
           "name": "Threat Intelligence (conceptual)",
-          "description": "High-level threat landscape used to support conceptual risk categorisation."
+          "description": "High-level threat landscape used to support conceptual risk categorisation.",
+          "moscow": "Could",
+          "origin": "Derived from conceptual threat intelligence and high-level threat landscape analysis."
         }
       ],
       "outputs": [
         {
           "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
-          "description": "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective."
+          "description": "Measurable objectives derived from business attributes and traced into the conceptual WHY perspective.",
+          "moscow": "Must",
+          "origin": "Produced by Sub-process 2.1."
         },
         {
           "id": "policy-architecture",
           "name": "Policy Architecture",
-          "description": "Conceptual policy hierarchy linking control objectives, requirements, and governance intent."
+          "description": "Conceptual policy hierarchy linking control objectives, requirements, and governance intent.",
+          "moscow": "Must",
+          "origin": "Produced by Sub-process 2.4."
         },
         {
           "id": "risk-categories",
           "name": "Risk Categories",
-          "description": "Conceptual risk categories mapped to business attributes and control objectives."
+          "description": "Conceptual risk categories mapped to business attributes and control objectives.",
+          "moscow": "Must",
+          "origin": "Produced by Sub-process 2.2."
         },
         {
           "id": "risk-management-strategies",
           "name": "Risk Management Strategies",
-          "description": "Conceptual risk treatment strategies aligned to risk appetite and policy direction."
+          "description": "Conceptual risk treatment strategies aligned to risk appetite and policy direction.",
+          "moscow": "Must",
+          "origin": "Produced by Sub-process 2.3."
         },
         {
           "id": "risk-modelling-framework",
           "name": "Risk Modelling Framework",
-          "description": "Shared conceptual evaluation framework for assessing and comparing risk across layers."
+          "description": "Shared conceptual evaluation framework for assessing and comparing risk across layers.",
+          "moscow": "Should",
+          "origin": "Produced by Sub-process 2.5."
         },
         {
           "id": "assurance-framework",
           "name": "Assurance Framework",
-          "description": "Conceptual assurance framework mapping evidence and assurance activities to objectives."
+          "description": "Conceptual assurance framework mapping evidence and assurance activities to objectives.",
+          "moscow": "Should",
+          "origin": "Produced by Sub-process 2.6."
         }
       ],
       "subprocesses": [
-        "Control Objectives Derivation",
-        "Risk Categorisation",
-        "Risk Appetite & Strategy Definition",
-        "Policy Architecture Design",
-        "Risk Modelling Framework Establishment",
-        "Assurance Framework Definition"
-      ]
+        {
+          "id": "control-objectives-derivation",
+          "name": "Control Objectives Derivation",
+          "description": "Derives measurable enablement and control objectives from business attributes and ensures complete traceability from attribute to objective.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "name": "Business Attributes Taxonomy & Profile (from Step 1)",
+              "moscow": "Must",
+              "origin": "Output of Step 1."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "draft-enablement-and-control-objectives",
+              "name": "Draft Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 2.1."
+            }
+          ]
+        },
+        {
+          "id": "risk-categorisation",
+          "name": "Risk Categorisation",
+          "description": "Organises risks into conceptual categories and maps them to business attributes and control objectives.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "draft-enablement-and-control-objectives",
+              "name": "Draft Control Objectives (from 2.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.1."
+            },
+            {
+              "id": "business-risk-context",
+              "name": "Business Risk Context",
+              "moscow": "Must",
+              "origin": "Inherited from contextual risk analysis."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "risk-categories-taxonomy",
+              "name": "Risk Categories Taxonomy",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 2.2."
+            }
+          ]
+        },
+        {
+          "id": "risk-appetite-and-strategy-definition",
+          "name": "Risk Appetite & Strategy Definition",
+          "description": "Defines conceptual risk appetite and derives strategic treatment options such as avoid, transfer, mitigate, or accept.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "risk-categories-taxonomy",
+              "name": "Risk Categories Taxonomy (from 2.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.2."
+            },
+            {
+              "id": "management-risk-appetite-directives",
+              "name": "Management directives on risk appetite",
+              "moscow": "Must",
+              "origin": "Provided by management and enterprise governance context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "risk-appetite-statement",
+              "name": "Risk Appetite Statement",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 2.3."
+            },
+            {
+              "id": "risk-management-strategies",
+              "name": "Risk Management Strategies",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 2.3."
+            }
+          ]
+        },
+        {
+          "id": "policy-architecture-design",
+          "name": "Policy Architecture Design",
+          "description": "Builds the conceptual security policy hierarchy and maps policies to control objectives and strategic requirements.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "draft-enablement-and-control-objectives",
+              "name": "Draft Control Objectives (from 2.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.1."
+            },
+            {
+              "id": "risk-management-strategies",
+              "name": "Risk Management Strategies (from 2.3)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.3."
+            },
+            {
+              "id": "compliance-and-regulatory-requirements",
+              "name": "Compliance & Regulatory Requirements",
+              "moscow": "Should",
+              "origin": "Inherited from the compliance baseline."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "policy-architecture",
+              "name": "Policy Architecture",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 2.4."
+            }
+          ]
+        },
+        {
+          "id": "risk-modelling-framework-establishment",
+          "name": "Risk Modelling Framework Establishment",
+          "description": "Defines the conceptual methodology, scales, and models for consistent risk evaluation across later SABSA layers.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "risk-categories-taxonomy",
+              "name": "Risk Categories Taxonomy (from 2.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.2."
+            },
+            {
+              "id": "risk-management-strategies",
+              "name": "Risk Management Strategies (from 2.3)",
+              "moscow": "Should",
+              "origin": "Output of Sub-process 2.3."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "risk-modelling-framework",
+              "name": "Risk Modelling Framework",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 2.5."
+            }
+          ]
+        },
+        {
+          "id": "assurance-framework-definition",
+          "name": "Assurance Framework Definition",
+          "description": "Defines the conceptual assurance model and links assurance activities and evidence needs to control objectives.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "draft-enablement-and-control-objectives",
+              "name": "Draft Control Objectives (from 2.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.1."
+            },
+            {
+              "id": "policy-architecture",
+              "name": "Policy Architecture (from 2.4)",
+              "moscow": "Should",
+              "origin": "Output of Sub-process 2.4."
+            },
+            {
+              "id": "risk-modelling-framework",
+              "name": "Risk Modelling Framework (from 2.5)",
+              "moscow": "Should",
+              "origin": "Output of Sub-process 2.5."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "assurance-framework",
+              "name": "Assurance Framework",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 2.6."
+            }
+          ]
+        }
+      ],
+      "moscow": "Must"
     },
     {
       "id": "step-3",
@@ -177,48 +501,216 @@
         {
           "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
-          "description": "Conceptual control objectives determining which operational processes matter most."
+          "description": "Conceptual control objectives determining which operational processes matter most.",
+          "moscow": "Must",
+          "origin": "Output of Step 2."
         },
         {
           "id": "policy-architecture",
           "name": "Policy Architecture",
-          "description": "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping."
+          "description": "Conceptual policy hierarchy defining the scope and criteria for process selection and mapping.",
+          "moscow": "Must",
+          "origin": "Output of Step 2."
         },
         {
           "id": "business-process-inventory-contextual-layer",
           "name": "Business Process Inventory (Contextual Layer)",
-          "description": "Existing list of business processes used as the starting point for operational process analysis."
+          "description": "Existing list of business processes used as the starting point for operational process analysis.",
+          "moscow": "Must",
+          "origin": "Inherited from the contextual layer business process inventory."
         },
         {
           "id": "technology-context",
           "name": "Technology Context",
-          "description": "High-level technology architecture context supporting the derivation of process-support strategies."
+          "description": "High-level technology architecture context supporting the derivation of process-support strategies.",
+          "moscow": "Could",
+          "origin": "Inherited from TOGAF technology architecture context."
         }
       ],
       "outputs": [
         {
           "id": "inventory-of-all-operational-processes",
           "name": "Inventory of all Operational Processes (IT, industrial & manual)",
-          "description": "Classified inventory of operational processes across IT, industrial, and manual contexts."
+          "description": "Classified inventory of operational processes across IT, industrial, and manual contexts.",
+          "moscow": "Must",
+          "origin": "Built in Sub-processes 3.1 and 3.2, then validated in Sub-process 3.5."
         },
         {
           "id": "process-mapping-framework",
           "name": "Process Mapping Framework",
-          "description": "Traceability framework linking processes to control objectives and business attributes."
+          "description": "Traceability framework linking processes to control objectives and business attributes.",
+          "moscow": "Must",
+          "origin": "Produced in Sub-process 3.3 and confirmed in Sub-process 3.5."
         },
         {
           "id": "architectural-strategies-for-it-used-in-process-support",
           "name": "Architectural Strategies for IT used in Process Support",
-          "description": "Conceptual IT architecture strategies used to support and secure operational processes."
+          "description": "Conceptual IT architecture strategies used to support and secure operational processes.",
+          "moscow": "Should",
+          "origin": "Produced by Sub-process 3.4."
         }
       ],
       "subprocesses": [
-        "Operational Process Inventory",
-        "Process Classification & Criticality",
-        "Process Mapping Framework Design",
-        "IT Architectural Strategy Derivation",
-        "Process Assurance Validation"
-      ]
+        {
+          "id": "operational-process-inventory",
+          "name": "Operational Process Inventory",
+          "description": "Captures the full inventory of operational processes across IT, industrial, and manual contexts and assesses their security relevance.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "business-process-inventory-contextual-layer",
+              "name": "Business Process Inventory (Contextual Layer)",
+              "moscow": "Must",
+              "origin": "Inherited from the contextual layer."
+            },
+            {
+              "id": "assurance-framework",
+              "name": "Assurance Framework (from 2.6)",
+              "moscow": "Should",
+              "origin": "Output of Sub-process 2.6."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "raw-inventory-of-all-operational-processes",
+              "name": "Raw inventory of all operational processes",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 3.1."
+            }
+          ]
+        },
+        {
+          "id": "process-classification-and-criticality",
+          "name": "Process Classification & Criticality",
+          "description": "Classifies processes by criticality and protection need and maps business attributes and control objectives to them.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "raw-inventory-of-all-operational-processes",
+              "name": "Raw inventory of all operational processes (from 3.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 3.1."
+            },
+            {
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "name": "Business Attributes Taxonomy & Profile",
+              "moscow": "Must",
+              "origin": "Output of Step 1."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "classified-process-list-with-criticality-assessment",
+              "name": "Classified process list with criticality assessment",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 3.2."
+            }
+          ]
+        },
+        {
+          "id": "process-mapping-framework-design",
+          "name": "Process Mapping Framework Design",
+          "description": "Defines the mapping method and traceability structure from process to control objective to business attribute.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "classified-process-list-with-criticality-assessment",
+              "name": "Classified process list (from 3.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 3.2."
+            },
+            {
+              "id": "policy-architecture",
+              "name": "Policy Architecture (from 2.4)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.4."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "process-mapping-framework",
+              "name": "Process Mapping Framework",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 3.3."
+            }
+          ]
+        },
+        {
+          "id": "it-architectural-strategy-derivation",
+          "name": "IT Architectural Strategy Derivation",
+          "description": "Derives conceptual IT architecture strategies that support and secure operational process execution.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "process-mapping-framework",
+              "name": "Process Mapping Framework (from 3.3)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 3.3."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            },
+            {
+              "id": "technology-context",
+              "name": "Technology Context (TOGAF)",
+              "moscow": "Should",
+              "origin": "Inherited from TOGAF technology architecture context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "architectural-strategies-for-it-used-in-process-support",
+              "name": "Architectural Strategies for IT used in Process Support",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 3.4."
+            }
+          ]
+        },
+        {
+          "id": "process-assurance-validation",
+          "name": "Process Assurance Validation",
+          "description": "Checks whether all critical processes are covered by control objectives and confirms traceability from process to objective to attribute.",
+          "moscow": "Could",
+          "inputs": [
+            {
+              "id": "all-outputs-from-3-1-to-3-4",
+              "name": "All outputs from 3.1 to 3.4",
+              "moscow": "Must",
+              "origin": "Combined outputs of the preceding Sub-processes 3.1 to 3.4."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "validated-inventory-of-all-operational-processes",
+              "name": "Validated Inventory of all Operational Processes",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 3.5."
+            },
+            {
+              "id": "confirmed-process-mapping-framework",
+              "name": "Confirmed Process Mapping Framework",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 3.5."
+            }
+          ]
+        }
+      ],
+      "moscow": "Must"
     },
     {
       "id": "step-4",
@@ -228,37 +720,162 @@
         {
           "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
-          "description": "Business attributes and performance targets defining domain protection needs."
+          "description": "Business attributes and performance targets defining domain protection needs.",
+          "moscow": "Must",
+          "origin": "Output of Step 1."
         },
         {
           "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
-          "description": "Conceptual objectives shaping the scope and intent of security domains."
+          "description": "Conceptual objectives shaping the scope and intent of security domains.",
+          "moscow": "Must",
+          "origin": "Output of Step 2."
         },
         {
           "id": "policy-architecture",
           "name": "Policy Architecture",
-          "description": "Conceptual policy structure influencing domain boundaries and control expectations."
+          "description": "Conceptual policy structure influencing domain boundaries and control expectations.",
+          "moscow": "Should",
+          "origin": "Output of Step 2."
         },
         {
           "id": "organisation-structure-and-locations",
           "name": "Organisation Structure & Locations",
-          "description": "Organisational and geographical structure used to identify conceptual security domains."
+          "description": "Organisational and geographical structure used to identify conceptual security domains.",
+          "moscow": "Should",
+          "origin": "Inherited from organisational structure and location context."
         }
       ],
       "outputs": [
         {
           "id": "security-domain-concepts-and-framework",
           "name": "Security Domain Concepts & Framework",
-          "description": "Conceptual domain framework with domain boundaries, interactions, and attribute mappings."
+          "description": "Conceptual domain framework with domain boundaries, interactions, and attribute mappings.",
+          "moscow": "Must",
+          "origin": "Produced across Sub-processes 4.1 to 4.4 and finalised in Sub-process 4.4."
         }
       ],
       "subprocesses": [
-        "Domain Identification",
-        "Domain Attribute Mapping",
-        "Domain Boundary Definition",
-        "Security Domain Concept Formalization"
-      ]
+        {
+          "id": "domain-identification",
+          "name": "Domain Identification",
+          "description": "Identifies conceptual security domains from business structure and groups of homogeneous security requirements.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "name": "Business Attributes Taxonomy & Profile",
+              "moscow": "Must",
+              "origin": "Output of Step 1."
+            },
+            {
+              "id": "organisation-structure-and-locations",
+              "name": "Organisation Structure & Locations",
+              "moscow": "Should",
+              "origin": "Inherited from organisational and location context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "preliminary-domain-list",
+              "name": "Preliminary domain list",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 4.1."
+            }
+          ]
+        },
+        {
+          "id": "domain-attribute-mapping",
+          "name": "Domain Attribute Mapping",
+          "description": "Maps business attributes and control objectives to identified domains to expose domain-specific security demands.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "preliminary-domain-list",
+              "name": "Preliminary domain list (from 4.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 4.1."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Control Objectives (from Step 2)",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "domain-to-attribute-mapping",
+              "name": "Domain-to-attribute mapping",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 4.2."
+            }
+          ]
+        },
+        {
+          "id": "domain-boundary-definition",
+          "name": "Domain Boundary Definition",
+          "description": "Defines conceptual boundaries, trust transitions, and interaction points between domains.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "domain-to-attribute-mapping",
+              "name": "Domain-to-attribute mapping (from 4.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 4.2."
+            },
+            {
+              "id": "process-mapping-framework",
+              "name": "Process Mapping Framework (from Step 3)",
+              "moscow": "Should",
+              "origin": "Output of Step 3."
+            },
+            {
+              "id": "business-architecture-context",
+              "name": "Business Architecture Context (TOGAF)",
+              "moscow": "Could",
+              "origin": "Inherited from TOGAF business architecture context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "defined-domain-boundaries-and-interaction-points",
+              "name": "Defined domain boundaries and interaction points",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 4.3."
+            }
+          ]
+        },
+        {
+          "id": "security-domain-concept-formalization",
+          "name": "Security Domain Concept Formalization",
+          "description": "Consolidates and formalises the domain concepts and ensures consistency with the rest of the conceptual-layer artefacts.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "defined-domain-boundaries-and-interaction-points",
+              "name": "Domain boundaries (from 4.3)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 4.3."
+            },
+            {
+              "id": "domain-to-attribute-mapping",
+              "name": "Domain-to-attribute mapping (from 4.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 4.2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "security-domain-concepts-and-framework",
+              "name": "Security Domain Concepts & Framework (finalised)",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 4.4."
+            }
+          ]
+        }
+      ],
+      "moscow": "Must"
     },
     {
       "id": "step-5",
@@ -268,48 +885,222 @@
         {
           "id": "security-domain-concepts-and-framework",
           "name": "Security Domain Concepts & Framework",
-          "description": "Conceptual domain model providing the structure for governance and trust allocation."
+          "description": "Conceptual domain model providing the structure for governance and trust allocation.",
+          "moscow": "Must",
+          "origin": "Output of Step 4."
         },
         {
           "id": "enablement-and-control-objectives",
           "name": "Enablement & Control Objectives",
-          "description": "Objectives that need explicit governance ownership and accountability."
+          "description": "Objectives that need explicit governance ownership and accountability.",
+          "moscow": "Must",
+          "origin": "Output of Step 2."
         },
         {
           "id": "assurance-framework",
           "name": "Assurance Framework",
-          "description": "Assurance responsibilities used to support entity and governance assignments."
+          "description": "Assurance responsibilities used to support entity and governance assignments.",
+          "moscow": "Should",
+          "origin": "Output of Sub-process 2.6."
         },
         {
           "id": "business-entity-structure",
           "name": "Business Entity Structure",
-          "description": "Stakeholders, partners, customers, and organisational entities relevant for classification."
+          "description": "Stakeholders, partners, customers, and organisational entities relevant for classification.",
+          "moscow": "Should",
+          "origin": "Inherited from business entity and stakeholder context."
         }
       ],
       "outputs": [
         {
           "id": "owners-custodians-and-users",
           "name": "Owners, Custodians & Users",
-          "description": "Conceptual entity register with role classification and accountability."
+          "description": "Conceptual entity register with role classification and accountability.",
+          "moscow": "Must",
+          "origin": "Built in Sub-process 5.1 and validated in Sub-process 5.5."
         },
         {
           "id": "service-providers-and-customers",
           "name": "Service Providers & Customers",
-          "description": "Conceptual provider and customer map including security responsibilities in the service chain."
+          "description": "Conceptual provider and customer map including security responsibilities in the service chain.",
+          "moscow": "Should",
+          "origin": "Built in Sub-process 5.2 and validated in Sub-process 5.5."
         },
         {
           "id": "trust-modelling-framework",
           "name": "Trust Modelling Framework",
-          "description": "Conceptual trust model defining trust relationships, levels, and boundaries."
+          "description": "Conceptual trust model defining trust relationships, levels, and boundaries.",
+          "moscow": "Must",
+          "origin": "Built in Sub-process 5.4 and finalised in Sub-process 5.5."
         }
       ],
       "subprocesses": [
-        "Entity Identification & Classification",
-        "Service Provider & Customer Mapping",
-        "Governance Accountability Framework",
-        "Trust Modelling",
-        "Governance Validation"
-      ]
+        {
+          "id": "entity-identification-and-classification",
+          "name": "Entity Identification & Classification",
+          "description": "Identifies and classifies owners, custodians, and users and establishes the foundational entity register.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "security-domain-concepts-and-framework",
+              "name": "Security Domain Concepts & Framework",
+              "moscow": "Must",
+              "origin": "Output of Step 4."
+            },
+            {
+              "id": "business-entity-structure",
+              "name": "Business Entity Structure",
+              "moscow": "Should",
+              "origin": "Inherited from stakeholder, partner, and customer context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "entity-register-draft",
+              "name": "Entity Register (Owners, Custodians, Users - draft)",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 5.1."
+            }
+          ]
+        },
+        {
+          "id": "service-provider-and-customer-mapping",
+          "name": "Service Provider & Customer Mapping",
+          "description": "Identifies internal and external providers and customers and maps security responsibilities within the service chain.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "entity-register-draft",
+              "name": "Entity Register (from 5.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 5.1."
+            },
+            {
+              "id": "service-catalogue-context",
+              "name": "Service Catalogue Context",
+              "moscow": "Should",
+              "origin": "Inherited from ITIL service management context."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "service-provider-and-customer-map",
+              "name": "Service-Provider-&-Customer-Map",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 5.2."
+            }
+          ]
+        },
+        {
+          "id": "governance-accountability-framework",
+          "name": "Governance Accountability Framework",
+          "description": "Defines conceptual accountability structures and allocates security governance responsibilities across entities and domains.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "entity-register-draft",
+              "name": "Entity Register (from 5.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 5.1."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            },
+            {
+              "id": "security-domain-concepts-and-framework",
+              "name": "Security Domain Concepts & Framework",
+              "moscow": "Must",
+              "origin": "Output of Step 4."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "governance-accountability-assignments",
+              "name": "Governance accountability assignments (conceptual)",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 5.3."
+            }
+          ]
+        },
+        {
+          "id": "trust-modelling",
+          "name": "Trust Modelling",
+          "description": "Models trust relationships, trust levels, and trust boundaries between entities and domains.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "entity-register-draft",
+              "name": "Entity Register (from 5.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 5.1."
+            },
+            {
+              "id": "service-provider-and-customer-map",
+              "name": "Service-Provider-&-Customer-Map (from 5.2)",
+              "moscow": "Should",
+              "origin": "Output of Sub-process 5.2."
+            },
+            {
+              "id": "security-domain-concepts-and-framework",
+              "name": "Security Domain Concepts & Framework",
+              "moscow": "Must",
+              "origin": "Output of Step 4."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "trust-modelling-framework-draft",
+              "name": "Trust Modelling Framework (draft)",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 5.4."
+            }
+          ]
+        },
+        {
+          "id": "governance-validation",
+          "name": "Governance Validation",
+          "description": "Checks completeness of accountability and validates that all relevant objectives and trust structures are covered.",
+          "moscow": "Could",
+          "inputs": [
+            {
+              "id": "all-outputs-from-5-1-to-5-4",
+              "name": "All outputs from 5.1 to 5.4",
+              "moscow": "Must",
+              "origin": "Combined outputs of the preceding Sub-processes 5.1 to 5.4."
+            },
+            {
+              "id": "enablement-and-control-objectives",
+              "name": "Enablement & Control Objectives",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "validated-entity-register-owners-custodians-and-users",
+              "name": "Validated Entity Register: Owners, Custodians & Users",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 5.5."
+            },
+            {
+              "id": "validated-service-providers-and-customers",
+              "name": "Validated Service Providers & Customers",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 5.5."
+            },
+            {
+              "id": "finalised-trust-modelling-framework",
+              "name": "Finalised Trust Modelling Framework",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 5.5."
+            }
+          ]
+        }
+      ],
+      "moscow": "Must"
     },
     {
       "id": "step-6",
@@ -319,43 +1110,197 @@
         {
           "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
           "name": "Business Attributes Taxonomy & Profile with integrated performance targets",
-          "description": "Performance targets that need to be anchored across time and lifecycle perspectives."
+          "description": "Performance targets that need to be anchored across time and lifecycle perspectives.",
+          "moscow": "Must",
+          "origin": "Output of Step 1."
         },
         {
           "id": "risk-management-strategies",
           "name": "Risk Management Strategies",
-          "description": "Conceptual risk strategies that need to be sustained through lifecycle planning."
+          "description": "Conceptual risk strategies that need to be sustained through lifecycle planning.",
+          "moscow": "Must",
+          "origin": "Output of Step 2."
         },
         {
           "id": "assurance-framework",
           "name": "Assurance Framework",
-          "description": "Assurance activities that need a conceptual timing and review structure."
+          "description": "Assurance activities that need a conceptual timing and review structure.",
+          "moscow": "Should",
+          "origin": "Output of Sub-process 2.6."
         },
         {
           "id": "inventory-of-all-operational-processes",
           "name": "Inventory of all Operational Processes",
-          "description": "Operational processes used to anchor lifecycle and timing concepts."
+          "description": "Operational processes used to anchor lifecycle and timing concepts.",
+          "moscow": "Should",
+          "origin": "Output of Step 3."
         }
       ],
       "outputs": [
         {
           "id": "through-life-risk-management-framework",
           "name": "Through-Life Risk Management Framework",
-          "description": "Conceptual lifecycle framework for risk management including reviews and trigger events."
+          "description": "Conceptual lifecycle framework for risk management including reviews and trigger events.",
+          "moscow": "Must",
+          "origin": "Built in Sub-process 6.2 and validated in Sub-process 6.5."
         },
         {
           "id": "attribute-performance-targets",
           "name": "Attribute Performance Targets",
-          "description": "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring."
+          "description": "Time-anchored performance targets for attributes as the basis for KPI and KRI monitoring.",
+          "moscow": "Should",
+          "origin": "Built in Sub-process 6.3 and finalised in Sub-process 6.5."
         }
       ],
       "subprocesses": [
-        "Security Lifecycle Definition",
-        "Risk Management Lifecycle Integration",
-        "Attribute Performance Target Setting",
-        "Assurance Timing Framework",
-        "Lifecycle Traceability Check"
-      ]
+        {
+          "id": "security-lifecycle-definition",
+          "name": "Security Lifecycle Definition",
+          "description": "Defines the through-life security lifecycle and anchors security activities across the lifecycle of assets, services, and processes.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "inventory-of-all-operational-processes",
+              "name": "Inventory of all Operational Processes",
+              "moscow": "Should",
+              "origin": "Output of Step 3."
+            },
+            {
+              "id": "security-domain-concepts-and-framework",
+              "name": "Security Domain Concepts & Framework",
+              "moscow": "Should",
+              "origin": "Output of Step 4."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "through-life-security-lifecycle-model-draft",
+              "name": "Through-Life Security Lifecycle Model (draft)",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 6.1."
+            }
+          ]
+        },
+        {
+          "id": "risk-management-lifecycle-integration",
+          "name": "Risk Management Lifecycle Integration",
+          "description": "Integrates continuous risk management into the lifecycle model and defines review cycles and trigger events.",
+          "moscow": "Must",
+          "inputs": [
+            {
+              "id": "risk-management-strategies",
+              "name": "Risk Management Strategies (from Step 2)",
+              "moscow": "Must",
+              "origin": "Output of Step 2."
+            },
+            {
+              "id": "through-life-security-lifecycle-model-draft",
+              "name": "Through-Life Security Lifecycle Model (from 6.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 6.1."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "through-life-risk-management-framework-draft",
+              "name": "Through-Life Risk Management Framework (draft)",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 6.2."
+            }
+          ]
+        },
+        {
+          "id": "attribute-performance-target-setting",
+          "name": "Attribute Performance Target Setting",
+          "description": "Anchors performance targets in time and defines measurement frequencies and review periods for KPIs and KRIs.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "business-attributes-taxonomy-and-profile-with-integrated-performance-targets",
+              "name": "Business Attributes with Performance Targets",
+              "moscow": "Must",
+              "origin": "Output of Step 1."
+            },
+            {
+              "id": "through-life-security-lifecycle-model-draft",
+              "name": "Through-Life Security Lifecycle Model (from 6.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 6.1."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "time-anchored-attribute-performance-targets",
+              "name": "Time-anchored Attribute Performance Targets",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 6.3."
+            }
+          ]
+        },
+        {
+          "id": "assurance-timing-framework",
+          "name": "Assurance Timing Framework",
+          "description": "Defines the conceptual timing of assurance activities such as audits, reviews, tests, and compliance checks.",
+          "moscow": "Could",
+          "inputs": [
+            {
+              "id": "assurance-framework",
+              "name": "Assurance Framework (from 2.6)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 2.6."
+            },
+            {
+              "id": "through-life-security-lifecycle-model-draft",
+              "name": "Through-Life Security Lifecycle Model (from 6.1)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 6.1."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "assurance-timing-model",
+              "name": "Assurance Timing Model",
+              "moscow": "Could",
+              "origin": "Produced by Sub-process 6.4."
+            }
+          ]
+        },
+        {
+          "id": "lifecycle-traceability-check",
+          "name": "Lifecycle Traceability Check",
+          "description": "Validates lifecycle coverage and traceability across all six SABSA dimensions and all outputs from the preceding steps.",
+          "moscow": "Should",
+          "inputs": [
+            {
+              "id": "all-deliverables-from-steps-1-to-5",
+              "name": "All Deliverables from Steps 1 to 5",
+              "moscow": "Must",
+              "origin": "Combined outputs of Steps 1 through 5."
+            },
+            {
+              "id": "through-life-risk-management-framework-draft",
+              "name": "Through-Life Risk Management Framework (from 6.2)",
+              "moscow": "Must",
+              "origin": "Output of Sub-process 6.2."
+            }
+          ],
+          "outputs": [
+            {
+              "id": "validated-through-life-risk-management-framework",
+              "name": "Validated Through-Life Risk Management Framework",
+              "moscow": "Must",
+              "origin": "Produced by Sub-process 6.5."
+            },
+            {
+              "id": "finalised-attribute-performance-targets",
+              "name": "Finalised Attribute Performance Targets",
+              "moscow": "Should",
+              "origin": "Produced by Sub-process 6.5."
+            }
+          ]
+        }
+      ],
+      "moscow": "Should"
     }
   ]
 }
