@@ -59,10 +59,10 @@
             {
               "english_text": "Assurance of Operational Excellence & Continuity",
               "german_text": "Sicherstellung operativer Wirksamkeit und Kontinuität",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:assets-what:assurance-of-operational-excellence-and-continuity"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:assets-what:assurance-of-operational-excellence-and-continuity"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:assets-what"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:assets-what"
         },
         {
           "key": "management-architecture-motivation-why",
@@ -73,20 +73,20 @@
             {
               "english_text": "Risk Assessment",
               "german_text": "Risikobewertung",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-assessment"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-assessment"
             },
             {
               "english_text": "Risk Monitoring & Reporting",
               "german_text": "Risikoüberwachung und Berichterstattung",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-monitoring-and-reporting"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-monitoring-and-reporting"
             },
             {
               "english_text": "Risk Treatment",
               "german_text": "Risikobehandlung",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:motivation-why:risk-treatment"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:motivation-why:risk-treatment"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:motivation-why"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:motivation-why"
         },
         {
           "key": "management-architecture-process-how",
@@ -97,10 +97,10 @@
             {
               "english_text": "Management & Support of Systems, Applications & Services",
               "german_text": "Steuerung und Unterstützung von Systemen, Anwendungen und Services",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:process-how:management-and-support-of-systems-applications-and-services"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:process-how:management-and-support-of-systems-applications-and-services"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:process-how"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:process-how"
         },
         {
           "key": "management-architecture-people-who",
@@ -111,10 +111,10 @@
             {
               "english_text": "Management & Support of Enterprise-wide and Extended Enterprise Relationships",
               "german_text": "Steuerung und Unterstützung unternehmensweiter und unternehmensübergreifender Beziehungen",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:people-who:management-and-support-of-enterprise-wide-and-extended-enterprise-relationships"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:people-who:management-and-support-of-enterprise-wide-and-extended-enterprise-relationships"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:people-who"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:people-who"
         },
         {
           "key": "management-architecture-location-where",
@@ -125,10 +125,10 @@
             {
               "english_text": "Management of Buildings, Sites, Platforms & Networks",
               "german_text": "Steuerung von Gebäuden, Standorten, Plattformen und Netzwerken",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:location-where:management-of-buildings-sites-platforms-and-networks"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:location-where:management-of-buildings-sites-platforms-and-networks"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:location-where"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:location-where"
         },
         {
           "key": "management-architecture-time-when",
@@ -139,13 +139,13 @@
             {
               "english_text": "Management of Calendar and Timetable",
               "german_text": "Steuerung von Kalendern und Zeitplänen",
-              "archimate_key": "sabsa-architecture-matrix:item:management-architecture:time-when:management-of-calendar-and-timetable"
+              "archimate_key": "sabsa-management-matrix:item:management-architecture:time-when:management-of-calendar-and-timetable"
             }
           ],
-          "archimate_key": "sabsa-architecture-matrix:cell:management-architecture:time-when"
+          "archimate_key": "sabsa-management-matrix:cell:management-architecture:time-when"
         }
       ],
-      "archimate_key": "sabsa-architecture-matrix:row:management-architecture"
+      "archimate_key": "sabsa-management-matrix:row:management-architecture"
     },
     {
       "id": "contextual-overlay",
