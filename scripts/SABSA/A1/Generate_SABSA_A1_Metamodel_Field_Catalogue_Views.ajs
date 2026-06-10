@@ -125,7 +125,9 @@ var stats = {
     conceptsReused: 0,
     relationshipsCreated: 0,
     relationshipsReused: 0,
-    relationshipLinks: 0
+    relationshipLinks: 0,
+    viewConnectionsCreated: 0,
+    viewConnectionsSkipped: 0
 };
 
 function safeString(value) {
@@ -934,6 +936,7 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
     var connection;
 
     if (!relationship || !sourceVisual || !targetVisual) {
+        stats.viewConnectionsSkipped++;
         return null;
     }
 
@@ -944,6 +947,7 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
             relationship: safeString(relationship.name),
             error: String(error)
         }, "sabsa.a1.catalogue.connection.add.skipped");
+        stats.viewConnectionsSkipped++;
         return null;
     }
 
@@ -954,7 +958,33 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
     } catch (error) {
         logger.debug("Could not apply relationship label expression.", { error: String(error) }, "sabsa.a1.catalogue.connection.label.skipped");
     }
+    stats.viewConnectionsCreated++;
     return connection;
+}
+
+function getConceptVisualKey(concept) {
+    return safeString(concept && concept.prop("SabsaA1CatalogueKey")) || safeString(concept && concept.id);
+}
+
+function rememberVisual(visualsByConcept, concept, visual) {
+    var key = getConceptVisualKey(concept);
+
+    if (!concept || !visual) {
+        return;
+    }
+
+    if (key) {
+        visualsByConcept[key] = visual;
+    }
+    visualsByConcept[safeString(concept.name)] = visual;
+    visualsByConcept[normalizeTypeName(concept.name)] = visual;
+}
+
+function getVisualForConcept(visualsByConcept, concept) {
+    return visualsByConcept[getConceptVisualKey(concept)] ||
+        visualsByConcept[safeString(concept && concept.name)] ||
+        visualsByConcept[normalizeTypeName(safeString(concept && concept.name))] ||
+        null;
 }
 
 function resolveVisualByTypeName(visualsByType, typeName) {
@@ -973,7 +1003,7 @@ function resolveVisualByTypeName(visualsByType, typeName) {
     return visual || null;
 }
 
-function addRelationshipsByCatalogueKind(view, visualsByType, relationKinds) {
+function addVisibleRelationshipsByEndpoint(view, visualsByConcept, relationKinds) {
     var wanted = {};
 
     (relationKinds || []).forEach(function (kind) {
@@ -986,8 +1016,8 @@ function addRelationshipsByCatalogueKind(view, visualsByType, relationKinds) {
         addConnection(
             view,
             relationship,
-            resolveVisualByTypeName(visualsByType, safeString(relationship.prop("SourceType"))),
-            resolveVisualByTypeName(visualsByType, safeString(relationship.prop("TargetType")))
+            getVisualForConcept(visualsByConcept, relationship.source),
+            getVisualForConcept(visualsByConcept, relationship.target)
         );
     });
 }
@@ -2038,24 +2068,24 @@ function createGridView(baseName, sourceConcept, concepts, fillColor, columns) {
 function createTypeView(sourceConcept, typeConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.TypeViewName));
     var sourceVisual;
-    var visualsByType = {};
+    var visualsByConcept = {};
 
     view.documentation = "Generated core, promoted support and extension types with semantic and FK relationships from " + CONST.SourceMarkdownPath + ".";
     moveViewToFolder(view);
 
     sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+    rememberVisual(visualsByConcept, sourceConcept, sourceVisual);
 
     Object.keys(typeConcepts).forEach(function (key, index) {
         var concept = typeConcepts[key];
         var pos = gridPosition(index, CONST.Layout.TypeColumns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
         var visual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.TypeFill));
 
-        visualsByType[concept.name] = visual;
-        visualsByType[normalizeTypeName(concept.name)] = visual;
+        rememberVisual(visualsByConcept, concept, visual);
         addConnection(view, findRelationshipByKey("catalogue:source:type:" + safeString(concept.prop("SabsaType"))), sourceVisual, visual);
     });
 
-    addRelationshipsByCatalogueKind(view, visualsByType, [
+    addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
         "CoreTypeSemanticRelationship",
         "CoreTypeForeignKeyReference"
     ]);
@@ -2068,12 +2098,14 @@ function createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts
     var view = model.createArchimateView(buildUniqueViewName(CONST.ForeignKeyViewName));
     var sourceVisual;
     var visualsByKey = {};
+    var visualsByConcept = {};
     var fkEntries = [];
 
     view.documentation = "Generated FK field relations from catalogue field tables. Each FK row is shown between its owning SABSA A1 type and the resolved target type.";
     moveViewToFolder(view);
 
     sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+    rememberVisual(visualsByConcept, sourceConcept, sourceVisual);
 
     function visualKey(concept) {
         return safeString(concept && concept.prop("SabsaA1CatalogueKey"));
@@ -2088,6 +2120,7 @@ function createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts
 
         if (!visualsByKey[key]) {
             visualsByKey[key] = addStyledVisual(view, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, fillColor);
+            rememberVisual(visualsByConcept, concept, visualsByKey[key]);
         }
 
         return visualsByKey[key];
@@ -2119,21 +2152,19 @@ function createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts
 
     fkEntries.forEach(function (entry, index) {
         var baseY = CONST.Layout.StartY + 140 + (index * (CONST.Layout.CardHeight + CONST.Layout.GapY));
-        var sourceTypeVisual = ensureVisual(entry.sourceType, CONST.Layout.StartX, baseY, getConceptFill(entry.sourceType, CONST.Style.TypeFill));
-        var tableVisual = ensureVisual(tableData.tablesById[entry.tableId], CONST.Layout.StartX + 340, baseY, CONST.Style.RepresentationFill);
-        var fieldVisual = ensureVisual(entry.rowEntry.concept, CONST.Layout.StartX + 680, baseY, getConceptFill(entry.rowEntry.concept, CONST.Style.RepresentationFill));
-        var targetTypeVisual = ensureVisual(entry.targetType, CONST.Layout.StartX + 1020, baseY, getConceptFill(entry.targetType, CONST.Style.TypeFill));
-        var tableRowKey = "catalogue:table:" + slugify(entry.tableId) + ":row:" + entry.rowEntry.rowIndex;
-        var coreTypeFieldKey = "catalogue:core-type-field:" + safeString(entry.sourceType.prop("SabsaA1CatalogueKey")) + ":" + entry.tableId + ":" + entry.rowEntry.rowIndex;
-        var fieldFkKey = "catalogue:fk-row:" + safeString(entry.rowEntry.concept.prop("SabsaA1CatalogueKey")) + ":" + safeString(entry.targetType.prop("SabsaA1CatalogueKey"));
-        var typeFkKey = "catalogue:fk:" + safeString(entry.sourceType.prop("SabsaA1CatalogueKey")) + ":" + entry.tableId + ":" + entry.rowEntry.rowIndex + ":" + safeString(entry.targetType.prop("SabsaA1CatalogueKey"));
-
-        addConnection(view, findRelationshipByKey("catalogue:source:table:" + slugify(entry.tableId)), sourceVisual, tableVisual);
-        addConnection(view, findRelationshipByKey(tableRowKey), tableVisual, fieldVisual);
-        addConnection(view, findRelationshipByKey(coreTypeFieldKey), sourceTypeVisual, fieldVisual);
-        addConnection(view, findRelationshipByKey(fieldFkKey), fieldVisual, targetTypeVisual);
-        addConnection(view, findRelationshipByKey(typeFkKey), sourceTypeVisual, targetTypeVisual);
+        ensureVisual(entry.sourceType, CONST.Layout.StartX, baseY, getConceptFill(entry.sourceType, CONST.Style.TypeFill));
+        ensureVisual(tableData.tablesById[entry.tableId], CONST.Layout.StartX + 340, baseY, CONST.Style.RepresentationFill);
+        ensureVisual(entry.rowEntry.concept, CONST.Layout.StartX + 680, baseY, getConceptFill(entry.rowEntry.concept, CONST.Style.RepresentationFill));
+        ensureVisual(entry.targetType, CONST.Layout.StartX + 1020, baseY, getConceptFill(entry.targetType, CONST.Style.TypeFill));
     });
+
+    addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
+        "SourceTableTrace",
+        "TableRow",
+        "CoreTypeHasField",
+        "FieldRowForeignKeyReference",
+        "CoreTypeForeignKeyReference"
+    ]);
 
     stats.views++;
     return view;
@@ -2146,12 +2177,13 @@ function createTableIndexView(sourceConcept, tableConcepts) {
 function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.RelationshipViewName));
     var sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
-    var relationshipVisuals = {};
     var typeVisuals = {};
+    var visualsByConcept = {};
     var typeIndex = 0;
 
     view.documentation = "Generated from the relationship catalogue in " + CONST.SourceMarkdownPath + ".";
     moveViewToFolder(view);
+    rememberVisual(visualsByConcept, sourceConcept, sourceVisual);
 
     function ensureTypeVisual(typeName) {
         var metaConcept = getCoreTypeConcept(coreTypeConcepts, typeName);
@@ -2171,6 +2203,7 @@ function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeCon
         visual = addStyledVisual(view, metaConcept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(metaConcept, CONST.Style.TypeFill));
         typeVisuals[metaConcept.name] = visual;
         typeVisuals[normalizeTypeName(metaConcept.name)] = visual;
+        rememberVisual(visualsByConcept, metaConcept, visual);
         typeIndex++;
         return visual;
     }
@@ -2178,15 +2211,18 @@ function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeCon
     relationshipConcepts.forEach(function (concept, index) {
         var pos = gridPosition(index, CONST.Layout.Columns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
         var relationshipVisual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.RelationshipFill));
-        var sourceTypeVisual = ensureTypeVisual(concept.prop("SourceType"));
-        var targetTypeVisual = ensureTypeVisual(concept.prop("TargetType"));
 
-        relationshipVisuals[concept.name] = relationshipVisual;
-        addConnection(view, findRelationshipByKey("catalogue:source:relationship:" + slugify(concept.name)), sourceVisual, relationshipVisual);
-        addConnection(view, findRelationshipByKey("catalogue:relationship:" + slugify(concept.name) + ":source"), relationshipVisual, sourceTypeVisual);
-        addConnection(view, findRelationshipByKey("catalogue:relationship:" + slugify(concept.name) + ":target"), relationshipVisual, targetTypeVisual);
-        addConnection(view, findRelationshipByKey("catalogue:type-relation:" + slugify(concept.prop("Relationship"))), sourceTypeVisual, targetTypeVisual);
+        ensureTypeVisual(concept.prop("SourceType"));
+        ensureTypeVisual(concept.prop("TargetType"));
+        rememberVisual(visualsByConcept, concept, relationshipVisual);
     });
+
+    addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
+        "SourceTrace",
+        "RelationshipSource",
+        "RelationshipTarget",
+        "CoreTypeSemanticRelationship"
+    ]);
 
     stats.views++;
     return view;
@@ -2292,7 +2328,9 @@ function main() {
         concepts_created: stats.conceptsCreated,
         concepts_reused: stats.conceptsReused,
         relationships_created: stats.relationshipsCreated,
-        relationships_reused: stats.relationshipsReused
+        relationships_reused: stats.relationshipsReused,
+        view_connections_created: stats.viewConnectionsCreated,
+        view_connections_skipped: stats.viewConnectionsSkipped
     });
 
     dialogs.showInfo(
@@ -2310,7 +2348,9 @@ function main() {
         "\nConcepts created: " + stats.conceptsCreated +
         "\nConcepts reused: " + stats.conceptsReused +
         "\nRelationships created: " + stats.relationshipsCreated +
-        "\nRelationships reused: " + stats.relationshipsReused,
+        "\nRelationships reused: " + stats.relationshipsReused +
+        "\nView connections created: " + stats.viewConnectionsCreated +
+        "\nView connections skipped: " + stats.viewConnectionsSkipped,
         "SABSA A1 Metamodel Field Catalogue"
     );
 }
