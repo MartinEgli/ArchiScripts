@@ -1,0 +1,797 @@
+var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Generic_Risk_Model_View";
+var LOG_LEVEL = "WARN";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: LOG_LEVEL
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Generic Risk Model"
+});
+
+var CONST = {
+    SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-a1-generic-risk-model-data.json").getCanonicalPath(),
+    ViewName: "SABSA A1 - Generic Risk Management Model",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Generic Risk Management Model",
+        Phases: "Phases",
+        Objects: "Generic Objects",
+        Frameworks: "NIBOCJ Frameworks",
+        Relations: {
+            Flow: "Flow",
+            ObjectTrace: "Object Trace",
+            PhaseInputs: "Phase Inputs",
+            PhaseOutputs: "Phase Outputs",
+            FrameworkMapping: "NIBOCJ Mapping"
+        }
+    },
+    Layout: {
+        ViewMarginX: 40,
+        ViewMarginY: 40,
+        ObjectY: 50,
+        ObjectX: 60,
+        ObjectWidth: 190,
+        ObjectHeight: 56,
+        ObjectGap: 34,
+        PhaseY: 210,
+        PhaseX: 60,
+        PhaseWidth: 220,
+        PhaseHeight: 128,
+        PhaseGap: 28,
+        FrameworkY: 430,
+        FrameworkX: 60,
+        FrameworkWidth: 180,
+        FrameworkHeight: 58,
+        FrameworkGap: 28,
+        NoteX: 60,
+        NoteY: 540,
+        NoteWidth: 1460,
+        NoteHeight: 76
+    },
+    Style: {
+        ObjectFill: "#dff7ff",
+        PhaseFill: "#ffff9a",
+        GovernancePhaseFill: "#ffcc64",
+        AssurancePhaseFill: "#ccff9a",
+        FrameworkFill: "#f3f3f3",
+        NoteFill: "#fff7cc",
+        LineColor: "#111111",
+        FontColor: "#111111"
+    }
+};
+
+var stats = {
+    objects: 0,
+    phases: 0,
+    frameworks: 0,
+    relationships: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function readUtf8Text(absolutePath) {
+    return String(new java.lang.String(
+        Files.readAllBytes(Paths.get(absolutePath)),
+        StandardCharsets.UTF_8
+    ));
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var candidateNames = aliasesByFolderName[rootName] || [rootName];
+    var wantedNames = candidateNames.map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
+    if (!objectToMove) {
+        return null;
+    }
+
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    targetFolder.add(objectToMove);
+    return targetFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaA1GenericKind);
+
+    if (conceptType === "business-object") {
+        return {
+            rootName: "Business",
+            pathSegments: getModelFolderSegments([CONST.Folder.Objects])
+        };
+    }
+
+    if (conceptType === "business-process") {
+        return {
+            rootName: "Business",
+            pathSegments: getModelFolderSegments([CONST.Folder.Phases])
+        };
+    }
+
+    if (conceptType === "grouping" && kind === "Framework") {
+        return {
+            rootName: "Other",
+            pathSegments: getModelFolderSegments([CONST.Folder.Frameworks])
+        };
+    }
+
+    return null;
+}
+
+function moveConceptToFolder(concept, conceptType, properties) {
+    var placement = resolveConceptPlacement(conceptType, properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.A1], viewObject);
+}
+
+function resolveRelationshipPlacement(properties) {
+    var kind = safeString(properties && properties.SabsaA1GenericRelationKind);
+    var folderName = "";
+
+    if (kind === "Flow") {
+        folderName = CONST.Folder.Relations.Flow;
+    } else if (kind === "ObjectTrace") {
+        folderName = CONST.Folder.Relations.ObjectTrace;
+    } else if (kind === "PhaseInput") {
+        folderName = CONST.Folder.Relations.PhaseInputs;
+    } else if (kind === "PhaseOutput") {
+        folderName = CONST.Folder.Relations.PhaseOutputs;
+    } else if (kind === "FrameworkMapping") {
+        folderName = CONST.Folder.Relations.FrameworkMapping;
+    } else {
+        return null;
+    }
+
+    return {
+        rootName: "Relations",
+        pathSegments: getModelFolderSegments([folderName])
+    };
+}
+
+function moveRelationshipToFolder(relationship, properties) {
+    var placement = resolveRelationshipPlacement(properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByTypeAndKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaA1GenericKey")) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation) {
+    var concept = findConceptByTypeAndKey(conceptType, key);
+    var placement = resolveConceptPlacement(conceptType, properties);
+    var conceptCreated = false;
+
+    if (!concept) {
+        if (placement) {
+            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        } else {
+            concept = model.createElement(conceptType, name);
+        }
+        conceptCreated = true;
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaA1GenericKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        concept.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (conceptCreated) {
+        moveConceptToFolder(concept, conceptType, properties);
+    }
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1GenericKey")) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(relationshipType, sourceConcept, targetConcept, key, name, properties) {
+    var relationship = findRelationshipByKey(key);
+    var relationshipCreated = false;
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+            logger.debug("Preferred relationship type is not valid. Falling back to association.", {
+                preferred_type: relationshipType,
+                key: key,
+                error: String(error)
+            }, "sabsa.a1.relationship.fallback");
+        }
+        relationshipCreated = true;
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = name || "";
+    relationship.prop("SabsaA1GenericKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        relationship.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (relationshipCreated) {
+        moveRelationshipToFolder(relationship, properties);
+    }
+
+    stats.relationships++;
+    return relationship;
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    return visual;
+}
+
+function addNoteVisual(container, text, x, y, width, height) {
+    var note = container.createObject("note", x, y, width, height);
+    note.text = text;
+    styleVisual(note, CONST.Style.NoteFill);
+    return note;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+    return connection;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.a1.label_expression.skipped");
+    }
+}
+
+function tryApplyTextPosition(visual, position) {
+    try {
+        visual.textPosition = position;
+    } catch (error) {
+        logger.debug("Could not apply text position.", {
+            position: position,
+            error: String(error)
+        }, "sabsa.a1.text_position.skipped");
+    }
+}
+
+function buildObjectDocumentation(objectData) {
+    return safeString(objectData.description);
+}
+
+function buildPhaseDocumentation(phaseData) {
+    var lines = [safeString(phaseData.description), ""];
+
+    lines.push("Activities:");
+    (phaseData.activities || []).forEach(function (activity) {
+        lines.push("- " + safeString(activity));
+    });
+
+    lines.push("");
+    lines.push("Inputs: " + (phaseData.inputs || []).join("; "));
+    lines.push("Outputs: " + (phaseData.outputs || []).join("; "));
+    lines.push("NIBOCJ refs: " + (phaseData.nibocj_refs || []).join("; "));
+
+    return lines.join("\n");
+}
+
+function buildFrameworkDocumentation(frameworkData) {
+    var lines = [safeString(frameworkData.description)];
+
+    if (frameworkData.references && frameworkData.references.length) {
+        lines.push("");
+        lines.push("References:");
+        frameworkData.references.forEach(function (reference) {
+            lines.push("- " + safeString(reference));
+        });
+    }
+
+    return lines.join("\n");
+}
+
+function buildSourceDocumentation(data) {
+    var lines = [];
+    var source = data.source || {};
+
+    lines.push("Generated from " + CONST.SourceJsonPath + ".");
+
+    if (source.source_of_truth) {
+        lines.push("Source of truth: " + safeString(source.source_of_truth));
+    }
+
+    if (source.basis && source.basis.length) {
+        lines.push("");
+        lines.push("Basis:");
+        source.basis.forEach(function (entry) {
+            lines.push("- " + safeString(entry));
+        });
+    }
+
+    if (source.source_references && source.source_references.length) {
+        lines.push("");
+        lines.push("Source references:");
+        source.source_references.forEach(function (reference) {
+            lines.push("- " + safeString(reference.id) + ": " + safeString(reference.path) + " [" + safeString(reference.role) + "]");
+        });
+    }
+
+    if (source.nibocj_assumption) {
+        lines.push("");
+        lines.push("NIBOCJ assumption: " + safeString(source.nibocj_assumption));
+    }
+
+    return lines.join("\n");
+}
+
+function getPhaseFill(phaseData) {
+    if (phaseData.id === "govern-communicate") {
+        return CONST.Style.GovernancePhaseFill;
+    }
+
+    if (phaseData.id === "assure") {
+        return CONST.Style.AssurancePhaseFill;
+    }
+
+    return CONST.Style.PhaseFill;
+}
+
+function buildDataIndex(entries) {
+    var index = {};
+
+    (entries || []).forEach(function (entry) {
+        index[safeString(entry.id)] = entry;
+    });
+
+    return index;
+}
+
+function validateData(data) {
+    var objectIndex = buildDataIndex(data.generic_objects || []);
+    var frameworkIndex = buildDataIndex(data.nibocj || []);
+
+    if (!data.model || !safeString(data.model.name)) {
+        throw new Error("Invalid A1 generic model data: missing model name.");
+    }
+
+    if (!data.phases || !data.phases.length) {
+        throw new Error("Invalid A1 generic model data: missing phases.");
+    }
+
+    data.phases.forEach(function (phase) {
+        (phase.inputs || []).concat(phase.outputs || []).forEach(function (objectId) {
+            if (!objectIndex[safeString(objectId)]) {
+                throw new Error("Phase '" + phase.id + "' references unknown object '" + objectId + "'.");
+            }
+        });
+
+        (phase.nibocj_refs || []).forEach(function (frameworkId) {
+            if (!frameworkIndex[safeString(frameworkId)]) {
+                throw new Error("Phase '" + phase.id + "' references unknown NIBOCJ framework '" + frameworkId + "'.");
+            }
+        });
+    });
+}
+
+function createConcepts(data) {
+    var objectConcepts = {};
+    var phaseConcepts = {};
+    var frameworkConcepts = {};
+
+    (data.generic_objects || []).forEach(function (objectData) {
+        var key = "object:" + safeString(objectData.id);
+        objectConcepts[objectData.id] = ensureConcept("business-object", objectData.name, key, {
+            id: "sabsa-a1-generic:object:" + safeString(objectData.id),
+            SabsaA1GenericKind: "GenericObject",
+            GenericObjectId: safeString(objectData.id),
+            SourceJson: CONST.SourceJsonPath
+        }, buildObjectDocumentation(objectData));
+        stats.objects++;
+    });
+
+    (data.phases || []).forEach(function (phaseData, index) {
+        var key = "phase:" + safeString(phaseData.id);
+        phaseConcepts[phaseData.id] = ensureConcept("business-process", phaseData.name, key, {
+            id: "sabsa-a1-generic:phase:" + safeString(phaseData.id),
+            SabsaA1GenericKind: "Phase",
+            PhaseId: safeString(phaseData.id),
+            PhaseOrder: String(index + 1),
+            NibocjRefs: safeString((phaseData.nibocj_refs || []).join("; ")),
+            SourceJson: CONST.SourceJsonPath
+        }, buildPhaseDocumentation(phaseData));
+        stats.phases++;
+    });
+
+    (data.nibocj || []).forEach(function (frameworkData) {
+        var key = "framework:" + safeString(frameworkData.id);
+        frameworkConcepts[frameworkData.id] = ensureConcept("grouping", frameworkData.name, key, {
+            id: "sabsa-a1-generic:framework:" + safeString(frameworkData.id),
+            SabsaA1GenericKind: "Framework",
+            FrameworkId: safeString(frameworkData.id),
+            References: safeString((frameworkData.references || []).join("; ")),
+            SourceJson: CONST.SourceJsonPath
+        }, buildFrameworkDocumentation(frameworkData));
+        stats.frameworks++;
+    });
+
+    return {
+        objects: objectConcepts,
+        phases: phaseConcepts,
+        frameworks: frameworkConcepts
+    };
+}
+
+function createView(data, concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.ViewName));
+    var objectVisuals = {};
+    var phaseVisuals = {};
+    var frameworkVisuals = {};
+
+    view.documentation = buildSourceDocumentation(data);
+    moveViewToFolder(view);
+
+    (data.generic_objects || []).forEach(function (objectData, index) {
+        var x = CONST.Layout.ObjectX + (index * (CONST.Layout.ObjectWidth + CONST.Layout.ObjectGap));
+        var visual = addStyledVisual(
+            view,
+            concepts.objects[objectData.id],
+            x,
+            CONST.Layout.ObjectY,
+            CONST.Layout.ObjectWidth,
+            CONST.Layout.ObjectHeight,
+            CONST.Style.ObjectFill
+        );
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+        objectVisuals[objectData.id] = visual;
+    });
+
+    (data.phases || []).forEach(function (phaseData, index) {
+        var x = CONST.Layout.PhaseX + (index * (CONST.Layout.PhaseWidth + CONST.Layout.PhaseGap));
+        var visual = addStyledVisual(
+            view,
+            concepts.phases[phaseData.id],
+            x,
+            CONST.Layout.PhaseY,
+            CONST.Layout.PhaseWidth,
+            CONST.Layout.PhaseHeight,
+            getPhaseFill(phaseData)
+        );
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+        phaseVisuals[phaseData.id] = visual;
+    });
+
+    (data.nibocj || []).forEach(function (frameworkData, index) {
+        var x = CONST.Layout.FrameworkX + (index * (CONST.Layout.FrameworkWidth + CONST.Layout.FrameworkGap));
+        var visual = addStyledVisual(
+            view,
+            concepts.frameworks[frameworkData.id],
+            x,
+            CONST.Layout.FrameworkY,
+            CONST.Layout.FrameworkWidth,
+            CONST.Layout.FrameworkHeight,
+            CONST.Style.FrameworkFill
+        );
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+        frameworkVisuals[frameworkData.id] = visual;
+    });
+
+    (data.traceability || []).forEach(function (traceData) {
+        var sourceConcept = concepts.objects[traceData.from];
+        var targetConcept = concepts.objects[traceData.to];
+        var relationship;
+
+        if (!sourceConcept || !targetConcept) {
+            return;
+        }
+
+        relationship = ensureRelationship(
+            "association-relationship",
+            sourceConcept,
+            targetConcept,
+            "trace:" + safeString(traceData.from) + ":" + safeString(traceData.to),
+            safeString(traceData.label),
+            {
+                SabsaA1GenericRelationKind: "ObjectTrace",
+                TraceFrom: safeString(traceData.from),
+                TraceTo: safeString(traceData.to),
+                SourceJson: CONST.SourceJsonPath
+            }
+        );
+        addConnection(view, relationship, objectVisuals[traceData.from], objectVisuals[traceData.to]);
+    });
+
+    (data.phases || []).forEach(function (phaseData, index) {
+        var phaseConcept = concepts.phases[phaseData.id];
+        var phaseVisual = phaseVisuals[phaseData.id];
+
+        if (index > 0) {
+            var previousPhase = data.phases[index - 1];
+            var flowRelationship = ensureRelationship(
+                "triggering-relationship",
+                concepts.phases[previousPhase.id],
+                phaseConcept,
+                "flow:" + safeString(previousPhase.id) + ":" + safeString(phaseData.id),
+                "",
+                {
+                    SabsaA1GenericRelationKind: "Flow",
+                    SourceJson: CONST.SourceJsonPath
+                }
+            );
+            addConnection(view, flowRelationship, phaseVisuals[previousPhase.id], phaseVisual);
+        }
+
+        (phaseData.inputs || []).forEach(function (objectId) {
+            var relationship = ensureRelationship(
+                "access-relationship",
+                phaseConcept,
+                concepts.objects[objectId],
+                "phase-input:" + safeString(phaseData.id) + ":" + safeString(objectId),
+                "input",
+                {
+                    SabsaA1GenericRelationKind: "PhaseInput",
+                    PhaseId: safeString(phaseData.id),
+                    ObjectId: safeString(objectId),
+                    SourceJson: CONST.SourceJsonPath
+                }
+            );
+            addConnection(view, relationship, phaseVisual, objectVisuals[objectId]);
+        });
+
+        (phaseData.outputs || []).forEach(function (objectId) {
+            var relationship = ensureRelationship(
+                "access-relationship",
+                phaseConcept,
+                concepts.objects[objectId],
+                "phase-output:" + safeString(phaseData.id) + ":" + safeString(objectId),
+                "output",
+                {
+                    SabsaA1GenericRelationKind: "PhaseOutput",
+                    PhaseId: safeString(phaseData.id),
+                    ObjectId: safeString(objectId),
+                    SourceJson: CONST.SourceJsonPath
+                }
+            );
+            addConnection(view, relationship, phaseVisual, objectVisuals[objectId]);
+        });
+
+        (phaseData.nibocj_refs || []).forEach(function (frameworkId) {
+            var relationship = ensureRelationship(
+                "association-relationship",
+                concepts.frameworks[frameworkId],
+                phaseConcept,
+                "framework:" + safeString(frameworkId) + ":phase:" + safeString(phaseData.id),
+                "maps",
+                {
+                    SabsaA1GenericRelationKind: "FrameworkMapping",
+                    FrameworkId: safeString(frameworkId),
+                    PhaseId: safeString(phaseData.id),
+                    SourceJson: CONST.SourceJsonPath
+                }
+            );
+            addConnection(view, relationship, frameworkVisuals[frameworkId], phaseVisual);
+        });
+    });
+
+    addNoteVisual(
+        view,
+        "A1 generic model: business context and attributes drive risk appetite, risk view, objectives, treatment architecture, performance evidence, and vitality backlog. NIBOCJ overlay is a working cross-reference assumption: NIST, ISO, BSI, OCTAVE, COBIT, jArchi.",
+        CONST.Layout.NoteX,
+        CONST.Layout.NoteY,
+        CONST.Layout.NoteWidth,
+        CONST.Layout.NoteHeight
+    );
+
+    return view;
+}
+
+function confirmExecution(data) {
+    return dialogs.confirmInfo(
+        "This script will generate or update the SABSA A1 Generic Risk Management Model view." +
+        "\n\nSource JSON: " + CONST.SourceJsonPath +
+        "\nGeneric objects: " + (data.generic_objects || []).length +
+        "\nPhases: " + (data.phases || []).length +
+        "\nNIBOCJ frameworks: " + (data.nibocj || []).length +
+        "\n\nThe script will create or reuse folders, concepts, relationships, and the target view in the open Archi model." +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Generic Model Generator"
+    );
+}
+
+function buildResultMessage(view) {
+    return "Generated view: " + view.name +
+        "\nGeneric objects: " + stats.objects +
+        "\nPhases: " + stats.phases +
+        "\nNIBOCJ frameworks: " + stats.frameworks +
+        "\nRelationships: " + stats.relationships +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused;
+}
+
+function main() {
+    var sourceText;
+    var data;
+    var concepts;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    logger.start("SABSA A1 generic model generation started.", {
+        source_json: CONST.SourceJsonPath
+    });
+
+    sourceText = readUtf8Text(CONST.SourceJsonPath);
+    data = JSON.parse(sourceText);
+    validateData(data);
+
+    if (!confirmExecution(data)) {
+        logger.info("SABSA A1 generic model generation cancelled by user.", {
+            source_json: CONST.SourceJsonPath
+        }, "sabsa.a1.generation.cancelled");
+        return;
+    }
+
+    concepts = createConcepts(data);
+    view = createView(data, concepts);
+
+    logger.finish("SABSA A1 generic model generation finished.", {
+        view_name: view.name,
+        objects_created_or_reused: stats.objects,
+        phases_created_or_reused: stats.phases,
+        frameworks_created_or_reused: stats.frameworks,
+        relationships_created_or_reused: stats.relationships,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(buildResultMessage(view), "SABSA A1 Generic Risk Model");
+}
+
+main();

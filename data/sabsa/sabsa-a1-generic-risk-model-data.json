@@ -1,0 +1,350 @@
+{
+  "source": {
+    "id": "sabsa-a1-generic-risk-model",
+    "title": "SABSA A1 Generic Risk Management Model",
+    "generation_namespace": "sabsa-a1-generic-risk-model",
+    "source_of_truth": "ArchiScripts/data/sabsa/sabsa-a1-generic-risk-model-data.json",
+    "basis": [
+      "This JSON file is the direct source for the jArchi generator and generated ArchiMate view.",
+      "SABSA A1 training and examination material currently staged in reference/Inbox.",
+      "Q003/Q004 end-to-end Gesamtmodell and generic SABSA A1 ArchiMate exchange schema currently staged in reference/Inbox.",
+      "Local ArchiScripts conventions for generated SABSA model artefacts."
+    ],
+    "source_references": [
+      {
+        "id": "a1-training-slides",
+        "label": "SABSA A1 - Risk, Assurance & Governance v2.1.2026",
+        "path": "reference/Inbox/SABSA A1 - Risk, Assurance & Governance v2.1.2026 - DLCVEUA1260511.pdf",
+        "role": "primary_method_source"
+      },
+      {
+        "id": "a1-examination-paper",
+        "label": "DLCVEU A1 260515 SABSA A1 Examination Paper",
+        "path": "reference/Inbox/DLCVEU A1 260515 SABSA A1 Examination Paper.pdf",
+        "role": "exam_context_source"
+      },
+      {
+        "id": "q003-q004-end-to-end",
+        "label": "Q003/Q004 End-To-End Gesamtmodell",
+        "path": "reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md",
+        "role": "applied_model_source"
+      },
+      {
+        "id": "generic-a1-archimate-exchange-schema",
+        "label": "Generic SABSA A1 ArchiMate Exchange Schema",
+        "path": "reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json",
+        "role": "metamodel_and_mapping_source"
+      },
+      {
+        "id": "q003-q004-usecase-exchange-model",
+        "label": "Q003/Q004 Use Case ArchiMate Exchange Model",
+        "path": "reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json",
+        "role": "applied_exchange_model_source"
+      }
+    ],
+    "nibocj_assumption": "NIBOCJ is interpreted here as a working cross-reference mnemonic: NIST, ISO, BSI, OCTAVE, COBIT, jArchi."
+  },
+  "model": {
+    "id": "a1-generic-risk-management-model",
+    "name": "A1 Generic Risk Management Model",
+    "description": "Generic SABSA A1 model for turning business context, attributes, risks, appetite, objectives, architecture design, implementation, monitoring, and feedback into a traceable ArchiMate structure."
+  },
+  "generic_objects": [
+    {
+      "id": "business-context",
+      "name": "Business Context",
+      "description": "Stakeholders, business drivers, goals, constraints, regulatory obligations, and operating context."
+    },
+    {
+      "id": "business-attributes",
+      "name": "Business Attributes",
+      "description": "Measurable business-driven attributes used to express enablement and control needs."
+    },
+    {
+      "id": "risk-appetite",
+      "name": "Risk Appetite and Thresholds",
+      "description": "Decision boundaries for acceptable risk, performance thresholds, and escalation criteria."
+    },
+    {
+      "id": "risk-view",
+      "name": "Risk View",
+      "description": "Prioritised risk scenarios, causes, impacts, current exposure, and treatment options."
+    },
+    {
+      "id": "objectives",
+      "name": "Enablement and Control Objectives",
+      "description": "Business-aligned objectives that drive policy, design, services, mechanisms, and assurance."
+    },
+    {
+      "id": "solution-architecture",
+      "name": "Risk Treatment Solution Architecture",
+      "description": "Conceptual, logical, physical, and component treatment design for controls and enablers."
+    },
+    {
+      "id": "performance-evidence",
+      "name": "Performance Evidence",
+      "description": "KPIs, KRIs, scorecards, dashboards, assurance results, incidents, audit findings, and improvement evidence."
+    },
+    {
+      "id": "vitality-backlog",
+      "name": "Vitality Backlog",
+      "description": "Continuous improvement and architecture change backlog triggered by metrics, assurance, incidents, and new business requirements."
+    }
+  ],
+  "phases": [
+    {
+      "id": "strategy-planning",
+      "name": "Strategy and Planning",
+      "description": "Establish the business and risk context, derive the risk view, and set risk management strategy and objectives.",
+      "activities": [
+        "Establish stakeholders, business drivers, business attributes, and risk appetite",
+        "Identify, assess, and evaluate risks against business targets",
+        "Define enablement objectives, control objectives, and conceptual design direction"
+      ],
+      "inputs": [
+        "business-context",
+        "business-attributes",
+        "risk-appetite"
+      ],
+      "outputs": [
+        "risk-view",
+        "objectives"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "octave",
+        "cobit"
+      ]
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "description": "Translate risk objectives into conceptual, logical, physical, and component-level treatment architecture.",
+      "activities": [
+        "Perform gap analysis of controls and enablers",
+        "Define policies, services, procedures, mechanisms, tools, and operational components",
+        "Maintain traceability from objectives to treatment design"
+      ],
+      "inputs": [
+        "risk-view",
+        "objectives"
+      ],
+      "outputs": [
+        "solution-architecture"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "cobit",
+        "jarchi"
+      ]
+    },
+    {
+      "id": "implement",
+      "name": "Implement",
+      "description": "Plan, prove, roll out, train, test, and validate the selected risk treatment solution.",
+      "activities": [
+        "Plan proof of concept and rollout",
+        "Manage implementation and training",
+        "Test through audit, system tests, process tests, penetration tests, UAT, and OAT"
+      ],
+      "inputs": [
+        "solution-architecture"
+      ],
+      "outputs": [
+        "performance-evidence"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "cobit",
+        "jarchi"
+      ]
+    },
+    {
+      "id": "manage-measure",
+      "name": "Manage and Measure",
+      "description": "Operate, monitor, assure, and report risk and security performance through metrics, scorecards, and dashboards.",
+      "activities": [
+        "Manage operational events and incidents",
+        "Run assurance, audit, live penetration testing, and review activities",
+        "Monitor KPIs, KRIs, risk scorecards, dashboards, and maturity improvement"
+      ],
+      "inputs": [
+        "solution-architecture",
+        "performance-evidence"
+      ],
+      "outputs": [
+        "performance-evidence",
+        "vitality-backlog"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "cobit",
+        "jarchi"
+      ]
+    },
+    {
+      "id": "govern-communicate",
+      "name": "Govern and Communicate",
+      "description": "Keep risk decisions, accountability, reporting, communication, and policy direction aligned across the lifecycle.",
+      "activities": [
+        "Set decision rights and risk ownership",
+        "Communicate appetite, policy, performance, and residual risk",
+        "Escalate decisions where thresholds or accountability boundaries are crossed"
+      ],
+      "inputs": [
+        "risk-appetite",
+        "objectives",
+        "performance-evidence"
+      ],
+      "outputs": [
+        "vitality-backlog"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "cobit"
+      ]
+    },
+    {
+      "id": "assure",
+      "name": "Assure",
+      "description": "Provide through-life assurance that the architecture and its operation remain fit for purpose, traceable, compliant, and effective.",
+      "activities": [
+        "Check completeness, assurance, compliance, performance, justification, and significance",
+        "Validate traceability from business attributes to controls, metrics, and evidence",
+        "Feed assurance findings into vitality and architecture change management"
+      ],
+      "inputs": [
+        "objectives",
+        "solution-architecture",
+        "performance-evidence"
+      ],
+      "outputs": [
+        "vitality-backlog"
+      ],
+      "nibocj_refs": [
+        "nist",
+        "iso",
+        "bsi",
+        "cobit",
+        "jarchi"
+      ]
+    }
+  ],
+  "nibocj": [
+    {
+      "id": "nist",
+      "name": "NIST",
+      "description": "Risk, controls, cybersecurity outcomes, continuous monitoring, and assessment references.",
+      "references": [
+        "NIST CSF 2.0",
+        "NIST SP 800-30",
+        "NIST SP 800-37",
+        "NIST SP 800-53",
+        "NIST SP 800-137"
+      ]
+    },
+    {
+      "id": "iso",
+      "name": "ISO",
+      "description": "ISMS requirements, risk management process, controls, and measurement references.",
+      "references": [
+        "ISO/IEC 27001:2022",
+        "ISO/IEC 27002:2022",
+        "ISO/IEC 27005:2022",
+        "ISO/IEC 27004"
+      ]
+    },
+    {
+      "id": "bsi",
+      "name": "BSI",
+      "description": "German IT-Grundschutz orientation for baseline protection, safeguards, checks, and risk analysis.",
+      "references": [
+        "BSI IT-Grundschutz",
+        "BSI Standard 200-1",
+        "BSI Standard 200-2",
+        "BSI Standard 200-3"
+      ]
+    },
+    {
+      "id": "octave",
+      "name": "OCTAVE",
+      "description": "Asset-driven operational risk analysis, scenario thinking, and organisational risk workshops.",
+      "references": [
+        "OCTAVE Allegro",
+        "OCTAVE risk analysis method"
+      ]
+    },
+    {
+      "id": "cobit",
+      "name": "COBIT",
+      "description": "Governance and management objectives for enterprise information and technology.",
+      "references": [
+        "COBIT 2019 EDM",
+        "COBIT 2019 APO",
+        "COBIT 2019 DSS",
+        "COBIT 2019 MEA"
+      ]
+    },
+    {
+      "id": "jarchi",
+      "name": "jArchi",
+      "description": "Automation layer for ArchiMate model generation, traceability properties, folder placement, and view rendering.",
+      "references": [
+        "Archi jArchi scripting plugin",
+        "Local ArchiScripts SABSA generators"
+      ]
+    }
+  ],
+  "traceability": [
+    {
+      "from": "business-context",
+      "to": "business-attributes",
+      "label": "drives"
+    },
+    {
+      "from": "business-attributes",
+      "to": "risk-appetite",
+      "label": "sets thresholds for"
+    },
+    {
+      "from": "risk-appetite",
+      "to": "risk-view",
+      "label": "bounds"
+    },
+    {
+      "from": "risk-view",
+      "to": "objectives",
+      "label": "prioritises"
+    },
+    {
+      "from": "objectives",
+      "to": "solution-architecture",
+      "label": "directs"
+    },
+    {
+      "from": "solution-architecture",
+      "to": "performance-evidence",
+      "label": "is measured by"
+    },
+    {
+      "from": "performance-evidence",
+      "to": "vitality-backlog",
+      "label": "feeds"
+    },
+    {
+      "from": "vitality-backlog",
+      "to": "business-context",
+      "label": "updates"
+    }
+  ]
+}
