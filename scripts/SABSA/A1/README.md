@@ -115,7 +115,7 @@ Runs the shared field-catalogue generator in overlay model mode. It creates or r
 - `SABSA A1 Overlay Model - Overview`
 - `SABSA A1 Overlay Model - Type Model`
 
-The type model view shows derived overlay type inheritance with visible `CoreTypeSpecialization` relationships, for example `Threat` -> `Event Attribute` and `Control` -> `Risk Treatment`.
+The type model view shows derived overlay type inheritance with visible `CoreTypeSpecialization` relationships in dedicated `Type Inheritance - ...` sections, for example `Threat` -> `Event Attribute` and `Control` -> `Risk Treatment`.
 
 ## Generate_SABSA_A1_Overlay_Template_Library_Views.ajs
 
