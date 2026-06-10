@@ -1,0 +1,470 @@
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Assurance_Framework_View";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "WARN"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Assurance Framework"
+});
+
+var CONST = {
+    ViewName: "SABSA A1 - Assurance Framework",
+    Namespace: "SabsaA1AssuranceFramework",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Assurance Framework",
+        Elements: "Elements",
+        Relations: "Assurance Framework"
+    },
+    Property: {
+        Key: "SabsaA1AssuranceFrameworkKey",
+        Kind: "SabsaA1AssuranceFrameworkKind",
+        Namespace: "Namespace",
+        SabsaType: "SabsaType",
+        SourceView: "SourceView",
+        Layer: "SabsaLayer"
+    },
+    Layout: {
+        TitleX: 30,
+        TitleY: 30,
+        TitleWidth: 820,
+        TitleHeight: 54,
+        LeftPanelX: 28,
+        LeftPanelY: 155,
+        LeftPanelWidth: 300,
+        LeftPanelHeight: 320,
+        CenterX: 380,
+        ContextY: 118,
+        ContextWidth: 540,
+        ContextHeight: 108,
+        ContextHeaderHeight: 38,
+        ModelY: 258,
+        ModelWidth: 540,
+        ModelHeight: 108,
+        ActivitiesY: 390,
+        ActivitiesWidth: 540,
+        ActivitiesHeight: 112,
+        RightPanelX: 970,
+        RightPanelY: 155,
+        RightPanelWidth: 300,
+        RightPanelHeight: 128,
+        ArtefactPanelX: 970,
+        ArtefactPanelY: 308,
+        ArtefactPanelWidth: 300,
+        ArtefactPanelHeight: 310,
+        ItemX: 42,
+        ItemY: 30,
+        ItemWidth: 222,
+        ItemHeight: 38,
+        ItemGapY: 12,
+        ContextItemY: 58,
+        ContextItemWidth: 132,
+        ContextItemHeight: 32,
+        ArtefactItemHeight: 78
+    },
+    Style: {
+        TitleFill: "#ffffff",
+        PanelFill: "#eef3f3",
+        PanelHeaderFill: "#70a7ba",
+        DarkTealFill: "#174e58",
+        WhiteFill: "#ffffff",
+        ContextHeaderFill: "#70a7ba",
+        ContextBodyFill: "#e8f1f3",
+        ModelFill: "#e8f1f3",
+        ModelBorder: "#007142",
+        ActivitiesFill: "#e8f1f3",
+        ActivitiesBorder: "#233a90",
+        AssuranceGreen: "#007a3d",
+        LineColor: "#53aebc",
+        FontColor: "#001b4d",
+        HeaderFontColor: "#ffffff",
+        GreenLineColor: "#007142"
+    }
+};
+
+var ELEMENTS = [
+    { id: "attributes", name: "Attributes", type: "Attribute", conceptType: "business-object", kind: "Input" },
+    { id: "risk", name: "Risk", type: "Risk", conceptType: "assessment", kind: "Input" },
+    { id: "processes", name: "Processes", type: "Process", conceptType: "business-process", kind: "Input" },
+    { id: "environment", name: "Environment", type: "Environment", conceptType: "business-object", kind: "Input" },
+    { id: "people", name: "People", type: "People", conceptType: "business-actor", kind: "Input" },
+    { id: "time", name: "Time", type: "Time", conceptType: "business-object", kind: "Input" },
+    { id: "assurance-context", name: "Assurance Context", type: "Assurance_Context", conceptType: "grouping", kind: "Context" },
+    { id: "scope", name: "Scope", type: "Scope", conceptType: "business-object", kind: "ContextElement" },
+    { id: "properties", name: "Properties", type: "Property", conceptType: "business-object", kind: "ContextElement" },
+    { id: "requirements", name: "Requirements", type: "Assurance_Requirement", conceptType: "requirement", kind: "ContextElement" },
+    { id: "domains", name: "Domains", type: "Domain", conceptType: "business-actor", kind: "ContextInput" },
+    { id: "dependencies", name: "Dependencies", type: "Dependency", conceptType: "business-object", kind: "ContextInput" },
+    { id: "assurance-model", name: "Assurance Model", type: "Assurance_Model", conceptType: "assessment", kind: "Model" },
+    { id: "deploy-assurance-investigation-activities", name: "Deploy Assurance Investigation Activities", type: "Assurance_Investigation_Activities", conceptType: "business-process", kind: "Activity" },
+    { id: "define-assurance-levels", name: "Define\nAssurance\nLevels", type: "Assurance_Level_Definition", conceptType: "course-of-action", kind: "Artefact" },
+    { id: "assurance-activities-catalogue", name: "Assurance\nActivities\nCatalogue", type: "Assurance_Activity_Catalogue", conceptType: "business-object", kind: "Artefact" },
+    { id: "assurance-needs-assessment", name: "Assurance\nNeeds Assessment", type: "Assurance_Needs_Assessment", conceptType: "assessment", kind: "Artefact" }
+];
+
+var RELATIONS = [
+    { from: "attributes", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "risk", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "processes", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "environment", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "people", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "time", to: "assurance-context", type: "access-relationship", label: "informs" },
+    { from: "domains", to: "assurance-context", type: "access-relationship", label: "scopes" },
+    { from: "dependencies", to: "assurance-context", type: "access-relationship", label: "constrains" },
+    { from: "assurance-context", to: "assurance-model", type: "triggering-relationship", label: "frames" },
+    { from: "assurance-model", to: "deploy-assurance-investigation-activities", type: "triggering-relationship", label: "deploys" },
+    { from: "define-assurance-levels", to: "assurance-model", type: "access-relationship", label: "defines" },
+    { from: "assurance-activities-catalogue", to: "assurance-model", type: "access-relationship", label: "catalogues" },
+    { from: "assurance-needs-assessment", to: "assurance-model", type: "access-relationship", label: "prioritises" }
+];
+
+var stats = {
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function displayName(value) {
+    return safeString(value).replace(/_/g, " ").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/^\s+|\s+$/g, "");
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Motivation": ["Motivation"],
+        "Strategy": ["Strategy"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var wantedNames = (aliasesByFolderName[rootName] || [rootName]).map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (!foundFolder && wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    return childFolder || parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType) {
+    if (conceptType === "assessment" || conceptType === "requirement") {
+        return { rootName: "Motivation", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+    }
+    if (conceptType === "capability" || conceptType === "course-of-action") {
+        return { rootName: "Strategy", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+    }
+    if (conceptType === "grouping") {
+        return { rootName: "Other", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+    }
+
+    return { rootName: "Business", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    if (!objectToMove) {
+        return null;
+    }
+
+    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    return objectToMove;
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", getModelFolderSegments([]), viewObject);
+}
+
+function moveRelationshipToFolder(relationship) {
+    return moveObjectToFolder("Relations", getModelFolderSegments([CONST.Folder.Relations]), relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(data) {
+    var key = "assurance-framework:element:" + data.id;
+    var placement = resolveConceptPlacement(data.conceptType);
+    var concept = findConceptByKey(data.conceptType, key);
+
+    if (!concept) {
+        concept = model.createElement(data.conceptType, displayName(data.name), ensureFolderPath(placement.rootName, placement.pathSegments));
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = displayName(data.name);
+    concept.documentation = "SABSA A1 assurance framework element: " + displayName(data.name) + ".";
+    concept.prop(CONST.Property.Key, key);
+    concept.prop(CONST.Property.Namespace, CONST.Namespace);
+    concept.prop(CONST.Property.Kind, data.kind);
+    concept.prop(CONST.Property.SabsaType, data.type);
+    concept.prop(CONST.Property.SourceView, CONST.ViewName);
+    concept.prop(CONST.Property.Layer, "Conceptual");
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(data, concepts) {
+    var key = "assurance-framework:relationship:" + data.from + ":" + data.to;
+    var relationship = findRelationshipByKey(key);
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(data.type, data.label, concepts[data.from], concepts[data.to]);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", data.label, concepts[data.from], concepts[data.to]);
+        }
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = displayName(data.label);
+    relationship.prop(CONST.Property.Key, key);
+    relationship.prop(CONST.Property.Namespace, CONST.Namespace);
+    relationship.prop("SabsaA1AssuranceFrameworkRelationKind", "FrameworkFlow");
+    relationship.prop("SourceElement", data.from);
+    relationship.prop("TargetElement", data.to);
+    relationship.prop("RelationshipLabel", data.label);
+    moveRelationshipToFolder(relationship);
+
+    return relationship;
+}
+
+function styleVisual(visual, fillColor, fontColor, lineColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = lineColor || CONST.Style.LineColor;
+    visual.fontColor = fontColor || CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.a1.assurance.label.skipped");
+    }
+}
+
+function addVisual(view, concept, x, y, width, height, fillColor, fontColor, lineColor, labelExpression) {
+    var visual = view.add(concept, x, y, width, height);
+
+    styleVisual(visual, fillColor, fontColor, lineColor);
+    tryApplyLabelExpression(visual, labelExpression || "${name}");
+
+    return visual;
+}
+
+function addNote(container, text, x, y, width, height, fillColor, fontColor, lineColor) {
+    var note = container.createObject("note", x, y, width, height);
+
+    note.text = text;
+    styleVisual(note, fillColor, fontColor, lineColor);
+
+    return note;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+
+    return connection;
+}
+
+function buildConcepts() {
+    var concepts = {};
+
+    ELEMENTS.forEach(function (entry) {
+        concepts[entry.id] = ensureConcept(entry);
+    });
+
+    return concepts;
+}
+
+function addPanel(view, x, y, width, height) {
+    addNote(view, "", x, y, width, height, CONST.Style.PanelFill, CONST.Style.FontColor, CONST.Style.PanelFill);
+    addNote(view, "", x, y, width, 16, CONST.Style.PanelHeaderFill, CONST.Style.PanelHeaderFill, CONST.Style.PanelHeaderFill);
+}
+
+function addListItem(view, concept, x, y, width, height, fillColor, fontColor, lineColor) {
+    return addVisual(view, concept, x, y, width, height, fillColor, fontColor, lineColor, "${name}");
+}
+
+function createFrameworkView(concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.ViewName));
+    var visuals = {};
+
+    view.documentation = "SABSA A1 assurance framework view showing assurance context, model, investigation activities, input dimensions and assurance artefacts.";
+    moveViewToFolder(view);
+
+    addNote(view, "Refresh - SABSA Assurance Framework", CONST.Layout.TitleX, CONST.Layout.TitleY, CONST.Layout.TitleWidth, CONST.Layout.TitleHeight, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+
+    addPanel(view, CONST.Layout.LeftPanelX, CONST.Layout.LeftPanelY, CONST.Layout.LeftPanelWidth, CONST.Layout.LeftPanelHeight);
+    ["attributes", "risk", "processes", "environment", "people", "time"].forEach(function (id, index) {
+        var fill = id === "attributes" ? CONST.Style.DarkTealFill : CONST.Style.WhiteFill;
+        var font = id === "attributes" ? CONST.Style.HeaderFontColor : CONST.Style.FontColor;
+        var y = CONST.Layout.LeftPanelY + CONST.Layout.ItemY + (index * (CONST.Layout.ItemHeight + CONST.Layout.ItemGapY));
+        visuals[id] = addListItem(view, concepts[id], CONST.Layout.LeftPanelX + CONST.Layout.ItemX, y, CONST.Layout.ItemWidth, CONST.Layout.ItemHeight, fill, font, CONST.Style.PanelHeaderFill);
+    });
+
+    visuals["assurance-context"] = addVisual(view, concepts["assurance-context"], CONST.Layout.CenterX, CONST.Layout.ContextY, CONST.Layout.ContextWidth, CONST.Layout.ContextHeight, CONST.Style.ContextBodyFill, CONST.Style.FontColor, CONST.Style.ContextHeaderFill, "");
+    addNote(visuals["assurance-context"], "Assurance Context", 0, 0, CONST.Layout.ContextWidth, CONST.Layout.ContextHeaderHeight, CONST.Style.ContextHeaderFill, CONST.Style.FontColor, CONST.Style.ContextHeaderFill);
+    ["scope", "properties", "requirements"].forEach(function (id, index) {
+        visuals[id] = addVisual(
+            visuals["assurance-context"],
+            concepts[id],
+            54 + (index * 160),
+            CONST.Layout.ContextItemY,
+            CONST.Layout.ContextItemWidth,
+            CONST.Layout.ContextItemHeight,
+            CONST.Style.ContextBodyFill,
+            CONST.Style.FontColor,
+            CONST.Style.ContextBodyFill,
+            "${name}"
+        );
+    });
+
+    visuals["assurance-model"] = addVisual(view, concepts["assurance-model"], CONST.Layout.CenterX + 8, CONST.Layout.ModelY, CONST.Layout.ModelWidth - 16, CONST.Layout.ModelHeight, CONST.Style.ModelFill, CONST.Style.FontColor, CONST.Style.ModelBorder, "${name}");
+    visuals["deploy-assurance-investigation-activities"] = addVisual(view, concepts["deploy-assurance-investigation-activities"], CONST.Layout.CenterX + 8, CONST.Layout.ActivitiesY, CONST.Layout.ActivitiesWidth - 16, CONST.Layout.ActivitiesHeight, CONST.Style.ActivitiesFill, CONST.Style.FontColor, CONST.Style.ActivitiesBorder, "${name}");
+
+    addPanel(view, CONST.Layout.RightPanelX, CONST.Layout.RightPanelY, CONST.Layout.RightPanelWidth, CONST.Layout.RightPanelHeight);
+    visuals.domains = addListItem(view, concepts.domains, CONST.Layout.RightPanelX + CONST.Layout.ItemX, CONST.Layout.RightPanelY + CONST.Layout.ItemY, CONST.Layout.ItemWidth, CONST.Layout.ItemHeight, CONST.Style.PanelFill, CONST.Style.FontColor, CONST.Style.DarkTealFill);
+    visuals.dependencies = addListItem(view, concepts.dependencies, CONST.Layout.RightPanelX + CONST.Layout.ItemX, CONST.Layout.RightPanelY + CONST.Layout.ItemY + CONST.Layout.ItemHeight + CONST.Layout.ItemGapY, CONST.Layout.ItemWidth, CONST.Layout.ItemHeight, CONST.Style.WhiteFill, CONST.Style.FontColor, CONST.Style.PanelHeaderFill);
+
+    addPanel(view, CONST.Layout.ArtefactPanelX, CONST.Layout.ArtefactPanelY, CONST.Layout.ArtefactPanelWidth, CONST.Layout.ArtefactPanelHeight);
+    addNote(view, "", CONST.Layout.ArtefactPanelX, CONST.Layout.ArtefactPanelY, CONST.Layout.ArtefactPanelWidth, 16, CONST.Style.AssuranceGreen, CONST.Style.AssuranceGreen, CONST.Style.AssuranceGreen);
+    ["define-assurance-levels", "assurance-activities-catalogue", "assurance-needs-assessment"].forEach(function (id, index) {
+        var y = CONST.Layout.ArtefactPanelY + 32 + (index * (CONST.Layout.ArtefactItemHeight + 14));
+        visuals[id] = addListItem(view, concepts[id], CONST.Layout.ArtefactPanelX + 42, y, CONST.Layout.ItemWidth, CONST.Layout.ArtefactItemHeight, CONST.Style.WhiteFill, CONST.Style.FontColor, CONST.Style.AssuranceGreen);
+    });
+
+    RELATIONS.forEach(function (relation) {
+        addConnection(view, ensureRelationship(relation, concepts), visuals[relation.from], visuals[relation.to]);
+    });
+
+    return view;
+}
+
+function confirmExecution() {
+    return dialogs.confirmInfo(
+        "This script will generate or update the SABSA A1 Assurance Framework view." +
+        "\n\nView: " + CONST.ViewName +
+        "\nElements: " + ELEMENTS.length +
+        "\nRelationships: " + RELATIONS.length +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Assurance Framework Generator"
+    );
+}
+
+function main() {
+    var concepts;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    if (!confirmExecution()) {
+        logger.info("SABSA A1 assurance framework generation cancelled by user.", {}, "sabsa.a1.assurance.cancelled");
+        return;
+    }
+
+    concepts = buildConcepts();
+    view = createFrameworkView(concepts);
+
+    dialogs.showInfo(
+        "Generated view: " + view.name +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused,
+        "SABSA A1 Assurance Framework"
+    );
+}
+
+main();
