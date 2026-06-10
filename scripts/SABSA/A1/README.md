@@ -79,14 +79,14 @@ The script extracts:
 
 - all Markdown tables in the standalone chapter-numbered catalogue as table elements
 - every extracted table row as a row element with `Table_*` properties
-- field definitions as explicit properties on the matching table and core-type elements, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
+- field definitions as explicit properties on the matching metamodel core-type elements only, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
 - `Table 3-LA01 - SABSA Architecture Layer Alignment`
 - `Table 6-01 - Core Type Inventory`
 - `Table 6-02 - Core Type Promotion And Extension`
 - `Table 6-03 - Relationship Catalogue`
 - `Table 6-05 - Recommended Architecture Viewpoints`
 
-It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
+It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
 
 - `SABSA A1 - Metamodel Complete Table Index`
 - `SABSA A1 - SABSA Architecture Layer Alignment`
@@ -100,4 +100,4 @@ The complete table model also creates relationships from source to table, table 
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
-Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values and field metadata from the metamodel, and creates a trace relationship back to the selected meta element.
+Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values from the metamodel, leaves `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
