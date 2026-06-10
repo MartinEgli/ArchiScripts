@@ -6,7 +6,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
-var SCRIPT_NAME = "Generate_SABSA_A1_Exchange_Schema_Metamodel_Views";
+var SCRIPT_NAME = "Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views";
 var LOG_LEVEL = "WARN";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
     clearConsole: true,

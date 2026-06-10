@@ -1,0 +1,13 @@
+/*
+===============================================================================
+Generate SABSA A1 Exchange Schema Metamodel Views
+===============================================================================
+
+Archived compatibility entry point. Prefer:
+../Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs").getCanonicalPath());

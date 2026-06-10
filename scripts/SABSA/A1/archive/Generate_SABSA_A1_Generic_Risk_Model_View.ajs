@@ -1,0 +1,13 @@
+/*
+===============================================================================
+Generate SABSA A1 Generic Risk Model View
+===============================================================================
+
+Archived compatibility entry point. Prefer:
+../Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs").getCanonicalPath());
