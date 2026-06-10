@@ -89,14 +89,14 @@ It creates or reuses metamodel, overlay, relationship and sample elements. Exist
 
 The meta script extracts:
 
-- field definitions as explicit properties on the matching metamodel core-type elements only, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
+- field definitions as compact explicit properties on the matching metamodel core-type elements only, using one descriptor property per field: `Field_<field>` with datatype, required flag, key role, template family and description
 - `Table 3-LA01 - SABSA Architecture Layer Alignment`
 - `Table 6-01 - Core Type Inventory`
 - `Table 6-02 - Core Type Promotion And Extension`
 - `Table 6-03 - Relationship Catalogue`
 - `Table 6-05 - Recommended Architecture Viewpoints`
 
-It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor` and `VisualColorRole`. Meta core-type elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. The generator removes old `Field_*` metadata copies from SABSA A1 non-meta elements when it reuses or scans them. Meta type elements are shown as `«SABSA A1 Overlay Type»` followed by the type name, while sample and applied overlay elements use the concrete overlay stereotype such as `«SABSA A1 Risk»`. It generates the metamodel views:
+It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor` and `VisualColorRole`. Meta core-type elements carry compact `Field_*` descriptor metadata; sample and applied overlay elements carry concrete field values only. FK/reference ID fields are omitted from sample and applied elements because relationships carry the traceability. The generator removes old verbose `Field_*_Datatype`, `Field_*_Description` and other redundant field metadata copies when it reuses or scans elements. Meta type elements are shown as `«SABSA A1 Overlay Type»` followed by the type name, while sample and applied overlay elements use the concrete overlay stereotype such as `«SABSA A1 Risk»`. It generates the metamodel views:
 
 Visible Archi concept, relationship and stereotype names replace `_` with spaces across the A1 generation and apply scripts, while stable keys and technical properties such as `SabsaType`, field names and catalogue IDs keep their source values.
 
@@ -123,8 +123,8 @@ Shared backwards-compatible generator core. Running it directly uses combined mo
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
-Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values from the metamodel, uses metamodel field defaults such as `classification = Threat`, `state_effect = Strength` or `treatment_type = Enabler`, removes old `Field_*` metadata copies from the selected explicit element, leaves `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
+Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing non-FK field values from the metamodel, uses metamodel field defaults such as `classification = Threat`, `state_effect = Strength` or `treatment_type = Enabler`, removes old `Field_*` metadata and FK/reference ID field values from the selected explicit element, leaves compact `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
 
 ## Cleanup_SABSA_A1_Field_Metadata_From_Explicit_Elements.ajs
 
-Removes existing `Field_*` metadata properties from SABSA A1 explicit/generated concepts and relationships while leaving them on `CoreType` metamodel elements. Use this once after older generator runs if explicit/sample/applied elements still contain `Field_*` metadata copies.
+Removes existing verbose `Field_*` metadata properties from SABSA A1 explicit/generated concepts and relationships, removes redundant `Field_*_Datatype` / `Field_*_Description` style metadata from `CoreType` metamodel elements, and removes FK/reference ID field values from explicit/sample/applied elements when a linked meta element identifies those fields. Use this once after older generator runs if explicit/sample/applied elements still contain verbose metadata or FK ID properties.
