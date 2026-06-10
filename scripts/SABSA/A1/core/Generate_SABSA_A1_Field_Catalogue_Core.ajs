@@ -3100,10 +3100,6 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
         currentY = nextLibraryGroupY(currentY, relationshipGroupHeight);
     }
 
-    addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
-        "CoreTypeSpecialization"
-    ]);
-
     createOverlayTypeInheritanceSection(view, coreTypeConcepts, currentY);
 
     stats.views++;
@@ -3112,10 +3108,13 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
 
 function createOverlayTypeInheritanceSection(view, coreTypeConcepts, startY) {
     var inheritanceGroups = {};
-    var parentX = CONST.Layout.LibraryGroupX + CONST.Layout.LibraryGroupInnerX;
-    var childStartX = parentX + CONST.Layout.CardWidth + CONST.Layout.GapX + 90;
+    var parentX = CONST.Layout.LibraryGroupInnerX;
+    var childStartX = parentX + CONST.Layout.CardWidth + (CONST.Layout.GapX * 3);
+    var availableChildWidth = CONST.Layout.LibraryGroupWidth - childStartX - CONST.Layout.LibraryGroupInnerX;
+    var childColumns = Math.max(1, Math.min(3, Math.floor((availableChildWidth + CONST.Layout.GapX) / (CONST.Layout.CardWidth + CONST.Layout.GapX))));
     var currentY = startY;
-    var typeLabel = "«Overlay Type»\n${name}\n${property:ParentType}";
+    var parentLabel = "«Base Overlay Type»\n${name}\n${property:BaseType}";
+    var childLabel = "«Specialized Overlay Type»\n${name}\nparent: ${property:ParentType}";
 
     getCoreTypeSpecializations().forEach(function (entry) {
         var child = coreTypeConcepts[entry.TypeName];
@@ -3140,26 +3139,48 @@ function createOverlayTypeInheritanceSection(view, coreTypeConcepts, startY) {
 
     Object.keys(inheritanceGroups).sort().forEach(function (parentType) {
         var groupData = inheritanceGroups[parentType];
-        var rowCount = Math.max(1, Math.ceil(groupData.children.length / 3));
-        var groupHeight = CONST.Layout.LibraryGroupInnerY + (rowCount * CONST.Layout.CardHeight) + ((rowCount - 1) * CONST.Layout.GapY) + CONST.Layout.LibraryGroupGapY;
-        addLibraryGroup(view, "Type Inheritance - " + displayName(parentType), CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
-        var parentVisual = addStyledVisual(view, groupData.parent, parentX, currentY + CONST.Layout.LibraryGroupInnerY, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(groupData.parent, CONST.Style.TypeFill));
+        var children = groupData.children.sort(function (left, right) {
+            return safeString(left.typeName).localeCompare(safeString(right.typeName));
+        });
+        var rowCount = Math.max(1, Math.ceil(children.length / childColumns));
+        var childBlockHeight = (rowCount * CONST.Layout.CardHeight) + ((rowCount - 1) * CONST.Layout.GapY);
+        var contentHeight = Math.max(CONST.Layout.CardHeight, childBlockHeight);
+        var groupHeight = CONST.Layout.LibraryGroupInnerY + contentHeight + CONST.Layout.LibraryGroupGapY;
+        var group = addLibraryGroup(
+            view,
+            "Type Inheritance - " + displayName(parentType),
+            CONST.Layout.LibraryGroupX,
+            currentY,
+            CONST.Layout.LibraryGroupWidth,
+            groupHeight,
+            CONST.Style.LibraryTypeGroupFill
+        );
+        var parentY = CONST.Layout.LibraryGroupInnerY + Math.max(0, Math.floor((contentHeight - CONST.Layout.CardHeight) / 2));
+        var parentVisual = addStyledVisual(
+            group,
+            groupData.parent,
+            parentX,
+            parentY,
+            CONST.Layout.CardWidth,
+            CONST.Layout.CardHeight,
+            getConceptFill(groupData.parent, CONST.Style.TypeFill)
+        );
 
         try {
-            parentVisual.labelExpression = "«Base Overlay Type»\n${name}\n${property:BaseType}";
+            parentVisual.labelExpression = parentLabel;
         } catch (error) {
             logger.debug("Could not apply inheritance parent label expression.", { error: String(error) }, "sabsa.a1.overlay.inheritance.parent.label.skipped");
         }
 
-        groupData.children.forEach(function (childEntry, index) {
+        children.forEach(function (childEntry, index) {
             var child = childEntry.concept;
-            var row = Math.floor(index / 3);
-            var col = index % 3;
+            var row = Math.floor(index / childColumns);
+            var col = index % childColumns;
             var childVisual = addStyledVisual(
-                view,
+                group,
                 child,
                 childStartX + (col * (CONST.Layout.CardWidth + CONST.Layout.GapX)),
-                currentY + CONST.Layout.LibraryGroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY)),
+                CONST.Layout.LibraryGroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY)),
                 CONST.Layout.CardWidth,
                 CONST.Layout.CardHeight,
                 getConceptFill(child, CONST.Style.TypeFill)
@@ -3167,7 +3188,7 @@ function createOverlayTypeInheritanceSection(view, coreTypeConcepts, startY) {
             var relationship = findRelationshipByKey("catalogue:type-specialization:" + childEntry.typeName + ":" + parentType);
 
             try {
-                childVisual.labelExpression = typeLabel;
+                childVisual.labelExpression = childLabel;
             } catch (error) {
                 logger.debug("Could not apply inheritance child label expression.", { error: String(error) }, "sabsa.a1.overlay.inheritance.child.label.skipped");
             }
