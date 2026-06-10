@@ -60,6 +60,24 @@ The script creates stable framework elements under `SABSA/A1/Assurance Framework
 
 - `SABSA A1 - Assurance Framework`
 
+## Generate_SABSA_A1_Risk_Feedback_Control_System_View.ajs
+
+Generates a SABSA A1 Risk Management Feedback Control System view in the style of the A1 training diagram:
+
+- `Risk Treatment Strategy`
+- `Risk Treatment`
+- `Domain Authorities`
+- `Decision Sub-system`
+- `Control Sub-system`
+- `Detect Change`
+- `Monitoring & Measurement Sub-system`
+- `Report Risk`
+- `Risk Assessment`
+
+The script creates stable framework elements under `SABSA/A1/Risk Feedback Control System` and generates:
+
+- `SABSA A1 - Risk Management Feedback Control System`
+
 ## NIBOCJ Assumption
 
 `NIBOCJ` is currently interpreted as a working cross-reference mnemonic:
