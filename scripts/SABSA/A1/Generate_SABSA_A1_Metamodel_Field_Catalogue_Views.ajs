@@ -901,10 +901,10 @@ function parseJsonObject(value) {
     }
 }
 
-function isReferenceField(metaConcept, fieldName) {
+function isReferenceIdField(metaConcept, fieldName) {
     var keyRole = getFieldKeyRole(metaConcept, fieldName);
 
-    return keyRole === "FK" || (keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName)));
+    return keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName));
 }
 
 function getFieldRoleLabel(data) {
@@ -2028,14 +2028,14 @@ function buildSampleValue(fieldName, datatype, description) {
     return "sample_" + propertyKey(fieldName);
 }
 
-function removeReferenceFieldValues(concept, metaConcept) {
+function removeReferenceIdFieldValues(concept, metaConcept) {
     var removed = 0;
     var fieldList = safeString(metaConcept.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
         return !!fieldName;
     });
 
     fieldList.forEach(function (fieldName) {
-        if (isReferenceField(metaConcept, fieldName) && safeString(concept.prop(fieldName))) {
+        if (isReferenceIdField(metaConcept, fieldName) && safeString(concept.prop(fieldName))) {
             concept.removeProp(fieldName);
             removed++;
         }
@@ -2050,14 +2050,14 @@ function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
     });
     var defaults = parseJsonObject(metaConcept.prop("DefaultValuesJson"));
 
-    stats.fieldMetadataPropertiesRemoved += removeReferenceFieldValues(sampleConcept, metaConcept);
+    stats.fieldMetadataPropertiesRemoved += removeReferenceIdFieldValues(sampleConcept, metaConcept);
 
     fieldList.forEach(function (fieldName) {
         var datatype = getFieldDatatype(metaConcept, fieldName);
         var description = getFieldDescription(metaConcept, fieldName);
         var defaultValue = safeString(defaults[fieldName]);
 
-        if (isReferenceField(metaConcept, fieldName)) {
+        if (isReferenceIdField(metaConcept, fieldName)) {
             return;
         }
 

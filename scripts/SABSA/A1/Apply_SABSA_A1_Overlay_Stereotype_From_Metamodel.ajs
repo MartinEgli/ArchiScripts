@@ -155,10 +155,10 @@ function parseJsonObject(value) {
     }
 }
 
-function isReferenceField(metaElement, fieldName) {
+function isReferenceIdField(metaElement, fieldName) {
     var keyRole = getFieldKeyRole(metaElement, fieldName);
 
-    return keyRole === "FK" || (keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName)));
+    return keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName));
 }
 
 function ensureModelAvailable() {
@@ -256,11 +256,11 @@ function removeFieldMetadataProperties(concept) {
     return removed;
 }
 
-function removeReferenceFieldValues(concept, metaElement, fieldList) {
+function removeReferenceIdFieldValues(concept, metaElement, fieldList) {
     var removed = 0;
 
     (fieldList || []).forEach(function (fieldName) {
-        if (isReferenceField(metaElement, fieldName) && safeString(concept.prop(fieldName))) {
+        if (isReferenceIdField(metaElement, fieldName) && safeString(concept.prop(fieldName))) {
             concept.removeProp(fieldName);
             removed++;
         }
@@ -329,14 +329,14 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     concept.prop(CONST.Property.DefaultLabelExpression, entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype);
     concept.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
     removed = removeFieldMetadataProperties(concept);
-    removed += removeReferenceFieldValues(concept, metaElement, fieldList);
+    removed += removeReferenceIdFieldValues(concept, metaElement, fieldList);
 
     fieldList.forEach(function (fieldName) {
         var datatype = getFieldDatatype(metaElement, fieldName);
         var description = getFieldDescription(metaElement, fieldName);
         var defaultValue = safeString(defaults[fieldName]);
 
-        if (isReferenceField(metaElement, fieldName)) {
+        if (isReferenceIdField(metaElement, fieldName)) {
             return;
         }
 

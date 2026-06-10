@@ -3,13 +3,13 @@
 Cleanup SABSA A1 Field Metadata From Explicit Elements
 ===============================================================================
 
-Removes verbose Field_* metadata properties and concrete FK/reference ID field
-values from SABSA A1 explicit/generated elements.
+Removes verbose Field_* metadata properties and concrete ID-style reference
+field values from SABSA A1 explicit/generated elements.
 
 Rule:
 - Compact Field_<field> metadata belongs only to SABSA A1 CoreType metamodel elements.
 - Redundant Field_<field>_Datatype / _Description style metadata is removed from CoreType elements.
-- Explicit/sample/applied elements keep non-FK concrete field values; FK/reference IDs are represented by relationships.
+- Explicit/sample/applied elements keep concrete field values except ID-style reference fields; FK semantics remain represented by relationships.
 ===============================================================================
 */
 
@@ -36,7 +36,7 @@ var stats = {
     relationshipsCleaned: 0,
     propertiesRemoved: 0,
     metaConceptsCleaned: 0,
-    referenceFieldValuesRemoved: 0
+    referenceIdFieldValuesRemoved: 0
 };
 
 function safeString(value) {
@@ -92,10 +92,10 @@ function getFieldKeyRole(metaElement, fieldName) {
     return parseDescriptorValue(metaElement.prop(getFieldPropertyPrefix(fieldName)), "keyRole");
 }
 
-function isReferenceField(metaElement, fieldName) {
+function isReferenceIdField(metaElement, fieldName) {
     var keyRole = getFieldKeyRole(metaElement, fieldName);
 
-    return keyRole === "FK" || (keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName)));
+    return keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName));
 }
 
 function isSabsaA1Object(object) {
@@ -147,7 +147,7 @@ function findMetaElement(object) {
     }).first();
 }
 
-function removeReferenceFieldValues(object) {
+function removeReferenceIdFieldValues(object) {
     var metaElement = findMetaElement(object);
     var removed = 0;
     var fieldList;
@@ -161,7 +161,7 @@ function removeReferenceFieldValues(object) {
     });
 
     fieldList.forEach(function (fieldName) {
-        if (isReferenceField(metaElement, fieldName) && safeString(object.prop(fieldName))) {
+        if (isReferenceIdField(metaElement, fieldName) && safeString(object.prop(fieldName))) {
             object.removeProp(fieldName);
             removed++;
         }
@@ -192,7 +192,7 @@ function confirmExecution() {
         return window.confirm(
             "Remove Field_* metadata properties from SABSA A1 explicit/generated elements?\n\n" +
             "CoreType metamodel elements keep compact Field_<field> descriptors.\n" +
-            "Verbose Field_* metadata and FK/reference ID field values are removed."
+            "Verbose Field_* metadata and ID-style reference field values are removed."
         );
     } catch (error) {
         return true;
@@ -220,12 +220,12 @@ function cleanConcepts() {
         }
 
         removed = removeFieldMetadataProperties(concept);
-        referenceRemoved = removeReferenceFieldValues(concept);
+        referenceRemoved = removeReferenceIdFieldValues(concept);
         if (removed + referenceRemoved > 0) {
             stats.conceptsCleaned++;
             stats.propertiesRemoved += removed + referenceRemoved;
-            stats.referenceFieldValuesRemoved += referenceRemoved;
-            console.log("[CLEANED] " + concept.name + " removed Field_* properties: " + removed + ", reference fields: " + referenceRemoved);
+            stats.referenceIdFieldValuesRemoved += referenceRemoved;
+            console.log("[CLEANED] " + concept.name + " removed Field_* properties: " + removed + ", ID-style reference fields: " + referenceRemoved);
         }
     });
 }
@@ -269,7 +269,7 @@ function main() {
         "\nRelationships scanned: " + stats.relationshipsScanned +
         "\nRelationships cleaned: " + stats.relationshipsCleaned +
         "\nMeta CoreType concepts cleaned: " + stats.metaConceptsCleaned +
-        "\nFK/reference field values removed: " + stats.referenceFieldValuesRemoved +
+        "\nID-style reference field values removed: " + stats.referenceIdFieldValuesRemoved +
         "\nProperties removed total: " + stats.propertiesRemoved,
         "INFO"
     );
