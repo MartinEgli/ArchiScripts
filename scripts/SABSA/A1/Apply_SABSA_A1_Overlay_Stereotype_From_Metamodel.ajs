@@ -269,8 +269,9 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
         var prefix = getFieldPropertyPrefix(fieldName);
         var datatype = metaElement.prop(prefix + "_Datatype");
         var description = metaElement.prop(prefix + "_Description");
+        var defaultValue = safeString(metaElement.prop(prefix + "_DefaultValue"));
 
-        if (setIfMissing(concept, fieldName, buildSampleValue(fieldName, datatype, description))) {
+        if (setIfMissing(concept, fieldName, defaultValue || buildSampleValue(fieldName, datatype, description))) {
             added++;
         }
     });

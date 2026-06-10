@@ -844,6 +844,62 @@ function applyFieldCatalogueProperties(target, rows, sourceTableId) {
     }
 }
 
+function copyFieldCatalogueProperties(source, target) {
+    var fieldList = safeString(source.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
+        return !!fieldName;
+    });
+
+    [
+        "FieldCatalogueSourceTable",
+        "FieldCount",
+        "FieldList",
+        "RequiredFieldList",
+        "PrimaryKeyFieldList",
+        "ForeignKeyFieldList"
+    ].forEach(function (propertyName) {
+        target.prop(propertyName, source.prop(propertyName));
+    });
+
+    fieldList.forEach(function (fieldName) {
+        var prefix = getFieldPropertyPrefix(fieldName);
+
+        [
+            "",
+            "_Name",
+            "_Datatype",
+            "_Required",
+            "_KeyRole",
+            "_TemplateFamily",
+            "_Description",
+            "_SourceTable"
+        ].forEach(function (suffix) {
+            target.prop(prefix + suffix, source.prop(prefix + suffix));
+        });
+    });
+}
+
+function applyEventAttributeSpecializationMetadata(coreTypeConcepts) {
+    var parent = coreTypeConcepts.Event_Attribute;
+
+    if (!parent || !safeString(parent.prop("FieldList"))) {
+        return;
+    }
+
+    getEventAttributeSpecializations().forEach(function (entry) {
+        var concept = coreTypeConcepts[entry.TypeName];
+        var classificationPrefix = getFieldPropertyPrefix("classification");
+
+        if (!concept) {
+            return;
+        }
+
+        copyFieldCatalogueProperties(parent, concept);
+        concept.prop(classificationPrefix + "_DefaultValue", entry.Classification);
+        concept.prop("DefaultClassification", entry.Classification);
+        concept.prop("FieldDefault_classification", entry.Classification);
+    });
+}
+
 function getLayerFill(layerName) {
     var layer = trim(layerName);
     var prefix = layer.split(/\s+/)[0];
@@ -1391,6 +1447,8 @@ function createCoreTypeConcepts(markdown, sourceConcept) {
         stats.coreTypes++;
     });
 
+    createEventAttributeSpecializations(concepts, sourceConcept);
+
     return concepts;
 }
 
@@ -1439,6 +1497,70 @@ function getCoreTypeConceptsForTitle(coreTypeConcepts, title) {
     add(title);
     parts.forEach(add);
     return result;
+}
+
+function getEventAttributeSpecializations() {
+    return [
+        {
+            TypeName: "Threat",
+            Classification: "Threat",
+            MainUse: "Event_Attribute specialization for negative SABSA risk classification."
+        },
+        {
+            TypeName: "Opportunity",
+            Classification: "Opportunity",
+            MainUse: "Event_Attribute specialization for positive SABSA opportunity classification."
+        }
+    ];
+}
+
+function createEventAttributeSpecializations(coreTypeConcepts, sourceConcept) {
+    var parent = coreTypeConcepts.Event_Attribute;
+
+    if (!parent) {
+        return;
+    }
+
+    getEventAttributeSpecializations().forEach(function (entry) {
+        var typeName = entry.TypeName;
+        var conceptType = safeString(parent.prop("RecommendedArchiMateType")) || parent.type || "grouping";
+        var fillColor = getConceptFill(parent, CONST.Style.TypeFill);
+        var concept;
+
+        if (coreTypeConcepts[typeName]) {
+            return;
+        }
+
+        concept = ensureConcept(conceptType, typeName, "catalogue:type:" + typeName, {
+            SabsaA1CatalogueKind: "CoreType",
+            SabsaType: typeName,
+            TypeName: typeName,
+            ParentType: "Event_Attribute",
+            SpecializesType: "Event_Attribute",
+            DefaultClassification: entry.Classification,
+            MainUse: entry.MainUse,
+            SourceSection: "Derived from Table 11-02 Event_Attribute classification",
+            RecommendedArchiMateType: conceptType,
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor)
+        }, buildDocumentation("Derived SABSA A1 overlay specialization of Event_Attribute.", entry));
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines derived type", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Derived from Table 11-02 Event_Attribute classification"
+        });
+        ensureRelationship("specialization-relationship", concept, parent, "catalogue:type-specialization:" + typeName + ":Event_Attribute", "specializes Event Attribute", {
+            SabsaA1CatalogueRelationKind: "CoreTypeSpecialization",
+            RelationshipLabel: "specializes Event Attribute",
+            SourceType: typeName,
+            TargetType: "Event_Attribute",
+            DefaultClassification: entry.Classification,
+            SourceSection: "Derived from Table 11-02 Event_Attribute classification"
+        });
+
+        coreTypeConcepts[typeName] = concept;
+        stats.coreTypes++;
+    });
 }
 
 function splitCamelCase(value) {
@@ -1699,7 +1821,8 @@ function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
         var prefix = getFieldPropertyPrefix(fieldName);
         var datatype = metaConcept.prop(prefix + "_Datatype");
         var description = metaConcept.prop(prefix + "_Description");
-        sampleConcept.prop(fieldName, buildSampleValue(fieldName, datatype, description));
+        var defaultValue = safeString(metaConcept.prop(prefix + "_DefaultValue"));
+        sampleConcept.prop(fieldName, defaultValue || buildSampleValue(fieldName, datatype, description));
     });
 }
 
@@ -2232,7 +2355,8 @@ function createTypeView(sourceConcept, typeConcepts) {
 
     addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
         "CoreTypeSemanticRelationship",
-        "CoreTypeForeignKeyReference"
+        "CoreTypeForeignKeyReference",
+        "CoreTypeSpecialization"
     ]);
 
     stats.views++;
@@ -2590,6 +2714,7 @@ function main() {
     relationshipConcepts = createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts);
     viewpointConcepts = createViewpointConcepts(markdown, sourceConcept);
     linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
+    applyEventAttributeSpecializationMetadata(coreTypeConcepts);
     samplesByType = createSampleConcepts(coreTypeConcepts);
     sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
     cleanupNonMetaFieldMetadataProperties();
