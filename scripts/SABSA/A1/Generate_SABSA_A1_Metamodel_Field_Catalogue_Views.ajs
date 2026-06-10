@@ -585,7 +585,12 @@ function setProperties(target, properties) {
 }
 
 function isFieldMetadataProperty(propertyName) {
-    return /^Field_/.test(safeString(propertyName));
+    return /^Field_/.test(safeString(propertyName)) || /^FieldDefault_/.test(safeString(propertyName));
+}
+
+function isRedundantFieldMetadataProperty(propertyName) {
+    return /^Field_.*_(Name|Datatype|Required|KeyRole|TemplateFamily|Description|SourceTable|DefaultValue)$/.test(safeString(propertyName)) ||
+        /^FieldDefault_/.test(safeString(propertyName));
 }
 
 function canOwnFieldMetadata(properties) {
@@ -609,6 +614,23 @@ function removeFieldMetadataProperties(target) {
     return removed;
 }
 
+function removeRedundantFieldMetadataProperties(target) {
+    var removed = 0;
+
+    if (!target || !target.prop) {
+        return removed;
+    }
+
+    target.prop().forEach(function (propertyName) {
+        if (isRedundantFieldMetadataProperty(propertyName)) {
+            target.removeProp(propertyName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
 function isSabsaA1CatalogueOrOverlayObject(object) {
     return safeString(object.prop("SabsaA1CatalogueKind")) !== "" ||
         safeString(object.prop("SabsaA1CatalogueRelationKind")) !== "" ||
@@ -622,11 +644,15 @@ function canConceptOwnFieldMetadata(concept) {
 
 function cleanupNonMetaFieldMetadataProperties() {
     $("element").each(function (concept) {
-        if (!isSabsaA1CatalogueOrOverlayObject(concept) || canConceptOwnFieldMetadata(concept)) {
+        if (!isSabsaA1CatalogueOrOverlayObject(concept)) {
             return;
         }
 
-        stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
+        if (canConceptOwnFieldMetadata(concept)) {
+            stats.fieldMetadataPropertiesRemoved += removeRedundantFieldMetadataProperties(concept);
+        } else {
+            stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
+        }
     });
 
     $("relationship").each(function (relationship) {
@@ -830,6 +856,57 @@ function buildFieldDescriptor(data) {
     ].join("; ");
 }
 
+function parseDescriptorValue(descriptor, key) {
+    var wanted = safeString(key).toLowerCase();
+    var value = "";
+
+    safeString(descriptor).split(/\s*;\s*/).forEach(function (part) {
+        var index = part.indexOf("=");
+        var partKey;
+
+        if (index < 0 || value) {
+            return;
+        }
+
+        partKey = part.substring(0, index).toLowerCase();
+        if (partKey === wanted) {
+            value = part.substring(index + 1);
+        }
+    });
+
+    return value;
+}
+
+function getFieldDescriptor(metaConcept, fieldName) {
+    return safeString(metaConcept.prop(getFieldPropertyPrefix(fieldName)));
+}
+
+function getFieldDatatype(metaConcept, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaConcept, fieldName), "datatype");
+}
+
+function getFieldKeyRole(metaConcept, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaConcept, fieldName), "keyRole");
+}
+
+function getFieldDescription(metaConcept, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaConcept, fieldName), "description");
+}
+
+function parseJsonObject(value) {
+    try {
+        return JSON.parse(safeString(value) || "{}");
+    } catch (error) {
+        return {};
+    }
+}
+
+function isReferenceField(metaConcept, fieldName) {
+    var keyRole = getFieldKeyRole(metaConcept, fieldName);
+
+    return keyRole === "FK" || (keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName)));
+}
+
 function getFieldRoleLabel(data) {
     return stripMarkup(data && data["Key Role"]) || "Property";
 }
@@ -865,13 +942,6 @@ function applyFieldCatalogueProperties(target, rows, sourceTableId) {
         }
 
         target.prop(prefix, buildFieldDescriptor(data));
-        target.prop(prefix + "_Name", fieldName);
-        target.prop(prefix + "_Datatype", data.Datatype);
-        target.prop(prefix + "_Required", data.Required);
-        target.prop(prefix + "_KeyRole", data["Key Role"]);
-        target.prop(prefix + "_TemplateFamily", data["Template Family"]);
-        target.prop(prefix + "_Description", data.Note);
-        target.prop(prefix + "_SourceTable", sourceTableId);
     });
 
     if (fieldNames.length) {
@@ -902,19 +972,7 @@ function copyFieldCatalogueProperties(source, target) {
 
     fieldList.forEach(function (fieldName) {
         var prefix = getFieldPropertyPrefix(fieldName);
-
-        [
-            "",
-            "_Name",
-            "_Datatype",
-            "_Required",
-            "_KeyRole",
-            "_TemplateFamily",
-            "_Description",
-            "_SourceTable"
-        ].forEach(function (suffix) {
-            target.prop(prefix + suffix, source.prop(prefix + suffix));
-        });
+        target.prop(prefix, source.prop(prefix));
     });
 }
 
@@ -928,14 +986,6 @@ function applyCoreTypeSpecializationMetadata(coreTypeConcepts) {
         }
 
         copyFieldCatalogueProperties(parent, concept);
-
-        Object.keys(entry.Defaults || {}).forEach(function (fieldName) {
-            var defaultValue = entry.Defaults[fieldName];
-            var prefix = getFieldPropertyPrefix(fieldName);
-
-            concept.prop(prefix + "_DefaultValue", defaultValue);
-            concept.prop("FieldDefault_" + propertyKey(fieldName), defaultValue);
-        });
 
         concept.prop("DefaultValuesJson", JSON.stringify(entry.Defaults || {}));
     });
@@ -1978,16 +2028,39 @@ function buildSampleValue(fieldName, datatype, description) {
     return "sample_" + propertyKey(fieldName);
 }
 
-function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
+function removeReferenceFieldValues(concept, metaConcept) {
+    var removed = 0;
     var fieldList = safeString(metaConcept.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
         return !!fieldName;
     });
 
     fieldList.forEach(function (fieldName) {
-        var prefix = getFieldPropertyPrefix(fieldName);
-        var datatype = metaConcept.prop(prefix + "_Datatype");
-        var description = metaConcept.prop(prefix + "_Description");
-        var defaultValue = safeString(metaConcept.prop(prefix + "_DefaultValue"));
+        if (isReferenceField(metaConcept, fieldName) && safeString(concept.prop(fieldName))) {
+            concept.removeProp(fieldName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
+function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
+    var fieldList = safeString(metaConcept.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
+        return !!fieldName;
+    });
+    var defaults = parseJsonObject(metaConcept.prop("DefaultValuesJson"));
+
+    stats.fieldMetadataPropertiesRemoved += removeReferenceFieldValues(sampleConcept, metaConcept);
+
+    fieldList.forEach(function (fieldName) {
+        var datatype = getFieldDatatype(metaConcept, fieldName);
+        var description = getFieldDescription(metaConcept, fieldName);
+        var defaultValue = safeString(defaults[fieldName]);
+
+        if (isReferenceField(metaConcept, fieldName)) {
+            return;
+        }
+
         sampleConcept.prop(fieldName, defaultValue || buildSampleValue(fieldName, datatype, description));
     });
 }

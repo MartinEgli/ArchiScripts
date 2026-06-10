@@ -110,6 +110,57 @@ function getFieldPropertyPrefix(fieldName) {
     return "Field_" + propertyKey(fieldName);
 }
 
+function parseDescriptorValue(descriptor, key) {
+    var wanted = safeString(key).toLowerCase();
+    var value = "";
+
+    safeString(descriptor).split(/\s*;\s*/).forEach(function (part) {
+        var index = part.indexOf("=");
+        var partKey;
+
+        if (index < 0 || value) {
+            return;
+        }
+
+        partKey = part.substring(0, index).toLowerCase();
+        if (partKey === wanted) {
+            value = part.substring(index + 1);
+        }
+    });
+
+    return value;
+}
+
+function getFieldDescriptor(metaElement, fieldName) {
+    return safeString(metaElement.prop(getFieldPropertyPrefix(fieldName)));
+}
+
+function getFieldDatatype(metaElement, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaElement, fieldName), "datatype");
+}
+
+function getFieldKeyRole(metaElement, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaElement, fieldName), "keyRole");
+}
+
+function getFieldDescription(metaElement, fieldName) {
+    return parseDescriptorValue(getFieldDescriptor(metaElement, fieldName), "description");
+}
+
+function parseJsonObject(value) {
+    try {
+        return JSON.parse(safeString(value) || "{}");
+    } catch (error) {
+        return {};
+    }
+}
+
+function isReferenceField(metaElement, fieldName) {
+    var keyRole = getFieldKeyRole(metaElement, fieldName);
+
+    return keyRole === "FK" || (keyRole !== "PK" && /(^|_)ids?$/.test(propertyKey(fieldName)));
+}
+
 function ensureModelAvailable() {
     if (!model) {
         throw new Error("No active model is open.");
@@ -185,7 +236,7 @@ function setIfMissing(concept, propertyName, value) {
 }
 
 function isFieldMetadataProperty(propertyName) {
-    return /^Field_/.test(safeString(propertyName));
+    return /^Field_/.test(safeString(propertyName)) || /^FieldDefault_/.test(safeString(propertyName));
 }
 
 function removeFieldMetadataProperties(concept) {
@@ -198,6 +249,19 @@ function removeFieldMetadataProperties(concept) {
     concept.prop().forEach(function (propertyName) {
         if (isFieldMetadataProperty(propertyName)) {
             concept.removeProp(propertyName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
+function removeReferenceFieldValues(concept, metaElement, fieldList) {
+    var removed = 0;
+
+    (fieldList || []).forEach(function (fieldName) {
+        if (isReferenceField(metaElement, fieldName) && safeString(concept.prop(fieldName))) {
+            concept.removeProp(fieldName);
             removed++;
         }
     });
@@ -249,6 +313,7 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     var fieldList = safeString(metaElement.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
         return !!fieldName;
     });
+    var defaults = parseJsonObject(metaElement.prop("DefaultValuesJson"));
     var added = 0;
     var removed = 0;
 
@@ -264,12 +329,16 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     concept.prop(CONST.Property.DefaultLabelExpression, entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype);
     concept.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
     removed = removeFieldMetadataProperties(concept);
+    removed += removeReferenceFieldValues(concept, metaElement, fieldList);
 
     fieldList.forEach(function (fieldName) {
-        var prefix = getFieldPropertyPrefix(fieldName);
-        var datatype = metaElement.prop(prefix + "_Datatype");
-        var description = metaElement.prop(prefix + "_Description");
-        var defaultValue = safeString(metaElement.prop(prefix + "_DefaultValue"));
+        var datatype = getFieldDatatype(metaElement, fieldName);
+        var description = getFieldDescription(metaElement, fieldName);
+        var defaultValue = safeString(defaults[fieldName]);
+
+        if (isReferenceField(metaElement, fieldName)) {
+            return;
+        }
 
         if (setIfMissing(concept, fieldName, defaultValue || buildSampleValue(fieldName, datatype, description))) {
             added++;
