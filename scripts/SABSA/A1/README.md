@@ -164,6 +164,8 @@ Runs the shared field-catalogue generator in overlay model mode. It creates or r
 
 The type model view shows derived overlay type inheritance with visible `CoreTypeSpecialization` relationships in dedicated `Type Inheritance - ...` sections, for example `Threat` -> `Event Attribute` and `Control` -> `Risk Treatment`.
 
+Overlay type and template elements are organized by SABSA A1 area, for example business context, risk identification, assessment/evaluation, treatment/control, monitoring/governance and assurance. The generated `BaseType` property uses readable ArchiMate base type names while `ConceptType` remains the technical jArchi type used by the apply script.
+
 ## Generate_SABSA_A1_Overlay_Template_Library_Views.ajs
 
 Runs the shared field-catalogue generator in template mode. It creates or reuses metamodel and template elements and generates only:
@@ -185,6 +187,8 @@ All field-catalogue entry points above parse:
 - `Table 6-05 - Recommended Architecture Viewpoints`
 
 They create source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor` and `VisualColorRole`. Meta core-type elements carry compact `Field_*` descriptor metadata; template and applied overlay elements carry concrete field values only. ID-style reference fields such as `*_id` and `*_ids` are omitted from template and applied elements because relationships carry the traceability; FK semantics and relationships are still generated. Visible Archi concept, relationship and stereotype names replace `_` with spaces across the A1 generation and apply scripts, while stable keys and technical properties such as `SabsaType`, field names and catalogue IDs keep their source values.
+
+Core type and template folders below `Overlay Model/SABSA/A1/Metamodel Field Catalogue` are subdivided by the generated `SabsaA1Area` / `OverlayArea` value. Existing generated elements are looked up by stable `SabsaA1CatalogueKey` across element types so reruns can reorganize them into the area folders instead of creating duplicates when a recommended base type has been improved.
 
 When table elements exist, metamodel/overlay/template modes reuse them to add relationships from table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type and `CoreTypeHasField` links. Even without table elements they still create named FK-based `CoreTypeForeignKeyReference` links and direct named core-type semantic relationships from `Table 6-03`. Type-to-field relation labels use the field table `Key Role` value, for example `PK`, `FK` or `Property`. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
 
