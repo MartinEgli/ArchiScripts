@@ -174,6 +174,27 @@ function setIfMissing(concept, propertyName, value) {
     return false;
 }
 
+function isFieldMetadataProperty(propertyName) {
+    return /^Field_/.test(safeString(propertyName));
+}
+
+function removeFieldMetadataProperties(concept) {
+    var removed = 0;
+
+    if (!concept || !concept.prop) {
+        return removed;
+    }
+
+    concept.prop().forEach(function (propertyName) {
+        if (isFieldMetadataProperty(propertyName)) {
+            concept.removeProp(propertyName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
 function buildSampleValue(fieldName, datatype, description) {
     var type = safeString(datatype).toLowerCase();
     var note = safeString(description).replace(/<[^>]+>/g, "").replace(/`/g, "");
@@ -218,6 +239,7 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
         return !!fieldName;
     });
     var added = 0;
+    var removed = 0;
 
     tryCreateSpecialization(entry.TypeName, concept.type);
     concept.specialization = entry.TypeName;
@@ -229,6 +251,7 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     concept.prop(CONST.Property.Stereotype, "«SABSA A1 " + entry.TypeName + "»");
     concept.prop(CONST.Property.DefaultLabelExpression, entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype);
     concept.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
+    removed = removeFieldMetadataProperties(concept);
 
     fieldList.forEach(function (fieldName) {
         var prefix = getFieldPropertyPrefix(fieldName);
@@ -247,7 +270,10 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     }
 
     ensureMetaRelationship(concept, metaElement, entry);
-    return added;
+    return {
+        added: added,
+        removed: removed
+    };
 }
 
 function findRelationshipByApplyKey(key) {
@@ -280,7 +306,7 @@ function main() {
     var entries;
     var chosenTemplate;
     var metaElement;
-    var added;
+    var result;
 
     ensureModelAvailable();
     selectedDiagramObject = getSelectedDiagramObject();
@@ -297,10 +323,10 @@ function main() {
         throw new Error("Could not find metamodel element for stereotype '" + chosenTemplate.TypeName + "'.");
     }
 
-    added = applyTemplate(selectedDiagramObject, chosenTemplate, metaElement);
+    result = applyTemplate(selectedDiagramObject, chosenTemplate, metaElement);
     showMessage(
         CONST.Dialog.Title,
-        "Applied stereotype: «SABSA A1 " + chosenTemplate.TypeName + "»\nMissing field values added: " + added + "\nExisting field values were kept.",
+        "Applied stereotype: «SABSA A1 " + chosenTemplate.TypeName + "»\nMissing field values added: " + result.added + "\nField metadata properties removed: " + result.removed + "\nExisting field values were kept.",
         "INFO"
     );
 }

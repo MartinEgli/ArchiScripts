@@ -125,7 +125,8 @@ var stats = {
     relationshipsReused: 0,
     relationshipLinks: 0,
     viewConnectionsCreated: 0,
-    viewConnectionsSkipped: 0
+    viewConnectionsSkipped: 0,
+    fieldMetadataPropertiesRemoved: 0
 };
 
 function safeString(value) {
@@ -323,6 +324,9 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
     concept.prop("SabsaA1CatalogueKey", key);
     setCommonSourceProperties(concept, safeString(properties && properties.SabsaA1CatalogueKind));
     setProperties(concept, properties);
+    if (!canOwnFieldMetadata(properties)) {
+        stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
+    }
     applyOverlayStereotype(concept, conceptType, properties);
 
     if (conceptCreated) {
@@ -510,6 +514,51 @@ function buildDocumentation(title, properties) {
 function setProperties(target, properties) {
     Object.keys(properties || {}).forEach(function (propertyName) {
         target.prop(propertyName, safeString(properties[propertyName]));
+    });
+}
+
+function isFieldMetadataProperty(propertyName) {
+    return /^Field_/.test(safeString(propertyName));
+}
+
+function canOwnFieldMetadata(properties) {
+    return safeString(properties && properties.SabsaA1CatalogueKind) === "CoreType";
+}
+
+function removeFieldMetadataProperties(target) {
+    var removed = 0;
+
+    if (!target || !target.prop) {
+        return removed;
+    }
+
+    target.prop().forEach(function (propertyName) {
+        if (isFieldMetadataProperty(propertyName)) {
+            target.removeProp(propertyName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
+function isSabsaA1CatalogueOrOverlayConcept(concept) {
+    return safeString(concept.prop("SabsaA1CatalogueKind")) !== "" ||
+        safeString(concept.prop(CONST.Property.Namespace)) === CONST.Namespace ||
+        safeString(concept.prop(CONST.Property.MetaElementKey)) !== "";
+}
+
+function canConceptOwnFieldMetadata(concept) {
+    return safeString(concept.prop("SabsaA1CatalogueKind")) === "CoreType";
+}
+
+function cleanupNonMetaFieldMetadataProperties() {
+    $("element").each(function (concept) {
+        if (!isSabsaA1CatalogueOrOverlayConcept(concept) || canConceptOwnFieldMetadata(concept)) {
+            return;
+        }
+
+        stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
     });
 }
 
@@ -2294,6 +2343,7 @@ function main() {
     linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
     samplesByType = createSampleConcepts(coreTypeConcepts);
     sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
+    cleanupNonMetaFieldMetadataProperties();
     persistOverlayIndexes(coreTypeConcepts, relationshipConcepts);
 
     createTableIndexView(sourceConcept, tableData.tables);
@@ -2320,6 +2370,7 @@ function main() {
         concepts_reused: stats.conceptsReused,
         relationships_created: stats.relationshipsCreated,
         relationships_reused: stats.relationshipsReused,
+        field_metadata_properties_removed: stats.fieldMetadataPropertiesRemoved,
         view_connections_created: stats.viewConnectionsCreated,
         view_connections_skipped: stats.viewConnectionsSkipped
     });
@@ -2340,6 +2391,7 @@ function main() {
         "\nConcepts reused: " + stats.conceptsReused +
         "\nRelationships created: " + stats.relationshipsCreated +
         "\nRelationships reused: " + stats.relationshipsReused +
+        "\nField metadata properties removed: " + stats.fieldMetadataPropertiesRemoved +
         "\nView connections created: " + stats.viewConnectionsCreated +
         "\nView connections skipped: " + stats.viewConnectionsSkipped,
         "SABSA A1 Metamodel Field Catalogue"
