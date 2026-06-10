@@ -96,6 +96,16 @@ function propertyKey(value) {
         .replace(/^_+|_+$/g, "");
 }
 
+function displayName(value) {
+    return safeString(value)
+        .replace(/<[^>]+>/g, "")
+        .replace(/`/g, "")
+        .replace(/\*\*/g, "")
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function getFieldPropertyPrefix(fieldName) {
     return "Field_" + propertyKey(fieldName);
 }
@@ -141,7 +151,7 @@ function findMetaElement(entry) {
 }
 
 function buildCandidateDisplay(entry) {
-    return entry.TypeName + " [" + entry.ConceptType + "]";
+    return (displayName(entry.TypeName) || safeString(entry.TypeName)) + " [" + entry.ConceptType + "]";
 }
 
 function chooseTemplate(entries, conceptType) {
@@ -235,20 +245,21 @@ function tryCreateSpecialization(name, conceptType) {
 
 function applyTemplate(selectedDiagramObject, entry, metaElement) {
     var concept = selectedDiagramObject.concept;
+    var typeName = displayName(entry.TypeName) || safeString(entry.TypeName);
     var fieldList = safeString(metaElement.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
         return !!fieldName;
     });
     var added = 0;
     var removed = 0;
 
-    tryCreateSpecialization(entry.TypeName, concept.type);
-    concept.specialization = entry.TypeName;
+    tryCreateSpecialization(typeName, concept.type);
+    concept.specialization = typeName;
 
     concept.prop(CONST.Property.Namespace, CONST.Namespace);
     concept.prop(CONST.Property.Kind, "SabsaA1OverlayTypedElement");
-    concept.prop(CONST.Property.TypeName, entry.TypeName);
+    concept.prop(CONST.Property.TypeName, typeName);
     concept.prop(CONST.Property.ConceptType, concept.type);
-    concept.prop(CONST.Property.Stereotype, "«SABSA A1 " + entry.TypeName + "»");
+    concept.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
     concept.prop(CONST.Property.DefaultLabelExpression, entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype);
     concept.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
     removed = removeFieldMetadataProperties(concept);
@@ -284,20 +295,21 @@ function findRelationshipByApplyKey(key) {
 
 function ensureMetaRelationship(concept, metaElement, entry) {
     var conceptIdentity = safeString(concept.id) || safeString(concept.prop("id")) || safeString(concept.name);
+    var typeName = displayName(entry.TypeName) || safeString(entry.TypeName);
     var key = "sabsa-a1-apply:" + conceptIdentity + ":" + entry.MetaElementKey;
     var relationship = findRelationshipByApplyKey(key);
 
     if (!relationship) {
-        relationship = model.createRelationship("association-relationship", "uses stereotype " + entry.TypeName, concept, metaElement);
+        relationship = model.createRelationship("association-relationship", "uses stereotype " + typeName, concept, metaElement);
     }
 
-    relationship.name = "uses stereotype " + entry.TypeName;
+    relationship.name = "uses stereotype " + typeName;
     relationship.prop("SabsaA1ApplyKey", key);
     relationship.prop(CONST.Property.Namespace, CONST.Namespace);
     relationship.prop(CONST.Property.Kind, "SabsaA1OverlayApplication");
     relationship.prop(CONST.Property.TypeName, "UsesSabsaA1Stereotype");
     relationship.prop(CONST.Property.Stereotype, "«SABSA A1 UsesSabsaA1Stereotype»");
-    relationship.prop("AppliedStereotype", entry.TypeName);
+    relationship.prop("AppliedStereotype", typeName);
     relationship.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
 }
 
@@ -320,13 +332,13 @@ function main() {
 
     metaElement = findMetaElement(chosenTemplate);
     if (!metaElement) {
-        throw new Error("Could not find metamodel element for stereotype '" + chosenTemplate.TypeName + "'.");
+        throw new Error("Could not find metamodel element for stereotype '" + (displayName(chosenTemplate.TypeName) || chosenTemplate.TypeName) + "'.");
     }
 
     result = applyTemplate(selectedDiagramObject, chosenTemplate, metaElement);
     showMessage(
         CONST.Dialog.Title,
-        "Applied stereotype: «SABSA A1 " + chosenTemplate.TypeName + "»\nMissing field values added: " + result.added + "\nField metadata properties removed: " + result.removed + "\nExisting field values were kept.",
+        "Applied stereotype: «SABSA A1 " + (displayName(chosenTemplate.TypeName) || chosenTemplate.TypeName) + "»\nMissing field values added: " + result.added + "\nField metadata properties removed: " + result.removed + "\nExisting field values were kept.",
         "INFO"
     );
 }

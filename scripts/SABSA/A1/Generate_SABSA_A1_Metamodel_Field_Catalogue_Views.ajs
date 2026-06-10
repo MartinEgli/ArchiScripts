@@ -181,6 +181,13 @@ function stripMarkup(value) {
         .replace(/\s+/g, " ");
 }
 
+function displayName(value) {
+    return stripMarkup(value)
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function normalizeFolderName(folderName) {
     return safeString(folderName)
         .toLowerCase()
@@ -339,7 +346,7 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
         stats.conceptsReused++;
     }
 
-    concept.name = name;
+    concept.name = displayName(name) || safeString(name);
     concept.documentation = documentation || "";
     concept.prop("SabsaA1CatalogueKey", key);
     setCommonSourceProperties(concept, safeString(properties && properties.SabsaA1CatalogueKind));
@@ -382,7 +389,7 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
         stats.relationshipsReused++;
     }
 
-    relationship.name = name || "";
+    relationship.name = displayName(name) || safeString(name);
     relationship.prop("SabsaA1CatalogueKey", key);
     setCommonSourceProperties(relationship, "Relationship");
     setProperties(relationship, properties);
@@ -592,8 +599,8 @@ function cleanupNonMetaFieldMetadataProperties() {
 }
 
 function specializationName(value) {
-    return stripMarkup(value)
-        .replace(/[^A-Za-z0-9_ -]+/g, " ")
+    return displayName(value)
+        .replace(/[^A-Za-z0-9 -]+/g, " ")
         .replace(/\s+/g, " ")
         .trim();
 }
