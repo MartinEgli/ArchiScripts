@@ -101,3 +101,7 @@ The complete table model also creates relationships from source to table, table 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
 Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values from the metamodel, removes old `Field_*` metadata copies from the selected explicit element, leaves `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
+
+## Cleanup_SABSA_A1_Field_Metadata_From_Explicit_Elements.ajs
+
+Removes existing `Field_*` metadata properties from SABSA A1 explicit/generated concepts and relationships while leaving them on `CoreType` metamodel elements. Use this once after older generator runs if explicit/sample/applied elements still contain `Field_*` metadata copies.
