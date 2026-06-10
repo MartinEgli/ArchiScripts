@@ -2,7 +2,7 @@
 
 Deliverable scripts for SABSA Advanced Module A1 oriented modelling.
 
-## Generate_SABSA_A1_Generic_Risk_Model_View.ajs
+## Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs
 
 Generates a generic SABSA A1 risk management model view from the source-of-truth data file:
 
@@ -91,9 +91,9 @@ The script creates stable framework elements under `SABSA/A1/Risk Feedback Contr
 
 If the project later defines NIBOCJ differently, update the JSON data file first. The script reads the framework list from that data file instead of hard-coding the framework entries.
 
-## Generate_SABSA_A1_Exchange_Schema_Metamodel_Views.ajs
+## Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs
 
-Generates metamodel views from:
+Generates exchange-schema mapping views from:
 
 - `../../../../reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json`
 
@@ -108,9 +108,9 @@ The script creates or reuses:
 - concrete relationship-definition concepts
 - mapping and traceability relationships
 
-The script deliberately keeps schema concepts as metamodel objects instead of trying to instantiate a full applied risk model.
+The script deliberately keeps schema concepts as mapping/metamodel objects instead of trying to instantiate a full applied risk model.
 
-## Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View.ajs
+## Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs
 
 Imports the Q003/Q004 model from the JSON extract:
 
@@ -194,6 +194,10 @@ The generator adds selected SABSA A1 overlay specializations where the literatur
 
 Shared generator core used by the focused field-catalogue entry points. It is not intended as the normal user-facing script. Prefer the focused entry point scripts above when views should be generated separately.
 
+## core/Run_SABSA_A1_Field_Catalogue_Mode.ajs
+
+Shared runner used by the focused field-catalogue entry points. The small entry scripts set the desired mode and then load this runner, which loads the common field-catalogue core.
+
 ## archive/
 
 Contains deprecated compatibility wrappers that have clearer replacements:
@@ -201,6 +205,9 @@ Contains deprecated compatibility wrappers that have clearer replacements:
 - `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs` -> `Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs`
 - `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs` -> `Generate_SABSA_A1_Metamodel_Architecture_Views.ajs`
 - `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs` -> focused field-catalogue scripts or `core/Generate_SABSA_A1_Field_Catalogue_Core.ajs`
+- `archive/Generate_SABSA_A1_Generic_Risk_Model_View.ajs` -> `Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs`
+- `archive/Generate_SABSA_A1_Exchange_Schema_Metamodel_Views.ajs` -> `Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs`
+- `archive/Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View.ajs` -> `Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs`
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
