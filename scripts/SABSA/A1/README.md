@@ -96,6 +96,12 @@ It creates source-traced ArchiMate catalogue elements with properties such as `S
 - `SABSA A1 - Metamodel Viewpoint Catalogue`
 - `SABSA A1 - Overlay Sample Relationship Overview`
 
+Following `Build_Security_Overlay_Library_With_Overlay_Model_Folder.ajs`, the generated concepts and views are placed below an `Overlay Model/SABSA/A1/...` structure and the generator also creates overlay-library views:
+
+- `SABSA A1 Overlay - Overview`
+- `SABSA A1 Overlay - Type Model`
+- `SABSA A1 Overlay - Template Library`
+
 The complete table model also creates relationships from source to table, table to row, table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type, `CoreTypeHasField` links, named FK-based `CoreTypeForeignKeyReference` links, and direct named core-type semantic relationships from `Table 6-03`. FK targets are resolved from backticked references, field names, free-text notes and catalogue aliases such as `Evidence` -> `Evidence_Item`, `Treatment` -> `Risk_Treatment`, and `Assurance Subject` -> `Assurance_Evaluation_Subject`. Relationship names carry the relationship semantics or field name, for example `risk_id -> Risk` or the relationship-catalogue semantics with cardinality. The type, FK, relationship and sample overview views render semantic and FK relationships through their actual ArchiMate relationship endpoints, and the completion dialog reports created and skipped view connections. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
