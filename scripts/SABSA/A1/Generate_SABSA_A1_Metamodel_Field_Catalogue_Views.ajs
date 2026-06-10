@@ -23,6 +23,7 @@ var CONST = {
     LayerViewName: "SABSA A1 - Metamodel Layer Architecture",
     TypeViewName: "SABSA A1 - Metamodel Core Type Inventory",
     RelationshipViewName: "SABSA A1 - Metamodel Relationship Catalogue",
+    ForeignKeyViewName: "SABSA A1 - Metamodel Field FK Relations",
     ViewpointViewName: "SABSA A1 - Metamodel Viewpoint Catalogue",
     TableIndexViewName: "SABSA A1 - Metamodel Complete Table Index",
     SampleOverviewViewName: "SABSA A1 - Overlay Sample Relationship Overview",
@@ -1957,6 +1958,26 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
                             RelationshipLabel: buildFkRelationLabel(rowEntry.data, referencedType),
                             SourceType: target.name,
                             TargetType: referencedType.name,
+                            TableId: tableId,
+                            RowIndex: String(rowEntry.rowIndex),
+                            FieldRowKey: safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")),
+                            FieldName: stripMarkup(rowEntry.data.Field),
+                            Datatype: rowEntry.data.Datatype,
+                            Required: rowEntry.data.Required,
+                            KeyRole: rowEntry.data["Key Role"],
+                            TemplateFamily: rowEntry.data["Template Family"],
+                            Description: rowEntry.data.Note,
+                            SourceSection: "Table " + tableId
+                        });
+
+                        ensureRelationship("association-relationship", rowEntry.concept, referencedType, "catalogue:fk-row:" + safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")) + ":" + safeString(referencedType.prop("SabsaA1CatalogueKey")), buildFkRelationLabel(rowEntry.data, referencedType), {
+                            SabsaA1CatalogueRelationKind: "FieldRowForeignKeyReference",
+                            RelationshipLabel: buildFkRelationLabel(rowEntry.data, referencedType),
+                            SourceType: target.name,
+                            TargetType: referencedType.name,
+                            TableId: tableId,
+                            RowIndex: String(rowEntry.rowIndex),
+                            FieldRowKey: safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")),
                             FieldName: stripMarkup(rowEntry.data.Field),
                             Datatype: rowEntry.data.Datatype,
                             Required: rowEntry.data.Required,
@@ -2038,6 +2059,81 @@ function createTypeView(sourceConcept, typeConcepts) {
         "CoreTypeSemanticRelationship",
         "CoreTypeForeignKeyReference"
     ]);
+
+    stats.views++;
+    return view;
+}
+
+function createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.ForeignKeyViewName));
+    var sourceVisual;
+    var visualsByKey = {};
+    var fkEntries = [];
+
+    view.documentation = "Generated FK field relations from catalogue field tables. Each FK row is shown between its owning SABSA A1 type and the resolved target type.";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+
+    function visualKey(concept) {
+        return safeString(concept && concept.prop("SabsaA1CatalogueKey"));
+    }
+
+    function ensureVisual(concept, x, y, fillColor) {
+        var key = visualKey(concept);
+
+        if (!concept || !key) {
+            return null;
+        }
+
+        if (!visualsByKey[key]) {
+            visualsByKey[key] = addStyledVisual(view, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, fillColor);
+        }
+
+        return visualsByKey[key];
+    }
+
+    tableData.tables.forEach(function (tableConcept) {
+        var tableId = safeString(tableConcept.prop("TableId"));
+        var title = safeString(tableConcept.prop("TableTitle"));
+        var ownerTypes = getCoreTypeConceptsForTitle(coreTypeConcepts, title);
+        var rowEntries = tableData.rowsByTableId[tableId] || [];
+
+        ownerTypes.forEach(function (ownerType) {
+            rowEntries.forEach(function (rowEntry) {
+                if (!isFieldCatalogueRow(rowEntry.data) || safeString(rowEntry.data["Key Role"]) !== "FK") {
+                    return;
+                }
+
+                getReferencedCoreTypeConcepts(coreTypeConcepts, rowEntry.data).forEach(function (targetType) {
+                    fkEntries.push({
+                        tableId: tableId,
+                        rowEntry: rowEntry,
+                        sourceType: ownerType,
+                        targetType: targetType
+                    });
+                });
+            });
+        });
+    });
+
+    fkEntries.forEach(function (entry, index) {
+        var baseY = CONST.Layout.StartY + 140 + (index * (CONST.Layout.CardHeight + CONST.Layout.GapY));
+        var sourceTypeVisual = ensureVisual(entry.sourceType, CONST.Layout.StartX, baseY, getConceptFill(entry.sourceType, CONST.Style.TypeFill));
+        var tableVisual = ensureVisual(tableData.tablesById[entry.tableId], CONST.Layout.StartX + 340, baseY, CONST.Style.RepresentationFill);
+        var fieldVisual = ensureVisual(entry.rowEntry.concept, CONST.Layout.StartX + 680, baseY, getConceptFill(entry.rowEntry.concept, CONST.Style.RepresentationFill));
+        var targetTypeVisual = ensureVisual(entry.targetType, CONST.Layout.StartX + 1020, baseY, getConceptFill(entry.targetType, CONST.Style.TypeFill));
+        var tableRowKey = "catalogue:table:" + slugify(entry.tableId) + ":row:" + entry.rowEntry.rowIndex;
+        var coreTypeFieldKey = "catalogue:core-type-field:" + safeString(entry.sourceType.prop("SabsaA1CatalogueKey")) + ":" + entry.tableId + ":" + entry.rowEntry.rowIndex;
+        var fieldFkKey = "catalogue:fk-row:" + safeString(entry.rowEntry.concept.prop("SabsaA1CatalogueKey")) + ":" + safeString(entry.targetType.prop("SabsaA1CatalogueKey"));
+        var typeFkKey = "catalogue:fk:" + safeString(entry.sourceType.prop("SabsaA1CatalogueKey")) + ":" + entry.tableId + ":" + entry.rowEntry.rowIndex + ":" + safeString(entry.targetType.prop("SabsaA1CatalogueKey"));
+
+        addConnection(view, findRelationshipByKey("catalogue:source:table:" + slugify(entry.tableId)), sourceVisual, tableVisual);
+        addConnection(view, findRelationshipByKey(tableRowKey), tableVisual, fieldVisual);
+        addConnection(view, findRelationshipByKey(coreTypeFieldKey), sourceTypeVisual, fieldVisual);
+        addConnection(view, findRelationshipByKey(fieldFkKey), fieldVisual, targetTypeVisual);
+        addConnection(view, findRelationshipByKey(typeFkKey), sourceTypeVisual, targetTypeVisual);
+    });
 
     stats.views++;
     return view;
@@ -2176,6 +2272,7 @@ function main() {
     createTableIndexView(sourceConcept, tableData.tables);
     createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
     createTypeView(sourceConcept, coreTypeConcepts);
+    createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts);
     createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
     createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
     createSampleOverviewView(samplesByType, sampleRelationships);
