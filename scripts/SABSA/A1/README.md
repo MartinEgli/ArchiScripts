@@ -88,6 +88,8 @@ The script extracts:
 
 It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta core-type elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. The generator removes old `Field_*` metadata copies from SABSA A1 non-meta elements when it reuses or scans them. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
 
+Visible Archi concept, relationship and stereotype names replace `_` with spaces, while stable keys and technical properties such as `SabsaType`, field names and catalogue IDs keep their source values.
+
 - `SABSA A1 - Metamodel Complete Table Index`
 - `SABSA A1 - SABSA Architecture Layer Alignment`
 - `SABSA A1 - Metamodel Core Type Inventory`
