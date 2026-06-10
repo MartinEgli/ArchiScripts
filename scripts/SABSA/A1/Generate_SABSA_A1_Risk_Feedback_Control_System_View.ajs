@@ -1,0 +1,431 @@
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Risk_Feedback_Control_System_View";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "WARN"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Risk Feedback Control System"
+});
+
+var CONST = {
+    ViewName: "SABSA A1 - Risk Management Feedback Control System",
+    Namespace: "SabsaA1RiskFeedbackControlSystem",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Risk Feedback Control System",
+        Elements: "Elements",
+        Relations: "Risk Feedback Control System"
+    },
+    Property: {
+        Key: "SabsaA1RiskFeedbackControlSystemKey",
+        Kind: "SabsaA1RiskFeedbackControlSystemKind",
+        Namespace: "Namespace",
+        SabsaType: "SabsaType",
+        SourceView: "SourceView",
+        Layer: "SabsaLayer"
+    },
+    Layout: {
+        TitleX: 30,
+        TitleY: 26,
+        TitleWidth: 1040,
+        TitleHeight: 58,
+        StrategyX: 150,
+        StrategyY: 78,
+        TreatmentX: 700,
+        TreatmentY: 78,
+        TopWidth: 460,
+        TopHeight: 104,
+        DomainX: 150,
+        DomainY: 330,
+        DomainWidth: 170,
+        DomainHeight: 66,
+        DecisionX: 330,
+        DecisionY: 330,
+        DecisionWidth: 270,
+        DecisionHeight: 112,
+        ControlX: 650,
+        ControlY: 210,
+        ControlWidth: 270,
+        ControlHeight: 104,
+        DetectX: 670,
+        DetectY: 350,
+        DetectWidth: 130,
+        DetectHeight: 56,
+        MonitoringX: 650,
+        MonitoringY: 455,
+        MonitoringWidth: 270,
+        MonitoringHeight: 104,
+        ReportX: 500,
+        ReportY: 470,
+        ReportWidth: 130,
+        ReportHeight: 56,
+        AssessmentX: 700,
+        AssessmentY: 585,
+        AssessmentWidth: 460,
+        AssessmentHeight: 104,
+        HeaderHeight: 38,
+        BodyY: 48
+    },
+    Style: {
+        TitleFill: "#ffffff",
+        StrategyHeaderFill: "#16464d",
+        TreatmentHeaderFill: "#006033",
+        AssessmentHeaderFill: "#1f2f74",
+        BodyFill: "#e8f1f3",
+        DecisionHeaderFill: "#16464d",
+        ControlHeaderFill: "#007a3d",
+        MonitoringHeaderFill: "#1f2f74",
+        LightBlueFill: "#dff3f4",
+        WhiteFill: "#ffffff",
+        LineColor: "#8c8c8c",
+        AccentLineColor: "#53aebc",
+        FontColor: "#002f45",
+        HeaderFontColor: "#ffffff"
+    }
+};
+
+var ELEMENTS = [
+    { id: "risk-treatment-strategy", name: "Risk Treatment Strategy", type: "Risk_Treatment_Strategy", conceptType: "course-of-action", kind: "Strategy" },
+    { id: "risk-treatment", name: "Risk Treatment", type: "Risk_Treatment", conceptType: "course-of-action", kind: "Treatment" },
+    { id: "domain-authorities", name: "Domain Authorities", type: "Domain_Authority", conceptType: "business-role", kind: "Authority" },
+    { id: "decision-subsystem", name: "Decision Sub-system", type: "Decision_Sub_System", conceptType: "business-process", kind: "Subsystem" },
+    { id: "control-subsystem", name: "Control Sub-system", type: "Control_Sub_System", conceptType: "business-process", kind: "Subsystem" },
+    { id: "detect-change", name: "Detect Change", type: "Detect_Change", conceptType: "business-event", kind: "Signal" },
+    { id: "monitoring-measurement-subsystem", name: "Monitoring & Measurement Sub-system", type: "Monitoring_Measurement_Sub_System", conceptType: "business-process", kind: "Subsystem" },
+    { id: "report-risk", name: "Report Risk", type: "Report_Risk", conceptType: "business-event", kind: "Signal" },
+    { id: "risk-assessment", name: "Risk Assessment", type: "Risk_Assessment", conceptType: "assessment", kind: "Assessment" }
+];
+
+var RELATIONS = [
+    { from: "domain-authorities", to: "decision-subsystem", type: "assignment-relationship", label: "authorise decisions" },
+    { from: "decision-subsystem", to: "control-subsystem", type: "triggering-relationship", label: "call for new parameter settings" },
+    { from: "risk-treatment-strategy", to: "decision-subsystem", type: "access-relationship", label: "sets objectives" },
+    { from: "risk-treatment", to: "control-subsystem", type: "access-relationship", label: "provides enablers and controls" },
+    { from: "control-subsystem", to: "detect-change", type: "triggering-relationship", label: "affects state of system" },
+    { from: "detect-change", to: "monitoring-measurement-subsystem", type: "triggering-relationship", label: "state change" },
+    { from: "monitoring-measurement-subsystem", to: "report-risk", type: "triggering-relationship", label: "reports new state of system" },
+    { from: "report-risk", to: "decision-subsystem", type: "triggering-relationship", label: "feedback" },
+    { from: "monitoring-measurement-subsystem", to: "risk-assessment", type: "access-relationship", label: "feeds assessment" }
+];
+
+var stats = {
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function displayName(value) {
+    return safeString(value).replace(/_/g, " ").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/^\s+|\s+$/g, "");
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Motivation": ["Motivation"],
+        "Strategy": ["Strategy"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var wantedNames = (aliasesByFolderName[rootName] || [rootName]).map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (!foundFolder && wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    return childFolder || parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType) {
+    if (conceptType === "assessment") {
+        return { rootName: "Motivation", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+    }
+    if (conceptType === "course-of-action" || conceptType === "capability") {
+        return { rootName: "Strategy", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+    }
+
+    return { rootName: "Business", pathSegments: getModelFolderSegments([CONST.Folder.Elements]) };
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    if (!objectToMove) {
+        return null;
+    }
+
+    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    return objectToMove;
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", getModelFolderSegments([]), viewObject);
+}
+
+function moveRelationshipToFolder(relationship) {
+    return moveObjectToFolder("Relations", getModelFolderSegments([CONST.Folder.Relations]), relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(data) {
+    var key = "risk-feedback-control-system:element:" + data.id;
+    var placement = resolveConceptPlacement(data.conceptType);
+    var concept = findConceptByKey(data.conceptType, key);
+
+    if (!concept) {
+        concept = model.createElement(data.conceptType, displayName(data.name), ensureFolderPath(placement.rootName, placement.pathSegments));
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = displayName(data.name);
+    concept.documentation = "SABSA A1 risk management feedback control system element: " + displayName(data.name) + ".";
+    concept.prop(CONST.Property.Key, key);
+    concept.prop(CONST.Property.Namespace, CONST.Namespace);
+    concept.prop(CONST.Property.Kind, data.kind);
+    concept.prop(CONST.Property.SabsaType, data.type);
+    concept.prop(CONST.Property.SourceView, CONST.ViewName);
+    concept.prop(CONST.Property.Layer, "Conceptual");
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(data, concepts) {
+    var key = "risk-feedback-control-system:relationship:" + data.from + ":" + data.to;
+    var relationship = findRelationshipByKey(key);
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(data.type, data.label, concepts[data.from], concepts[data.to]);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", data.label, concepts[data.from], concepts[data.to]);
+        }
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = displayName(data.label);
+    relationship.prop(CONST.Property.Key, key);
+    relationship.prop(CONST.Property.Namespace, CONST.Namespace);
+    relationship.prop("SabsaA1RiskFeedbackControlSystemRelationKind", "FeedbackControlFlow");
+    relationship.prop("SourceElement", data.from);
+    relationship.prop("TargetElement", data.to);
+    relationship.prop("RelationshipLabel", data.label);
+    moveRelationshipToFolder(relationship);
+
+    return relationship;
+}
+
+function styleVisual(visual, fillColor, fontColor, lineColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = lineColor || CONST.Style.LineColor;
+    visual.fontColor = fontColor || CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.a1.risk.feedback.label.skipped");
+    }
+}
+
+function addVisual(view, concept, x, y, width, height, fillColor, fontColor, lineColor, labelExpression) {
+    var visual = view.add(concept, x, y, width, height);
+
+    styleVisual(visual, fillColor, fontColor, lineColor);
+    tryApplyLabelExpression(visual, labelExpression || "${name}");
+
+    return visual;
+}
+
+function addNote(container, text, x, y, width, height, fillColor, fontColor, lineColor) {
+    var note = container.createObject("note", x, y, width, height);
+
+    note.text = text;
+    styleVisual(note, fillColor, fontColor, lineColor);
+
+    return note;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+
+    return connection;
+}
+
+function addCard(view, concept, x, y, width, height, headerFill, bodyText) {
+    var visual = addVisual(view, concept, x, y, width, height, CONST.Style.BodyFill, CONST.Style.FontColor, headerFill, "");
+
+    addNote(visual, concept.name, 0, 0, width, CONST.Layout.HeaderHeight, headerFill, CONST.Style.HeaderFontColor, headerFill);
+    addNote(visual, bodyText, 24, CONST.Layout.BodyY, width - 48, height - CONST.Layout.BodyY - 10, CONST.Style.BodyFill, CONST.Style.FontColor, CONST.Style.BodyFill);
+
+    return visual;
+}
+
+function buildConcepts() {
+    var concepts = {};
+
+    ELEMENTS.forEach(function (entry) {
+        concepts[entry.id] = ensureConcept(entry);
+    });
+
+    return concepts;
+}
+
+function createFrameworkView(concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.ViewName));
+    var visuals = {};
+
+    view.documentation = "SABSA A1 risk management feedback control system view showing decision, control, monitoring and risk assessment feedback loops.";
+    moveViewToFolder(view);
+
+    addNote(view, "Risk Management Feedback Control System", CONST.Layout.TitleX, CONST.Layout.TitleY, CONST.Layout.TitleWidth, CONST.Layout.TitleHeight, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+
+    visuals["risk-treatment-strategy"] = addCard(view, concepts["risk-treatment-strategy"], CONST.Layout.StrategyX, CONST.Layout.StrategyY, CONST.Layout.TopWidth, CONST.Layout.TopHeight, CONST.Style.StrategyHeaderFill, "Enablement                    Control\nObjectives                    Objectives");
+    visuals["risk-treatment"] = addCard(view, concepts["risk-treatment"], CONST.Layout.TreatmentX, CONST.Layout.TreatmentY, CONST.Layout.TopWidth, CONST.Layout.TopHeight, CONST.Style.TreatmentHeaderFill, "Enablers                              Controls");
+    visuals["domain-authorities"] = addVisual(view, concepts["domain-authorities"], CONST.Layout.DomainX, CONST.Layout.DomainY, CONST.Layout.DomainWidth, CONST.Layout.DomainHeight, CONST.Style.WhiteFill, CONST.Style.FontColor, CONST.Style.LineColor, "Domain\nAuthorities");
+    visuals["decision-subsystem"] = addCard(view, concepts["decision-subsystem"], CONST.Layout.DecisionX, CONST.Layout.DecisionY, CONST.Layout.DecisionWidth, CONST.Layout.DecisionHeight, CONST.Style.DecisionHeaderFill, "Decision\nSub-system");
+    visuals["control-subsystem"] = addCard(view, concepts["control-subsystem"], CONST.Layout.ControlX, CONST.Layout.ControlY, CONST.Layout.ControlWidth, CONST.Layout.ControlHeight, CONST.Style.ControlHeaderFill, "Control\nSub-system");
+    visuals["detect-change"] = addVisual(view, concepts["detect-change"], CONST.Layout.DetectX, CONST.Layout.DetectY, CONST.Layout.DetectWidth, CONST.Layout.DetectHeight, CONST.Style.LightBlueFill, CONST.Style.FontColor, CONST.Style.AccentLineColor, "Detect\nChange");
+    visuals["monitoring-measurement-subsystem"] = addCard(view, concepts["monitoring-measurement-subsystem"], CONST.Layout.MonitoringX, CONST.Layout.MonitoringY, CONST.Layout.MonitoringWidth, CONST.Layout.MonitoringHeight, CONST.Style.MonitoringHeaderFill, "Monitoring & Measurement\nSub-system");
+    visuals["report-risk"] = addVisual(view, concepts["report-risk"], CONST.Layout.ReportX, CONST.Layout.ReportY, CONST.Layout.ReportWidth, CONST.Layout.ReportHeight, CONST.Style.LightBlueFill, CONST.Style.FontColor, CONST.Style.AccentLineColor, "Report\nRisk");
+    visuals["risk-assessment"] = addCard(view, concepts["risk-assessment"], CONST.Layout.AssessmentX, CONST.Layout.AssessmentY, CONST.Layout.AssessmentWidth, CONST.Layout.AssessmentHeight, CONST.Style.AssessmentHeaderFill, "Identify Risk      Analyse Risk      Evaluate Risk");
+
+    addNote(view, "Call for new\nparameter settings", 452, 198, 210, 58, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+    addNote(view, "Affects state\nof system", 812, 354, 160, 58, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+    addNote(view, "Reports new\nstate of system", 430, 532, 170, 62, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+
+    RELATIONS.forEach(function (relation) {
+        addConnection(view, ensureRelationship(relation, concepts), visuals[relation.from], visuals[relation.to]);
+    });
+
+    return view;
+}
+
+function confirmExecution() {
+    return dialogs.confirmInfo(
+        "This script will generate or update the SABSA A1 Risk Management Feedback Control System view." +
+        "\n\nView: " + CONST.ViewName +
+        "\nElements: " + ELEMENTS.length +
+        "\nRelationships: " + RELATIONS.length +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Risk Feedback Control System Generator"
+    );
+}
+
+function main() {
+    var concepts;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    if (!confirmExecution()) {
+        logger.info("SABSA A1 risk feedback control system generation cancelled by user.", {}, "sabsa.a1.risk.feedback.cancelled");
+        return;
+    }
+
+    concepts = buildConcepts();
+    view = createFrameworkView(concepts);
+
+    dialogs.showInfo(
+        "Generated view: " + view.name +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused,
+        "SABSA A1 Risk Feedback Control System"
+    );
+}
+
+main();
