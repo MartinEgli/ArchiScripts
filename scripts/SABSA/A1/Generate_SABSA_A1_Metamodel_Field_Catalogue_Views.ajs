@@ -542,10 +542,11 @@ function removeFieldMetadataProperties(target) {
     return removed;
 }
 
-function isSabsaA1CatalogueOrOverlayConcept(concept) {
-    return safeString(concept.prop("SabsaA1CatalogueKind")) !== "" ||
-        safeString(concept.prop(CONST.Property.Namespace)) === CONST.Namespace ||
-        safeString(concept.prop(CONST.Property.MetaElementKey)) !== "";
+function isSabsaA1CatalogueOrOverlayObject(object) {
+    return safeString(object.prop("SabsaA1CatalogueKind")) !== "" ||
+        safeString(object.prop("SabsaA1CatalogueRelationKind")) !== "" ||
+        safeString(object.prop(CONST.Property.Namespace)) === CONST.Namespace ||
+        safeString(object.prop(CONST.Property.MetaElementKey)) !== "";
 }
 
 function canConceptOwnFieldMetadata(concept) {
@@ -554,11 +555,19 @@ function canConceptOwnFieldMetadata(concept) {
 
 function cleanupNonMetaFieldMetadataProperties() {
     $("element").each(function (concept) {
-        if (!isSabsaA1CatalogueOrOverlayConcept(concept) || canConceptOwnFieldMetadata(concept)) {
+        if (!isSabsaA1CatalogueOrOverlayObject(concept) || canConceptOwnFieldMetadata(concept)) {
             return;
         }
 
         stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
+    });
+
+    $("relationship").each(function (relationship) {
+        if (!isSabsaA1CatalogueOrOverlayObject(relationship)) {
+            return;
+        }
+
+        stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(relationship);
     });
 }
 

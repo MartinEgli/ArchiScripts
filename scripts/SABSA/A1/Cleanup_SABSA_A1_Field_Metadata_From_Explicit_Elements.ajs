@@ -1,0 +1,172 @@
+/*
+===============================================================================
+Cleanup SABSA A1 Field Metadata From Explicit Elements
+===============================================================================
+
+Removes Field_* metadata properties from SABSA A1 explicit/generated elements.
+
+Rule:
+- Field_* metadata belongs only to SABSA A1 CoreType metamodel elements.
+- Explicit/sample/applied/table/row elements keep their concrete field values.
+- Existing business field values such as risk_id or domain_id are not removed.
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+var CONST = {
+    Namespace: "SabsaA1Overlay",
+    Property: {
+        Namespace: "Namespace",
+        Kind: "Kind",
+        MetaElementKey: "MetaElementKey"
+    },
+    Dialog: {
+        Title: "SABSA A1 Field Metadata Cleanup",
+        ErrorTitle: "SABSA A1 Field Metadata Cleanup - Error"
+    }
+};
+
+var stats = {
+    conceptsScanned: 0,
+    conceptsCleaned: 0,
+    relationshipsScanned: 0,
+    relationshipsCleaned: 0,
+    propertiesRemoved: 0,
+    metaConceptsSkipped: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function isFieldMetadataProperty(propertyName) {
+    return /^Field_/.test(safeString(propertyName));
+}
+
+function isSabsaA1Object(object) {
+    return safeString(object.prop("SabsaA1CatalogueKind")) !== "" ||
+        safeString(object.prop("SabsaA1CatalogueRelationKind")) !== "" ||
+        safeString(object.prop(CONST.Property.Namespace)) === CONST.Namespace ||
+        safeString(object.prop(CONST.Property.MetaElementKey)) !== "";
+}
+
+function canOwnFieldMetadata(object) {
+    return safeString(object.prop("SabsaA1CatalogueKind")) === "CoreType";
+}
+
+function removeFieldMetadataProperties(object) {
+    var removed = 0;
+
+    object.prop().forEach(function (propertyName) {
+        if (isFieldMetadataProperty(propertyName)) {
+            object.removeProp(propertyName);
+            removed++;
+        }
+    });
+
+    return removed;
+}
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        } else if (level === "WARNING") {
+            iconType = JOptionPane.WARNING_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+function confirmExecution() {
+    try {
+        return window.confirm(
+            "Remove Field_* metadata properties from SABSA A1 explicit/generated elements?\n\n" +
+            "CoreType metamodel elements keep their Field_* metadata. Concrete business field values are kept."
+        );
+    } catch (error) {
+        return true;
+    }
+}
+
+function cleanConcepts() {
+    $("element").each(function (concept) {
+        var removed;
+
+        if (!isSabsaA1Object(concept)) {
+            return;
+        }
+
+        stats.conceptsScanned++;
+        if (canOwnFieldMetadata(concept)) {
+            stats.metaConceptsSkipped++;
+            return;
+        }
+
+        removed = removeFieldMetadataProperties(concept);
+        if (removed > 0) {
+            stats.conceptsCleaned++;
+            stats.propertiesRemoved += removed;
+            console.log("[CLEANED] " + concept.name + " removed Field_* properties: " + removed);
+        }
+    });
+}
+
+function cleanRelationships() {
+    $("relationship").each(function (relationship) {
+        var removed;
+
+        if (!isSabsaA1Object(relationship)) {
+            return;
+        }
+
+        stats.relationshipsScanned++;
+        removed = removeFieldMetadataProperties(relationship);
+        if (removed > 0) {
+            stats.relationshipsCleaned++;
+            stats.propertiesRemoved += removed;
+            console.log("[CLEANED] " + relationship.name + " removed Field_* properties: " + removed);
+        }
+    });
+}
+
+function main() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    if (!confirmExecution()) {
+        console.log("[INFO] Cleanup cancelled by user.");
+        return;
+    }
+
+    cleanConcepts();
+    cleanRelationships();
+
+    showMessage(
+        CONST.Dialog.Title,
+        "Field_* metadata cleanup finished." +
+        "\nConcepts scanned: " + stats.conceptsScanned +
+        "\nConcepts cleaned: " + stats.conceptsCleaned +
+        "\nRelationships scanned: " + stats.relationshipsScanned +
+        "\nRelationships cleaned: " + stats.relationshipsCleaned +
+        "\nMeta CoreType concepts skipped: " + stats.metaConceptsSkipped +
+        "\nField_* properties removed: " + stats.propertiesRemoved,
+        "INFO"
+    );
+}
+
+try {
+    main();
+} catch (error) {
+    showMessage(CONST.Dialog.ErrorTitle, String(error), "ERROR");
+    throw error;
+}
