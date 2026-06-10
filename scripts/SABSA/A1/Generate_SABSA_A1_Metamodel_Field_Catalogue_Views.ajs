@@ -17,8 +17,8 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/08_generic_sabsa_a1_metamodel_field_catalogue.md").getCanonicalPath(),
-    SourceDocumentName: "08_generic_sabsa_a1_metamodel_field_catalogue.md",
+    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md").getCanonicalPath(),
+    SourceDocumentName: "SABSA-A1-MFC_generic_metamodel_field_catalogue.md",
     Namespace: "SabsaA1Overlay",
     LayerViewName: "SABSA A1 - Metamodel Layer Architecture",
     TypeViewName: "SABSA A1 - Metamodel Core Type Inventory",
