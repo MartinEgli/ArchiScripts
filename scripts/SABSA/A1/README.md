@@ -73,7 +73,7 @@ It creates ArchiMate elements with source properties such as `SabsaA1MdKey`, `So
 
 Parses the generic metamodel field catalogue from:
 
-- `../../../../reference/Inbox/08_generic_sabsa_a1_metamodel_field_catalogue.md`
+- `../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md`
 
 The script extracts:
 
