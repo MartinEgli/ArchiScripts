@@ -52,22 +52,20 @@ The script deliberately keeps schema concepts as metamodel objects instead of tr
 
 ## Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View.ajs
 
-Parses the markdown Gesamtmodell directly from:
+Imports the Q003/Q004 model from the JSON extract:
 
-- `../../../../reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md`
+- `../../../../reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json`
 
-The script extracts:
+The script imports:
 
-- Mermaid nodes and edges from the embedded diagrams
-- `Table 16.8.8-03 - Q3 Risk To Q4 Governance Map`
-- `Table 16.8.8-04 - Source And Assumption Control`
-- `Table 16.8.8-05 - Anonymised Use Case Capsule Mapping`
-- `Table 16.8.8-06 - v1.8 Taxonomy Governance Thread`
+- JSON `elements` as ArchiMate concepts
+- JSON `relationships` as ArchiMate relationships
+- JSON `views` as generated Archi views using the stored node positions and relationship IDs
 
-It creates ArchiMate elements with source properties such as `SabsaA1MdKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RiskThreadId`, `RowIndex`, Mermaid aliases, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for extracted table cells. It also creates two generated views:
+It creates ArchiMate elements with source properties such as `SabsaA1MdKey`, `SourceJson`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `JsonElementId`, `VisualFillColor`, `VisualColorRole`, and `JsonProperty_*` properties from the extract. It also creates generated views from the JSON view specifications.
 
-- `SABSA A1 - MD Extracted Mermaid Model`
-- `SABSA A1 - MD Extracted Risk Governance Map`
+- `SABSA A1 - JSON Extracted Model`
+- JSON-defined use-case, Q3 and Q4 views
 
 ## Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs
 
