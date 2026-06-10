@@ -15,4 +15,4 @@ var SABSA_A1_FIELD_CATALOGUE_MODE = "documents";
 var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Field_Catalogue_Document_Parts_View";
 var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Field Catalogue - Document Parts View";
 
-load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
+load(new File(__DIR__ + "core/Generate_SABSA_A1_Field_Catalogue_Core.ajs").getCanonicalPath());

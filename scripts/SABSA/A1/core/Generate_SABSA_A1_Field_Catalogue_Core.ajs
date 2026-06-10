@@ -3,11 +3,11 @@ var Files = Java.type("java.nio.file.Files");
 var Paths = Java.type("java.nio.file.Paths");
 var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
-load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = typeof SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME === "undefined"
-    ? "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views"
+    ? "Generate_SABSA_A1_Field_Catalogue_Core"
     : String(SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME);
 var LOG_LEVEL = "WARN";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
@@ -21,7 +21,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md").getCanonicalPath(),
+    SourceMarkdownPath: new File(__DIR__ + "../../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md").getCanonicalPath(),
     SourceDocumentName: "SABSA-A1-MFC_generic_metamodel_field_catalogue.md",
     Namespace: "SabsaA1Overlay",
     DocumentPartsViewName: "SABSA A1 Field Catalogue - Document Parts",
