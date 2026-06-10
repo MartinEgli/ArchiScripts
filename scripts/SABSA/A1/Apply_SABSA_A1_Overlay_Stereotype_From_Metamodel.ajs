@@ -1,0 +1,322 @@
+/*
+===============================================================================
+Apply SABSA A1 Overlay Stereotype From Metamodel
+===============================================================================
+
+Applies one SABSA A1 overlay stereotype to the selected ArchiMate element.
+
+Behavior:
+- reads the metamodel template index from the active model
+- shows stereotypes matching the selected element type
+- applies the specialization and stereotype label
+- keeps existing business properties unchanged
+- adds only missing field properties and field metadata
+- creates a trace relationship back to the selected metamodel element
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+var CONST = {
+    ScriptName: "Apply SABSA A1 Overlay Stereotype From Metamodel",
+    Namespace: "SabsaA1Overlay",
+    Property: {
+        Namespace: "Namespace",
+        Kind: "Kind",
+        TypeName: "TypeName",
+        ConceptType: "ConceptType",
+        Stereotype: "Stereotype",
+        DefaultLabelExpression: "DefaultLabelExpression",
+        MetaElementKey: "MetaElementKey",
+        TemplateIndexJson: "SabsaA1OverlayTemplateIndexJson"
+    },
+    LabelExpression: {
+        Stereotype: "«SABSA A1 ${specialization}»\n${name}"
+    },
+    Dialog: {
+        Title: "SABSA A1 Overlay Stereotype",
+        ErrorTitle: "SABSA A1 Overlay Stereotype - Error"
+    }
+};
+
+function logInfo(message) {
+    console.log("[INFO] " + message);
+}
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        } else if (level === "WARNING") {
+            iconType = JOptionPane.WARNING_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+function chooseFromList(title, message, values) {
+    var JOptionPane = Java.type("javax.swing.JOptionPane");
+    var options = Java.to(values, "java.lang.Object[]");
+    var result = JOptionPane.showInputDialog(
+        null,
+        message,
+        title,
+        JOptionPane.QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]
+    );
+
+    return result === null ? null : String(result);
+}
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function propertyKey(value) {
+    return safeString(value)
+        .replace(/<[^>]+>/g, "")
+        .replace(/`/g, "")
+        .replace(/\*\*/g, "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+}
+
+function getFieldPropertyPrefix(fieldName) {
+    return "Field_" + propertyKey(fieldName);
+}
+
+function ensureModelAvailable() {
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+}
+
+function getSelectedDiagramObject() {
+    if (!selection || selection.length !== 1) {
+        throw new Error("Please select exactly one diagram element.");
+    }
+
+    if (!selection[0].concept) {
+        throw new Error("The selected object has no underlying ArchiMate element.");
+    }
+
+    return selection[0];
+}
+
+function loadTemplateIndex() {
+    var json = model.prop(CONST.Property.TemplateIndexJson);
+    var entries;
+
+    if (!json || trim(json) === "") {
+        throw new Error("Model property '" + CONST.Property.TemplateIndexJson + "' is empty. Run the SABSA A1 metamodel generator first.");
+    }
+
+    entries = JSON.parse(String(json));
+    if (!entries || !entries.length) {
+        throw new Error("The SABSA A1 overlay template index contains no entries.");
+    }
+
+    return entries;
+}
+
+function findMetaElement(entry) {
+    return $(entry.ConceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaA1CatalogueKey")) === safeString(entry.MetaElementKey);
+    }).first();
+}
+
+function buildCandidateDisplay(entry) {
+    return entry.TypeName + " [" + entry.ConceptType + "]";
+}
+
+function chooseTemplate(entries, conceptType) {
+    var candidates = entries.filter(function (entry) {
+        return safeString(entry.ConceptType) === safeString(conceptType);
+    });
+    var displayValues;
+    var chosen;
+
+    if (!candidates.length) {
+        throw new Error("No SABSA A1 overlay stereotypes match concept type '" + conceptType + "'.");
+    }
+
+    displayValues = candidates.map(buildCandidateDisplay);
+    chosen = chooseFromList(CONST.Dialog.Title, "Choose SABSA A1 overlay stereotype for '" + conceptType + "'.", displayValues);
+    if (!chosen) {
+        return null;
+    }
+
+    return candidates.filter(function (entry) {
+        return buildCandidateDisplay(entry) === chosen;
+    })[0] || null;
+}
+
+function setIfMissing(concept, propertyName, value) {
+    if (trim(concept.prop(propertyName)) === "") {
+        concept.prop(propertyName, safeString(value));
+        return true;
+    }
+    return false;
+}
+
+function buildSampleValue(fieldName, datatype, description) {
+    var type = safeString(datatype).toLowerCase();
+    var note = safeString(description).replace(/<[^>]+>/g, "").replace(/`/g, "");
+    var enumCandidate = note.split(",")[0].replace(/\.$/, "").trim();
+
+    if (type === "date") {
+        return "2026-06-10";
+    }
+    if (type === "integer" || type === "number") {
+        return "1";
+    }
+    if (type === "boolean") {
+        return "True";
+    }
+    if (type === "enum") {
+        return enumCandidate || "Sample";
+    }
+    if (type === "list") {
+        return "sample_ref";
+    }
+    if (type === "formula") {
+        return "sample_formula";
+    }
+    if (type === "text") {
+        return "Sample " + fieldName + ".";
+    }
+
+    return "sample_" + propertyKey(fieldName);
+}
+
+function tryCreateSpecialization(name, conceptType) {
+    try {
+        model.createSpecialization(name, conceptType);
+    } catch (error) {
+        // Existing specializations are fine.
+    }
+}
+
+function applyTemplate(selectedDiagramObject, entry, metaElement) {
+    var concept = selectedDiagramObject.concept;
+    var fieldList = safeString(metaElement.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
+        return !!fieldName;
+    });
+    var added = 0;
+
+    tryCreateSpecialization(entry.TypeName, concept.type);
+    concept.specialization = entry.TypeName;
+
+    concept.prop(CONST.Property.Namespace, CONST.Namespace);
+    concept.prop(CONST.Property.Kind, "SabsaA1OverlayTypedElement");
+    concept.prop(CONST.Property.TypeName, entry.TypeName);
+    concept.prop(CONST.Property.ConceptType, concept.type);
+    concept.prop(CONST.Property.Stereotype, "«SABSA A1 " + entry.TypeName + "»");
+    concept.prop(CONST.Property.DefaultLabelExpression, entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype);
+    concept.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
+
+    fieldList.forEach(function (fieldName) {
+        var prefix = getFieldPropertyPrefix(fieldName);
+        var datatype = metaElement.prop(prefix + "_Datatype");
+        var required = metaElement.prop(prefix + "_Required");
+        var keyRole = metaElement.prop(prefix + "_KeyRole");
+        var templateFamily = metaElement.prop(prefix + "_TemplateFamily");
+        var description = metaElement.prop(prefix + "_Description");
+
+        if (setIfMissing(concept, fieldName, buildSampleValue(fieldName, datatype, description))) {
+            added++;
+        }
+
+        setIfMissing(concept, prefix + "_Datatype", datatype);
+        setIfMissing(concept, prefix + "_Required", required);
+        setIfMissing(concept, prefix + "_KeyRole", keyRole);
+        setIfMissing(concept, prefix + "_TemplateFamily", templateFamily);
+        setIfMissing(concept, prefix + "_Description", description);
+    });
+
+    try {
+        selectedDiagramObject.labelExpression = entry.DefaultLabelExpression || CONST.LabelExpression.Stereotype;
+    } catch (error) {
+        logInfo("Could not apply label expression to selected diagram object.");
+    }
+
+    ensureMetaRelationship(concept, metaElement, entry);
+    return added;
+}
+
+function findRelationshipByApplyKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1ApplyKey")) === safeString(key);
+    }).first();
+}
+
+function ensureMetaRelationship(concept, metaElement, entry) {
+    var conceptIdentity = safeString(concept.id) || safeString(concept.prop("id")) || safeString(concept.name);
+    var key = "sabsa-a1-apply:" + conceptIdentity + ":" + entry.MetaElementKey;
+    var relationship = findRelationshipByApplyKey(key);
+
+    if (!relationship) {
+        relationship = model.createRelationship("association-relationship", "uses stereotype " + entry.TypeName, concept, metaElement);
+    }
+
+    relationship.name = "uses stereotype " + entry.TypeName;
+    relationship.prop("SabsaA1ApplyKey", key);
+    relationship.prop(CONST.Property.Namespace, CONST.Namespace);
+    relationship.prop(CONST.Property.Kind, "SabsaA1OverlayApplication");
+    relationship.prop(CONST.Property.TypeName, "UsesSabsaA1Stereotype");
+    relationship.prop(CONST.Property.Stereotype, "«SABSA A1 UsesSabsaA1Stereotype»");
+    relationship.prop("AppliedStereotype", entry.TypeName);
+    relationship.prop(CONST.Property.MetaElementKey, entry.MetaElementKey);
+}
+
+function main() {
+    var selectedDiagramObject;
+    var entries;
+    var chosenTemplate;
+    var metaElement;
+    var added;
+
+    ensureModelAvailable();
+    selectedDiagramObject = getSelectedDiagramObject();
+    entries = loadTemplateIndex();
+    chosenTemplate = chooseTemplate(entries, selectedDiagramObject.concept.type);
+
+    if (!chosenTemplate) {
+        logInfo("SABSA A1 overlay stereotype selection cancelled.");
+        return;
+    }
+
+    metaElement = findMetaElement(chosenTemplate);
+    if (!metaElement) {
+        throw new Error("Could not find metamodel element for stereotype '" + chosenTemplate.TypeName + "'.");
+    }
+
+    added = applyTemplate(selectedDiagramObject, chosenTemplate, metaElement);
+    showMessage(
+        CONST.Dialog.Title,
+        "Applied stereotype: «SABSA A1 " + chosenTemplate.TypeName + "»\nMissing field values added: " + added + "\nExisting field values were kept.",
+        "INFO"
+    );
+}
+
+try {
+    main();
+} catch (error) {
+    showMessage(CONST.Dialog.ErrorTitle, String(error), "ERROR");
+    throw error;
+}
