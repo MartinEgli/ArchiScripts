@@ -680,30 +680,40 @@ function getOverlayKind(properties) {
     return CONST.Kind.MetaType;
 }
 
+function getOverlaySpecialization(typeName, overlayKind) {
+    if (overlayKind === CONST.Kind.MetaType) {
+        return "Overlay Type";
+    }
+
+    return typeName;
+}
+
 function applyOverlayStereotype(target, conceptType, properties) {
     var typeName = getOverlayTypeName(conceptType, properties);
+    var overlayKind = getOverlayKind(properties);
+    var specialization = getOverlaySpecialization(typeName, overlayKind);
 
-    if (!target || !typeName) {
+    if (!target || !typeName || !specialization) {
         return;
     }
 
-    tryCreateSpecialization(typeName, conceptType);
+    tryCreateSpecialization(specialization, conceptType);
     try {
-        target.specialization = typeName;
+        target.specialization = specialization;
     } catch (error) {
         logger.debug("Could not apply specialization.", {
-            specialization: typeName,
+            specialization: specialization,
             concept_type: conceptType,
             error: String(error)
         }, "sabsa.a1.overlay.specialization.apply.skipped");
     }
 
     target.prop(CONST.Property.Namespace, CONST.Namespace);
-    target.prop(CONST.Property.Kind, getOverlayKind(properties));
+    target.prop(CONST.Property.Kind, overlayKind);
     target.prop(CONST.Property.BaseType, conceptType);
     target.prop(CONST.Property.TypeName, typeName);
     target.prop(CONST.Property.ConceptType, conceptType);
-    target.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
+    target.prop(CONST.Property.Stereotype, "«SABSA A1 " + specialization + "»");
     target.prop(CONST.Property.DefaultLabelExpression, CONST.LabelExpression.Stereotype);
 }
 
