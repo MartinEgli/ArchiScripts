@@ -190,17 +190,16 @@ When table elements exist, metamodel/overlay/template modes reuse them to add re
 
 The generator adds selected SABSA A1 overlay specializations where the literature or catalogue defines a stable semantic split: `Threat` and `Opportunity` specialize `Event_Attribute`; `Strength` and `Weakness` specialize `State_Attribute`; `Impact` and `Benefit` specialize `Consequence`; `Threat Risk` and `Opportunity Risk` specialize `Risk`; `Control`, `Enabler` and `Combined Treatment` specialize `Risk_Treatment`. These derived types inherit the base type field metadata and set field defaults such as `classification`, `state_effect`, `consequence_type`, `risk_direction` or `treatment_type` for templates and applied elements.
 
-## Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs
-
-Compatibility wrapper for `Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs`.
-
-## Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs
-
-Compatibility wrapper for `Generate_SABSA_A1_Metamodel_Architecture_Views.ajs`.
-
 ## Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs
 
 Shared backwards-compatible generator core. Running it directly uses combined mode and creates all document, table, metamodel, overlay model and template views. Prefer the focused entry point scripts above when views should be generated separately.
+
+## archive/
+
+Contains deprecated compatibility wrappers that have clearer replacements:
+
+- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs` -> `Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs`
+- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs` -> `Generate_SABSA_A1_Metamodel_Architecture_Views.ajs`
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 

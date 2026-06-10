@@ -6,6 +6,8 @@ Generate SABSA A1 Metamodel Field Catalogue Meta Views
 Compatibility entry point for the shared Generic SABSA A1 Metamodel Field
 Catalogue generator. Prefer Generate_SABSA_A1_Metamodel_Architecture_Views.ajs.
 This mode generates only the metamodel architecture views.
+
+Archived because the focused replacement entry point has a clearer name.
 ===============================================================================
 */
 
@@ -15,4 +17,4 @@ var SABSA_A1_FIELD_CATALOGUE_MODE = "metamodel";
 var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views";
 var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Metamodel - Architecture Views";
 
-load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
+load(new File(__DIR__ + "../Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());

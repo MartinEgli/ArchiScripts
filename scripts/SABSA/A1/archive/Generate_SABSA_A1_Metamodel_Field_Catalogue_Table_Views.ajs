@@ -6,6 +6,8 @@ Generate SABSA A1 Metamodel Field Catalogue Table Views
 Compatibility entry point for the shared Generic SABSA A1 Metamodel Field
 Catalogue generator. Prefer Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs.
 This mode generates only the table index view.
+
+Archived because the focused replacement entry point has a clearer name.
 ===============================================================================
 */
 
@@ -15,4 +17,4 @@ var SABSA_A1_FIELD_CATALOGUE_MODE = "tables";
 var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views";
 var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Field Catalogue - Table Index View";
 
-load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
+load(new File(__DIR__ + "../Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
