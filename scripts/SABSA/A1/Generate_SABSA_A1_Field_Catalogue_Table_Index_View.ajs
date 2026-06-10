@@ -15,4 +15,4 @@ var SABSA_A1_FIELD_CATALOGUE_MODE = "tables";
 var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Field_Catalogue_Table_Index_View";
 var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Field Catalogue - Table Index View";
 
-load(new File(__DIR__ + "core/Generate_SABSA_A1_Field_Catalogue_Core.ajs").getCanonicalPath());
+load(new File(__DIR__ + "core/Run_SABSA_A1_Field_Catalogue_Mode.ajs").getCanonicalPath());

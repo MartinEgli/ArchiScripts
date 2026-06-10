@@ -1,0 +1,13 @@
+/*
+===============================================================================
+Run SABSA A1 Field Catalogue Mode
+===============================================================================
+
+Shared entry point runner for focused field-catalogue view generators. Set the
+SABSA_A1_FIELD_CATALOGUE_* variables before loading this file.
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "Generate_SABSA_A1_Field_Catalogue_Core.ajs").getCanonicalPath());
