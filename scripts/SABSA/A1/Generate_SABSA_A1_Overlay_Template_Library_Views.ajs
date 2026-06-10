@@ -1,0 +1,18 @@
+/*
+===============================================================================
+Generate SABSA A1 Overlay Template Library Views
+===============================================================================
+
+Runs the shared Generic SABSA A1 Metamodel Field Catalogue generator in template
+view mode. This creates or reuses the metamodel and template elements and
+generates only the template relationship overview and template library views.
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+var SABSA_A1_FIELD_CATALOGUE_MODE = "templates";
+var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Overlay_Template_Library_Views";
+var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Overlay Templates - Library Views";
+
+load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());

@@ -24,16 +24,17 @@ var CONST = {
     SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md").getCanonicalPath(),
     SourceDocumentName: "SABSA-A1-MFC_generic_metamodel_field_catalogue.md",
     Namespace: "SabsaA1Overlay",
-    LayerViewName: "SABSA A1 - SABSA Architecture Layer Alignment",
-    TypeViewName: "SABSA A1 - Metamodel Core Type Inventory",
-    RelationshipViewName: "SABSA A1 - Metamodel Relationship Catalogue",
-    ForeignKeyViewName: "SABSA A1 - Metamodel Field FK Relations",
-    ViewpointViewName: "SABSA A1 - Metamodel Viewpoint Catalogue",
-    TableIndexViewName: "SABSA A1 - Metamodel Complete Table Index",
-    SampleOverviewViewName: "SABSA A1 - Overlay Sample Relationship Overview",
-    OverlayOverviewViewName: "SABSA A1 Overlay - Overview",
-    OverlayTypeModelViewName: "SABSA A1 Overlay - Type Model",
-    OverlayTemplateLibraryViewName: "SABSA A1 Overlay - Template Library",
+    DocumentPartsViewName: "SABSA A1 Field Catalogue - Document Parts",
+    LayerViewName: "SABSA A1 Metamodel - Architecture Layer Alignment",
+    TypeViewName: "SABSA A1 Metamodel - Core Type Inventory",
+    RelationshipViewName: "SABSA A1 Metamodel - Relationship Catalogue",
+    ForeignKeyViewName: "SABSA A1 Metamodel - Field FK Relations",
+    ViewpointViewName: "SABSA A1 Metamodel - Viewpoint Catalogue",
+    TableIndexViewName: "SABSA A1 Field Catalogue - Table Index",
+    TemplateRelationshipViewName: "SABSA A1 Overlay Templates - Relationship Overview",
+    OverlayOverviewViewName: "SABSA A1 Overlay Model - Overview",
+    OverlayTypeModelViewName: "SABSA A1 Overlay Model - Type Model",
+    OverlayTemplateLibraryViewName: "SABSA A1 Overlay Templates - Template Library",
     Folder: {
         Root: "SABSA",
         A1: "A1",
@@ -45,15 +46,15 @@ var CONST = {
         Viewpoints: "Viewpoints",
         Tables: "Tables",
         TableRows: "Table Rows",
-        Samples: "Samples",
+        Templates: "Templates",
         Source: "Source"
     },
     Kind: {
         Source: "SourceDocument",
         MetaType: "SabsaA1OverlayMetaType",
         MetaRelationship: "SabsaA1OverlayMetaRelationship",
-        Sample: "SabsaA1OverlaySample",
-        SampleRelationship: "SabsaA1OverlaySampleRelationship",
+        Template: "SabsaA1OverlayTemplate",
+        TemplateRelationship: "SabsaA1OverlayTemplateRelationship",
         Table: "CatalogueTable",
         TableRow: "CatalogueTableRow"
     },
@@ -140,8 +141,8 @@ var stats = {
     genericRows: 0,
     fieldDefinitions: 0,
     elementRelations: 0,
-    samples: 0,
-    sampleRelationships: 0,
+    templates: 0,
+    templateRelationships: 0,
     views: 0,
     conceptsCreated: 0,
     conceptsReused: 0,
@@ -162,13 +163,23 @@ function getExecutionMode() {
         ? "combined"
         : safeString(SABSA_A1_FIELD_CATALOGUE_MODE).toLowerCase();
 
+    if (mode === "document") {
+        return "documents";
+    }
     if (mode === "table") {
         return "tables";
     }
     if (mode === "metamodel") {
-        return "meta";
+        return "metamodel";
     }
-    if (mode === "tables" || mode === "meta" || mode === "combined") {
+    if (mode === "meta") {
+        return "metamodel";
+    }
+    if (mode === "template") {
+        return "templates";
+    }
+    if (mode === "documents" || mode === "tables" || mode === "metamodel" ||
+        mode === "overlay" || mode === "templates" || mode === "combined") {
         return mode;
     }
 
@@ -179,16 +190,45 @@ function shouldGenerateTables(mode) {
     return mode === "tables" || mode === "combined";
 }
 
+function shouldGenerateDocumentParts(mode) {
+    return mode === "documents" || mode === "combined";
+}
+
+function shouldCreateTableCatalogue(mode) {
+    return mode === "documents" || shouldGenerateTables(mode);
+}
+
 function shouldGenerateMeta(mode) {
-    return mode === "meta" || mode === "combined";
+    return mode === "metamodel" || mode === "overlay" || mode === "templates" || mode === "combined";
+}
+
+function shouldGenerateMetamodelViews(mode) {
+    return mode === "metamodel" || mode === "combined";
+}
+
+function shouldGenerateOverlayModelViews(mode) {
+    return mode === "overlay" || mode === "combined";
+}
+
+function shouldGenerateTemplateViews(mode) {
+    return mode === "templates" || mode === "combined";
 }
 
 function modeLabel(mode) {
-    if (mode === "tables") {
-        return "Table Catalogue";
+    if (mode === "documents") {
+        return "Document Parts View";
     }
-    if (mode === "meta") {
-        return "Metamodel Overlay";
+    if (mode === "tables") {
+        return "Table Index View";
+    }
+    if (mode === "metamodel") {
+        return "Metamodel Views";
+    }
+    if (mode === "overlay") {
+        return "Overlay Model Views";
+    }
+    if (mode === "templates") {
+        return "Overlay Template Views";
     }
     return "Complete Catalogue";
 }
@@ -313,7 +353,7 @@ function resolveConceptPlacement(conceptType, properties) {
                 kind === "Viewpoint" ? CONST.Folder.Viewpoints :
                     kind === "Table" ? CONST.Folder.Tables :
                         kind === "TableRow" ? CONST.Folder.TableRows :
-                            kind === "Sample" ? CONST.Folder.Samples : CONST.Folder.Source;
+                            kind === "Template" || kind === "Sample" ? CONST.Folder.Templates : CONST.Folder.Source;
 
     if (conceptType === "goal" || conceptType === "requirement" || conceptType === "constraint" ||
         conceptType === "assessment" || conceptType === "outcome" || conceptType === "driver") {
@@ -711,8 +751,8 @@ function getOverlayTypeName(conceptType, properties) {
     if (kind === "TableRow") {
         return properties && properties.FieldName ? specializationName("SABSA A1 Field " + properties.FieldName) : "SABSA A1 Catalogue Row";
     }
-    if (kind === "Sample") {
-        return specializationName(properties.SabsaType || properties.TypeName || "SABSA A1 Sample");
+    if (kind === "Template" || kind === "Sample") {
+        return specializationName(properties.SabsaType || properties.TypeName || "SABSA A1 Template");
     }
     if (kind === "Source") {
         return "SABSA A1 Source";
@@ -730,8 +770,8 @@ function getOverlayKind(properties) {
     if (kind === "Relationship") {
         return CONST.Kind.MetaRelationship;
     }
-    if (kind === "Sample") {
-        return CONST.Kind.Sample;
+    if (kind === "Template" || kind === "Sample") {
+        return CONST.Kind.Template;
     }
     if (kind === "Table") {
         return CONST.Kind.Table;
@@ -2013,19 +2053,19 @@ function buildSampleValue(fieldName, datatype, description) {
         return "True";
     }
     if (type === "enum") {
-        return enumCandidate || "Sample";
+        return enumCandidate || "Template";
     }
     if (type === "list") {
-        return "sample_ref";
+        return "template_ref";
     }
     if (type === "formula") {
-        return "sample_formula";
+        return "template_formula";
     }
     if (type === "text") {
-        return "Sample " + fieldName + ".";
+        return "Template " + fieldName + ".";
     }
 
-    return "sample_" + propertyKey(fieldName);
+    return "template_" + propertyKey(fieldName);
 }
 
 function removeReferenceIdFieldValues(concept, metaConcept) {
@@ -2071,28 +2111,28 @@ function createSampleConcepts(coreTypeConcepts) {
     Object.keys(coreTypeConcepts).forEach(function (typeName) {
         var metaConcept = coreTypeConcepts[typeName];
         var conceptType = safeString(metaConcept.prop("RecommendedArchiMateType")) || "grouping";
-        var sampleName = "Sample " + typeName;
+        var sampleName = "Template " + typeName;
         var sample = ensureConcept(conceptType, sampleName, "catalogue:sample:type:" + typeName, {
-            SabsaA1CatalogueKind: "Sample",
+            SabsaA1CatalogueKind: "Template",
             SabsaType: typeName,
             TypeName: typeName,
-            SourceSection: "Generated sample from " + typeName,
+            SourceSection: "Generated template from " + typeName,
             MetaElementKey: metaConcept.prop("SabsaA1CatalogueKey"),
             VisualFillColor: getConceptFill(metaConcept, CONST.Style.TypeFill),
             VisualColorRole: getColorRole(getConceptFill(metaConcept, CONST.Style.TypeFill))
-        }, "Sample element for SABSA A1 overlay stereotype " + typeName + ".");
+        }, "Template element for SABSA A1 overlay stereotype " + typeName + ".");
 
         applySamplePropertiesFromMeta(sample, metaConcept);
         ensureRelationship("association-relationship", sample, metaConcept, "catalogue:sample:meta:" + typeName, "uses stereotype " + typeName, {
-            SabsaA1CatalogueRelationKind: "SampleUsesMetaType",
-            RelationshipKind: CONST.Kind.SampleRelationship,
-            RelationshipTypeName: "SampleUsesMetaType",
+            SabsaA1CatalogueRelationKind: "TemplateUsesMetaType",
+            RelationshipKind: CONST.Kind.TemplateRelationship,
+            RelationshipTypeName: "TemplateUsesMetaType",
             RelationshipLabel: "uses stereotype " + typeName,
-            SourceSection: "Generated sample"
+            SourceSection: "Generated template"
         });
 
         samplesByType[typeName] = sample;
-        stats.samples++;
+        stats.templates++;
     });
 
     return samplesByType;
@@ -2115,8 +2155,8 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
         }
 
         relationship = ensureRelationship("association-relationship", sourceSample, targetSample, "catalogue:sample:relationship:" + slugify(parsed.label), label, {
-            SabsaA1CatalogueRelationKind: "SampleSemanticRelationship",
-            RelationshipKind: CONST.Kind.SampleRelationship,
+            SabsaA1CatalogueRelationKind: "TemplateSemanticRelationship",
+            RelationshipKind: CONST.Kind.TemplateRelationship,
             RelationshipTypeName: specializationName(parsed.label),
             RelationshipLabel: label,
             RelationshipExpression: parsed.label,
@@ -2128,7 +2168,7 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
             SourceSection: "Table 6-03"
         });
         sampleRelationships.push(relationship);
-        stats.sampleRelationships++;
+        stats.templateRelationships++;
     });
 
     $("relationship").filter(function (relationship) {
@@ -2148,9 +2188,9 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
         }
 
         relationship = ensureRelationship("association-relationship", sourceSample, targetSample, "catalogue:sample:fk:" + slugify(fkKey), label, {
-            SabsaA1CatalogueRelationKind: "SampleForeignKeyRelationship",
-            RelationshipKind: CONST.Kind.SampleRelationship,
-            RelationshipTypeName: "SampleForeignKeyReference",
+            SabsaA1CatalogueRelationKind: "TemplateForeignKeyRelationship",
+            RelationshipKind: CONST.Kind.TemplateRelationship,
+            RelationshipTypeName: "TemplateForeignKeyReference",
             RelationshipLabel: label,
             SourceType: sourceMeta.name,
             TargetType: targetMeta.name,
@@ -2161,18 +2201,18 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
             SourceSection: fkRelationship.prop("SourceSection")
         });
         sampleRelationships.push(relationship);
-        stats.sampleRelationships++;
+        stats.templateRelationships++;
     });
 
     return sampleRelationships;
 }
 
 function createSampleOverviewView(samplesByType, sampleRelationships) {
-    var view = model.createArchimateView(buildUniqueViewName(CONST.SampleOverviewViewName));
+    var view = model.createArchimateView(buildUniqueViewName(CONST.TemplateRelationshipViewName));
     var visuals = {};
     var sampleKeys = Object.keys(samplesByType);
 
-    view.documentation = "Generated SABSA A1 overlay sample elements and stereotyped sample relationships.";
+    view.documentation = "Generated SABSA A1 overlay template elements and stereotyped template relationships.";
     moveViewToFolder(view);
 
     sampleKeys.forEach(function (typeName, index) {
@@ -2686,6 +2726,31 @@ function createTableIndexView(sourceConcept, tableConcepts) {
     return createGridView(CONST.TableIndexViewName, sourceConcept, tableConcepts, CONST.Style.RepresentationFill, CONST.Layout.TypeColumns);
 }
 
+function createDocumentPartsView(sourceConcept, tableConcepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.DocumentPartsViewName));
+    var visualsByConcept = {};
+    var sourceVisual;
+
+    view.documentation = "Generated document-part view for the Generic SABSA A1 Metamodel Field Catalogue source and its extracted table sections.";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+    visualsByConcept[safeString(sourceConcept.name)] = sourceVisual;
+
+    (tableConcepts || []).forEach(function (concept, index) {
+        var pos = gridPosition(index, CONST.Layout.TypeColumns, CONST.Layout.StartX, CONST.Layout.StartY + 140, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        var visual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.RepresentationFill));
+
+        visualsByConcept[safeString(concept.name)] = visual;
+        visualsByConcept[normalizeTypeName(safeString(concept.name))] = visual;
+    });
+
+    addVisibleRelationshipsByEndpoint(view, visualsByConcept, ["SourceTableTrace"]);
+
+    stats.views++;
+    return view;
+}
+
 function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.RelationshipViewName));
     var sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
@@ -2750,7 +2815,7 @@ function createOverlayLibraryOverviewView() {
     addLibraryNote(
         view,
         "SABSA A1 Overlay Overview\n" +
-        "This generator creates metamodel detail views plus an Overlay Type Model and an Overlay Template Library.\n" +
+        "This view family documents the generated Overlay Type Model. Template library views are generated by the template entry point.\n" +
         "Field_* metadata belongs only to CoreType meta elements.",
         CONST.Layout.StartX,
         CONST.Layout.StartY,
@@ -2770,7 +2835,7 @@ function createOverlayLibraryOverviewView() {
     );
 
     addLibraryNote(group, "Overlay Type Model\nMeta types and meta relationships.", CONST.Layout.LibraryGroupInnerX, CONST.Layout.LibraryGroupInnerY, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Style.LibraryTypeGroupFill);
-    addLibraryNote(group, "Overlay Template Library\nSample/template elements with concrete field values only.", CONST.Layout.LibraryGroupInnerX + CONST.Layout.OverviewGapX, CONST.Layout.LibraryGroupInnerY, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Style.LibraryTemplateGroupFill);
+    addLibraryNote(group, "Overlay Template Library\nTemplate elements with concrete field values only.", CONST.Layout.LibraryGroupInnerX + CONST.Layout.OverviewGapX, CONST.Layout.LibraryGroupInnerY, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Style.LibraryTemplateGroupFill);
 
     stats.views++;
     return view;
@@ -2851,7 +2916,7 @@ function createOverlayTemplateLibraryView(samplesByType) {
 
     addLibraryNote(
         view,
-        "SABSA A1 Overlay Template Library\nSample/template elements are specialized and carry concrete field values. Field_* metadata stays on the linked CoreType meta element.",
+        "SABSA A1 Overlay Template Library\nTemplate elements are specialized and carry concrete field values. Field_* metadata stays on the linked CoreType meta element.",
         CONST.Layout.StartX,
         CONST.Layout.StartY,
         CONST.Layout.LibraryHeaderWidth,
@@ -2901,8 +2966,13 @@ function confirmExecution(summary, mode) {
         "\nAll catalogue tables: " + summary.genericTables +
         "\nAll catalogue rows: " + summary.genericRows +
         "\nField definitions: " + summary.fieldDefinitions +
+        (shouldGenerateDocumentParts(mode) ? "\nDocument parts view: source document and extracted table sections" : "") +
+        (shouldGenerateTables(mode) ? "\nTable index view: all extracted catalogue tables" : "") +
+        (shouldGenerateMetamodelViews(mode) ? "\nMetamodel views: layers, core types, FK relations, relationships and viewpoints" : "") +
+        (shouldGenerateOverlayModelViews(mode) ? "\nOverlay model views: overview and overlay type model" : "") +
+        (shouldGenerateTemplateViews(mode) ? "\nOverlay template views: template relationships and template library" : "") +
         (shouldGenerateMeta(mode) ? "\nNamed element relations: generated from relationship and FK catalogue rows" : "") +
-        (shouldGenerateMeta(mode) ? "\nOverlay samples: generated after stereotype metadata is built" : "") +
+        (shouldGenerateTemplateViews(mode) ? "\nOverlay templates: generated after stereotype metadata is built" : "") +
         "\nLayers: " + summary.layers +
         "\nCore types: " + summary.coreTypes +
         "\nRelationships: " + summary.relationships +
@@ -2959,11 +3029,18 @@ function main() {
 
     sourceConcept = createSourceConcept(markdown);
 
-    if (shouldGenerateTables(mode)) {
+    if (shouldCreateTableCatalogue(mode)) {
         tableData = createCompleteTableCatalogueConcepts(markdown, sourceConcept);
-        createTableIndexView(sourceConcept, tableData.tables);
     } else {
         tableData = createTableCatalogueReferenceData(markdown);
+    }
+
+    if (shouldGenerateDocumentParts(mode)) {
+        createDocumentPartsView(sourceConcept, tableData.tables);
+    }
+
+    if (shouldGenerateTables(mode)) {
+        createTableIndexView(sourceConcept, tableData.tables);
     }
 
     if (shouldGenerateMeta(mode)) {
@@ -2973,20 +3050,30 @@ function main() {
         viewpointConcepts = createViewpointConcepts(markdown, sourceConcept);
         linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
         applyCoreTypeSpecializationMetadata(coreTypeConcepts);
-        samplesByType = createSampleConcepts(coreTypeConcepts);
-        sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
+        if (shouldGenerateTemplateViews(mode)) {
+            samplesByType = createSampleConcepts(coreTypeConcepts);
+            sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
+        }
         cleanupNonMetaFieldMetadataProperties();
         persistOverlayIndexes(coreTypeConcepts, relationshipConcepts);
 
-        createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
-        createTypeView(sourceConcept, coreTypeConcepts);
-        createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts);
-        createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
-        createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
-        createSampleOverviewView(samplesByType, sampleRelationships);
-        createOverlayLibraryOverviewView();
-        createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts);
-        createOverlayTemplateLibraryView(samplesByType);
+        if (shouldGenerateMetamodelViews(mode)) {
+            createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
+            createTypeView(sourceConcept, coreTypeConcepts);
+            createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts);
+            createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
+            createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
+        }
+
+        if (shouldGenerateOverlayModelViews(mode)) {
+            createOverlayLibraryOverviewView();
+            createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts);
+        }
+
+        if (shouldGenerateTemplateViews(mode)) {
+            createSampleOverviewView(samplesByType, sampleRelationships);
+            createOverlayTemplateLibraryView(samplesByType);
+        }
     }
 
     logger.finish("SABSA A1 field catalogue generation finished.", {
@@ -2999,8 +3086,8 @@ function main() {
         generic_rows: stats.genericRows,
         field_definitions: stats.fieldDefinitions,
         named_element_relations: stats.elementRelations,
-        samples: stats.samples,
-        sample_relationships: stats.sampleRelationships,
+        templates: stats.templates,
+        template_relationships: stats.templateRelationships,
         views: stats.views,
         concepts_created: stats.conceptsCreated,
         concepts_reused: stats.conceptsReused,
@@ -3018,8 +3105,8 @@ function main() {
         "\nAll catalogue rows: " + stats.genericRows +
         "\nField definitions: " + stats.fieldDefinitions +
         "\nNamed element relations: " + stats.elementRelations +
-        "\nSamples: " + stats.samples +
-        "\nSample relationships: " + stats.sampleRelationships +
+        "\nTemplates: " + stats.templates +
+        "\nTemplate relationships: " + stats.templateRelationships +
         "\nLayers: " + stats.layers +
         "\nCore types: " + stats.coreTypes +
         "\nRelationships: " + stats.relationships +

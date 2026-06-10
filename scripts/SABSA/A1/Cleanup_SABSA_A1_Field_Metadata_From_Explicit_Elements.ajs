@@ -9,7 +9,7 @@ field values from SABSA A1 explicit/generated elements.
 Rule:
 - Compact Field_<field> metadata belongs only to SABSA A1 CoreType metamodel elements.
 - Redundant Field_<field>_Datatype / _Description style metadata is removed from CoreType elements.
-- Explicit/sample/applied elements keep concrete field values except ID-style reference fields; FK semantics remain represented by relationships.
+- Explicit/template/applied elements keep concrete field values except ID-style reference fields; FK semantics remain represented by relationships.
 ===============================================================================
 */
 

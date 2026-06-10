@@ -1,0 +1,18 @@
+/*
+===============================================================================
+Generate SABSA A1 Field Catalogue Document Parts View
+===============================================================================
+
+Runs the shared Generic SABSA A1 Metamodel Field Catalogue generator in document
+parts mode. This creates or reuses the source, table and table-row catalogue
+elements and generates only the document-parts view.
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+var SABSA_A1_FIELD_CATALOGUE_MODE = "documents";
+var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Field_Catalogue_Document_Parts_View";
+var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Field Catalogue - Document Parts View";
+
+load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());

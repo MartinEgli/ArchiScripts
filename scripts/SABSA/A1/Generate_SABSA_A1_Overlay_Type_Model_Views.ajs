@@ -1,0 +1,18 @@
+/*
+===============================================================================
+Generate SABSA A1 Overlay Type Model Views
+===============================================================================
+
+Runs the shared Generic SABSA A1 Metamodel Field Catalogue generator in overlay
+model mode. This creates or reuses the metamodel catalogue elements and
+generates only the overlay overview and overlay type model views.
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+var SABSA_A1_FIELD_CATALOGUE_MODE = "overlay";
+var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Overlay_Type_Model_Views";
+var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Overlay Model - Type Model Views";
+
+load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
