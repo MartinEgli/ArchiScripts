@@ -1,0 +1,1903 @@
+var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views";
+var LOG_LEVEL = "WARN";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: LOG_LEVEL
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Metamodel Field Catalogue"
+});
+
+var CONST = {
+    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/08_generic_sabsa_a1_metamodel_field_catalogue.md").getCanonicalPath(),
+    SourceDocumentName: "08_generic_sabsa_a1_metamodel_field_catalogue.md",
+    Namespace: "SabsaA1Overlay",
+    LayerViewName: "SABSA A1 - Metamodel Layer Architecture",
+    TypeViewName: "SABSA A1 - Metamodel Core Type Inventory",
+    RelationshipViewName: "SABSA A1 - Metamodel Relationship Catalogue",
+    ViewpointViewName: "SABSA A1 - Metamodel Viewpoint Catalogue",
+    TableIndexViewName: "SABSA A1 - Metamodel Complete Table Index",
+    SampleOverviewViewName: "SABSA A1 - Overlay Sample Relationship Overview",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Metamodel Field Catalogue",
+        Layers: "Layers",
+        CoreTypes: "Core Types",
+        Relationships: "Relationships",
+        Viewpoints: "Viewpoints",
+        Tables: "Tables",
+        TableRows: "Table Rows",
+        Samples: "Samples",
+        Source: "Source"
+    },
+    Kind: {
+        Source: "SourceDocument",
+        MetaType: "SabsaA1OverlayMetaType",
+        MetaRelationship: "SabsaA1OverlayMetaRelationship",
+        Sample: "SabsaA1OverlaySample",
+        SampleRelationship: "SabsaA1OverlaySampleRelationship",
+        Table: "CatalogueTable",
+        TableRow: "CatalogueTableRow"
+    },
+    Property: {
+        Namespace: "Namespace",
+        Kind: "Kind",
+        BaseType: "BaseType",
+        Category: "Category",
+        TypeName: "TypeName",
+        ConceptType: "ConceptType",
+        Stereotype: "Stereotype",
+        DefaultLabelExpression: "DefaultLabelExpression",
+        MetaElementKey: "MetaElementKey",
+        TemplateIndexJson: "SabsaA1OverlayTemplateIndexJson",
+        RelationshipIndexJson: "SabsaA1OverlayRelationshipIndexJson"
+    },
+    LabelExpression: {
+        Stereotype: "«SABSA A1 ${specialization}»\n${name}",
+        Fallback: "«${property:Stereotype}»\n${name}"
+    },
+    Layout: {
+        StartX: 40,
+        StartY: 40,
+        SourceWidth: 360,
+        SourceHeight: 72,
+        CardWidth: 260,
+        CardHeight: 76,
+        GapX: 26,
+        GapY: 22,
+        Columns: 4,
+        TypeColumns: 5
+    },
+    Style: {
+        SourceFill: "#fff7cc",
+        ContextualFill: "#ff9aff",
+        ConceptualFill: "#ccccff",
+        LogicalFill: "#ccffff",
+        PhysicalFill: "#ccff9a",
+        ComponentFill: "#ffff9a",
+        ManagementFill: "#ffcc64",
+        ColumnFill: "#ff9a69",
+        CellFill: "#ffff64",
+        RepresentationFill: "#ffffcc",
+        LayerFill: "#dff7ff",
+        TypeFill: "#ffff9a",
+        RelationshipFill: "#ffcc64",
+        ViewpointFill: "#ccff9a",
+        SupportFill: "#f3f3f3",
+        LineColor: "#111111",
+        FontColor: "#111111",
+        LayerFillByPrefix: {
+            "L1": "#ccccff",
+            "L2": "#ffcc64",
+            "L3": "#ccffff",
+            "L4": "#ffff9a",
+            "L5": "#ff9a69",
+            "L6": "#ffff64",
+            "L7": "#ccff9a",
+            "L8": "#ffcc64"
+        }
+    }
+};
+
+var stats = {
+    layers: 0,
+    coreTypes: 0,
+    relationships: 0,
+    viewpoints: 0,
+    genericTables: 0,
+    genericRows: 0,
+    fieldDefinitions: 0,
+    elementRelations: 0,
+    samples: 0,
+    sampleRelationships: 0,
+    views: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0,
+    relationshipLinks: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function slugify(value) {
+    return trim(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function propertyKey(value) {
+    return stripMarkup(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+}
+
+function stripMarkup(value) {
+    return trim(value)
+        .replace(/<[^>]+>/g, "")
+        .replace(/`/g, "")
+        .replace(/\*\*/g, "")
+        .replace(/\s+/g, " ");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function readUtf8Text(absolutePath) {
+    return String(new java.lang.String(
+        Files.readAllBytes(Paths.get(absolutePath)),
+        StandardCharsets.UTF_8
+    ));
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Motivation": ["Motivation"],
+        "Strategy": ["Strategy"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var wantedNames = (aliasesByFolderName[rootName] || [rootName]).map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaA1CatalogueKind);
+    var folder = kind === "Layer" ? CONST.Folder.Layers :
+        kind === "CoreType" ? CONST.Folder.CoreTypes :
+            kind === "Relationship" ? CONST.Folder.Relationships :
+                kind === "Viewpoint" ? CONST.Folder.Viewpoints :
+                    kind === "Table" ? CONST.Folder.Tables :
+                        kind === "TableRow" ? CONST.Folder.TableRows :
+                            kind === "Sample" ? CONST.Folder.Samples : CONST.Folder.Source;
+
+    if (conceptType === "goal" || conceptType === "requirement" || conceptType === "constraint" ||
+        conceptType === "assessment" || conceptType === "outcome" || conceptType === "driver") {
+        return { rootName: "Motivation", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "capability" || conceptType === "course-of-action") {
+        return { rootName: "Strategy", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "grouping") {
+        return { rootName: "Other", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    return { rootName: "Business", pathSegments: getModelFolderSegments([folder]) };
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    if (!objectToMove) {
+        return null;
+    }
+
+    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    return objectToMove;
+}
+
+function moveConceptToFolder(concept, conceptType, properties) {
+    var placement = resolveConceptPlacement(conceptType, properties);
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveRelationshipToFolder(relationship) {
+    return moveObjectToFolder("Relations", getModelFolderSegments([CONST.Folder.Relationships]), relationship);
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.A1], viewObject);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaA1CatalogueKey")) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation) {
+    var concept = findConceptByKey(conceptType, key);
+    var conceptCreated = false;
+
+    if (!concept) {
+        var placement = resolveConceptPlacement(conceptType, properties);
+        concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        conceptCreated = true;
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaA1CatalogueKey", key);
+    setCommonSourceProperties(concept, safeString(properties && properties.SabsaA1CatalogueKind));
+    setProperties(concept, properties);
+    applyOverlayStereotype(concept, conceptType, properties);
+
+    if (conceptCreated) {
+        moveConceptToFolder(concept, conceptType, properties);
+    }
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1CatalogueKey")) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(relationshipType, sourceConcept, targetConcept, key, name, properties) {
+    var relationship = findRelationshipByKey(key);
+    var relationshipCreated = false;
+
+    if (!sourceConcept || !targetConcept) {
+        return null;
+    }
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+        }
+        relationshipCreated = true;
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = name || "";
+    relationship.prop("SabsaA1CatalogueKey", key);
+    setCommonSourceProperties(relationship, "Relationship");
+    setProperties(relationship, properties);
+    applyRelationshipStereotype(relationship, relationshipType, properties);
+
+    if (relationshipCreated) {
+        moveRelationshipToFolder(relationship);
+    }
+
+    stats.relationshipLinks++;
+    return relationship;
+}
+
+function parseMarkdownTableLines(lines) {
+    var rows = [];
+    var headers = [];
+
+    lines.forEach(function (line, index) {
+        var cells;
+
+        if (line.indexOf("|") < 0) {
+            return;
+        }
+
+        cells = line.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(function (cell) {
+            return trim(cell);
+        });
+
+        if (index === 0) {
+            headers = cells;
+            return;
+        }
+
+        if (cells.join("").replace(/-/g, "").replace(/:/g, "") === "") {
+            return;
+        }
+
+        rows.push({ headers: headers, cells: cells });
+    });
+
+    return rows;
+}
+
+function extractTableAfterMarker(markdown, marker) {
+    var markerIndex = markdown.indexOf(marker);
+    var lines;
+    var tableLines = [];
+    var started = false;
+    var stopped = false;
+
+    if (markerIndex < 0) {
+        return [];
+    }
+
+    lines = markdown.substring(markerIndex).split(/\r?\n/);
+    lines.forEach(function (line) {
+        if (stopped) {
+            return;
+        }
+
+        if (trim(line).indexOf("|") === 0) {
+            tableLines.push(line);
+            started = true;
+            return;
+        }
+
+        if (started) {
+            stopped = true;
+        }
+    });
+
+    return parseMarkdownTableLines(tableLines);
+}
+
+function parseTableCaption(captionLine, fallbackIndex) {
+    var cleanCaption = stripMarkup(captionLine);
+    var match = cleanCaption.match(/Table\s+([A-Za-z0-9.\-]+)\s+-\s+([^\.]+)\./);
+    var tableId = match ? match[1] : "unknown-" + fallbackIndex;
+    var title = match ? match[2] : cleanCaption;
+
+    return {
+        id: tableId,
+        title: trim(title),
+        caption: cleanCaption
+    };
+}
+
+function parseMarkdownTableBlocks(markdown) {
+    var lines = markdown.split(/\r?\n/);
+    var blocks = [];
+    var lastCaption = "";
+    var i = 0;
+
+    while (i < lines.length) {
+        var line = trim(lines[i]);
+
+        if (line.indexOf("**Table 10.7.11") === 0) {
+            lastCaption = line;
+            i++;
+            continue;
+        }
+
+        if (line.indexOf("|") === 0) {
+            var tableLines = [];
+            var startLine = i + 1;
+            while (i < lines.length && trim(lines[i]).indexOf("|") === 0) {
+                tableLines.push(lines[i]);
+                i++;
+            }
+
+            if (lastCaption && tableLines.length >= 2) {
+                var parsedCaption = parseTableCaption(lastCaption, blocks.length + 1);
+                var parsedRows = parseMarkdownTableLines(tableLines);
+                blocks.push({
+                    id: parsedCaption.id,
+                    title: parsedCaption.title,
+                    caption: parsedCaption.caption,
+                    startLine: String(startLine),
+                    headers: parsedRows.length ? parsedRows[0].headers : [],
+                    rows: parsedRows.map(rowToObject)
+                });
+                lastCaption = "";
+            }
+            continue;
+        }
+
+        i++;
+    }
+
+    return blocks;
+}
+
+function rowToObject(row) {
+    var result = {};
+    row.headers.forEach(function (header, index) {
+        result[stripMarkup(header)] = stripMarkup(row.cells[index] || "");
+    });
+    return result;
+}
+
+function buildDocumentation(title, properties) {
+    var lines = [title, ""];
+    Object.keys(properties || {}).forEach(function (key) {
+        lines.push(key + ": " + safeString(properties[key]));
+    });
+    return lines.join("\n");
+}
+
+function setProperties(target, properties) {
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        target.prop(propertyName, safeString(properties[propertyName]));
+    });
+}
+
+function specializationName(value) {
+    return stripMarkup(value)
+        .replace(/[^A-Za-z0-9_ -]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function tryCreateSpecialization(name, conceptType) {
+    if (!name || !conceptType) {
+        return;
+    }
+
+    try {
+        model.createSpecialization(name, conceptType);
+    } catch (error) {
+        logger.debug("Specialization already exists or could not be created.", {
+            specialization: name,
+            concept_type: conceptType,
+            error: String(error)
+        }, "sabsa.a1.overlay.specialization.skipped");
+    }
+}
+
+function getOverlayTypeName(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaA1CatalogueKind);
+
+    if (properties && properties.TypeName) {
+        return specializationName(properties.TypeName);
+    }
+    if (kind === "CoreType") {
+        return specializationName(properties.SabsaType);
+    }
+    if (kind === "Relationship") {
+        return specializationName(properties.Relationship || "SABSA A1 Relationship");
+    }
+    if (kind === "Viewpoint") {
+        return specializationName(properties.Viewpoint || "SABSA A1 Viewpoint");
+    }
+    if (kind === "Layer") {
+        return specializationName(properties.Layer || "SABSA A1 Layer");
+    }
+    if (kind === "Table") {
+        return "SABSA A1 Catalogue Table";
+    }
+    if (kind === "TableRow") {
+        return properties && properties.FieldName ? specializationName("SABSA A1 Field " + properties.FieldName) : "SABSA A1 Catalogue Row";
+    }
+    if (kind === "Sample") {
+        return specializationName(properties.SabsaType || properties.TypeName || "SABSA A1 Sample");
+    }
+    if (kind === "Source") {
+        return "SABSA A1 Source";
+    }
+
+    return specializationName(conceptType || "SABSA A1 Element");
+}
+
+function getOverlayKind(properties) {
+    var kind = safeString(properties && properties.SabsaA1CatalogueKind);
+
+    if (kind === "CoreType" || kind === "Layer" || kind === "Viewpoint") {
+        return CONST.Kind.MetaType;
+    }
+    if (kind === "Relationship") {
+        return CONST.Kind.MetaRelationship;
+    }
+    if (kind === "Sample") {
+        return CONST.Kind.Sample;
+    }
+    if (kind === "Table") {
+        return CONST.Kind.Table;
+    }
+    if (kind === "TableRow") {
+        return CONST.Kind.TableRow;
+    }
+    if (kind === "Source") {
+        return CONST.Kind.Source;
+    }
+
+    return CONST.Kind.MetaType;
+}
+
+function applyOverlayStereotype(target, conceptType, properties) {
+    var typeName = getOverlayTypeName(conceptType, properties);
+
+    if (!target || !typeName) {
+        return;
+    }
+
+    tryCreateSpecialization(typeName, conceptType);
+    try {
+        target.specialization = typeName;
+    } catch (error) {
+        logger.debug("Could not apply specialization.", {
+            specialization: typeName,
+            concept_type: conceptType,
+            error: String(error)
+        }, "sabsa.a1.overlay.specialization.apply.skipped");
+    }
+
+    target.prop(CONST.Property.Namespace, CONST.Namespace);
+    target.prop(CONST.Property.Kind, getOverlayKind(properties));
+    target.prop(CONST.Property.TypeName, typeName);
+    target.prop(CONST.Property.ConceptType, conceptType);
+    target.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
+    target.prop(CONST.Property.DefaultLabelExpression, CONST.LabelExpression.Stereotype);
+}
+
+function getRelationshipTypeName(relationshipType, properties) {
+    if (properties && properties.RelationshipTypeName) {
+        return specializationName(properties.RelationshipTypeName);
+    }
+    if (properties && properties.RelationshipLabel) {
+        return specializationName(properties.RelationshipLabel);
+    }
+    if (properties && properties.SabsaA1CatalogueRelationKind) {
+        return specializationName(properties.SabsaA1CatalogueRelationKind);
+    }
+    return specializationName(relationshipType || "SABSA A1 Relationship");
+}
+
+function applyRelationshipStereotype(relationship, relationshipType, properties) {
+    var typeName = getRelationshipTypeName(relationshipType, properties);
+
+    if (!relationship || !typeName) {
+        return;
+    }
+
+    tryCreateSpecialization(typeName, relationshipType);
+    try {
+        relationship.specialization = typeName;
+    } catch (error) {
+        logger.debug("Could not apply relationship specialization.", {
+            specialization: typeName,
+            relationship_type: relationshipType,
+            error: String(error)
+        }, "sabsa.a1.overlay.relationship.specialization.skipped");
+    }
+
+    relationship.prop(CONST.Property.Namespace, CONST.Namespace);
+    relationship.prop(CONST.Property.Kind, safeString(properties && properties.RelationshipKind) || CONST.Kind.MetaRelationship);
+    relationship.prop(CONST.Property.TypeName, typeName);
+    relationship.prop(CONST.Property.ConceptType, relationshipType);
+    relationship.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
+    relationship.prop(CONST.Property.DefaultLabelExpression, CONST.LabelExpression.Stereotype);
+}
+
+function setCommonSourceProperties(target, sourceKind) {
+    target.prop("SourceMarkdown", CONST.SourceMarkdownPath);
+    target.prop("SourceDocumentName", CONST.SourceDocumentName);
+    target.prop("ExtractorScript", SCRIPT_NAME);
+    if (sourceKind) {
+        target.prop("SourceKind", sourceKind);
+    }
+}
+
+function applyTableProperties(target, data) {
+    Object.keys(data || {}).forEach(function (columnName) {
+        target.prop("Table_" + slugify(columnName), data[columnName]);
+    });
+}
+
+function isFieldCatalogueRow(data) {
+    return !!(data && data.Field && data.Datatype && data.Required);
+}
+
+function getFieldPropertyPrefix(fieldName) {
+    return "Field_" + propertyKey(fieldName);
+}
+
+function buildFieldDescriptor(data) {
+    return [
+        "datatype=" + safeString(data.Datatype),
+        "required=" + safeString(data.Required),
+        "keyRole=" + safeString(data["Key Role"]),
+        "templateFamily=" + safeString(data["Template Family"]),
+        "description=" + safeString(data.Note)
+    ].join("; ");
+}
+
+function applyFieldCatalogueProperties(target, rows, sourceTableId) {
+    var fieldNames = [];
+    var requiredFieldNames = [];
+    var primaryKeyFieldNames = [];
+    var foreignKeyFieldNames = [];
+
+    (rows || []).forEach(function (data) {
+        var fieldName;
+        var prefix;
+        var keyRole;
+
+        if (!isFieldCatalogueRow(data)) {
+            return;
+        }
+
+        fieldName = stripMarkup(data.Field);
+        prefix = getFieldPropertyPrefix(fieldName);
+        keyRole = safeString(data["Key Role"]);
+        fieldNames.push(fieldName);
+
+        if (safeString(data.Required).toLowerCase() === "yes") {
+            requiredFieldNames.push(fieldName);
+        }
+        if (keyRole === "PK") {
+            primaryKeyFieldNames.push(fieldName);
+        }
+        if (keyRole === "FK") {
+            foreignKeyFieldNames.push(fieldName);
+        }
+
+        target.prop(prefix, buildFieldDescriptor(data));
+        target.prop(prefix + "_Name", fieldName);
+        target.prop(prefix + "_Datatype", data.Datatype);
+        target.prop(prefix + "_Required", data.Required);
+        target.prop(prefix + "_KeyRole", data["Key Role"]);
+        target.prop(prefix + "_TemplateFamily", data["Template Family"]);
+        target.prop(prefix + "_Description", data.Note);
+        target.prop(prefix + "_SourceTable", sourceTableId);
+    });
+
+    if (fieldNames.length) {
+        target.prop("FieldCatalogueSourceTable", sourceTableId);
+        target.prop("FieldCount", String(fieldNames.length));
+        target.prop("FieldList", fieldNames.join("; "));
+        target.prop("RequiredFieldList", requiredFieldNames.join("; "));
+        target.prop("PrimaryKeyFieldList", primaryKeyFieldNames.join("; "));
+        target.prop("ForeignKeyFieldList", foreignKeyFieldNames.join("; "));
+    }
+}
+
+function getLayerFill(layerName) {
+    var layer = trim(layerName);
+    var prefix = layer.split(/\s+/)[0];
+    return CONST.Style.LayerFillByPrefix[prefix] || CONST.Style.LayerFill;
+}
+
+function getCoreTypeFill(typeName, archimateType) {
+    var type = safeString(typeName);
+    var conceptType = safeString(archimateType);
+
+    if (conceptType === "business-role" || type.indexOf("Authority") >= 0 || type === "Stakeholder") {
+        return CONST.Style.ManagementFill;
+    }
+    if (conceptType === "business-event" || type.indexOf("Event") >= 0) {
+        return CONST.Style.ColumnFill;
+    }
+    if (conceptType === "goal" || type.indexOf("Attribute") >= 0 || type.indexOf("Objective") >= 0) {
+        return CONST.Style.ConceptualFill;
+    }
+    if (conceptType === "requirement" || conceptType === "constraint") {
+        return CONST.Style.RepresentationFill;
+    }
+    if (conceptType === "course-of-action" || type.indexOf("Treatment") >= 0 || type.indexOf("Strategy") >= 0) {
+        return CONST.Style.PhysicalFill;
+    }
+    if (conceptType === "assessment" || type.indexOf("Risk") >= 0 || type.indexOf("Assessment") >= 0 ||
+        type.indexOf("Rating") >= 0 || type.indexOf("KRI") >= 0 || type.indexOf("Scorecard") >= 0) {
+        return CONST.Style.CellFill;
+    }
+    if (conceptType === "capability") {
+        return CONST.Style.ComponentFill;
+    }
+    if (conceptType === "outcome") {
+        return CONST.Style.LogicalFill;
+    }
+
+    return CONST.Style.TypeFill;
+}
+
+function getConceptFill(concept, fallbackFill) {
+    var kind = safeString(concept.prop("SabsaA1CatalogueKind"));
+    var explicitFill = safeString(concept.prop("VisualFillColor"));
+
+    if (explicitFill) {
+        return explicitFill;
+    }
+    if (kind === "Layer") {
+        return getLayerFill(concept.prop("Layer"));
+    }
+    if (kind === "CoreType") {
+        return getCoreTypeFill(concept.prop("SabsaType"), concept.prop("RecommendedArchiMateType"));
+    }
+    if (kind === "Relationship") {
+        return CONST.Style.RelationshipFill;
+    }
+    if (kind === "Viewpoint") {
+        return CONST.Style.ViewpointFill;
+    }
+
+    return fallbackFill || CONST.Style.SupportFill;
+}
+
+function getColorRole(fillColor) {
+    var roles = {
+        "#ff9aff": "SABSA contextual architecture",
+        "#ccccff": "SABSA conceptual architecture",
+        "#ccffff": "SABSA logical architecture",
+        "#ccff9a": "SABSA physical/treatment architecture",
+        "#ffff9a": "SABSA component/workflow architecture",
+        "#ffcc64": "SABSA management/relationship architecture",
+        "#ff9a69": "SABSA column/event/validation marker",
+        "#ffff64": "SABSA cell/risk-assessment marker",
+        "#ffffcc": "SABSA representation/evidence marker",
+        "#fff7cc": "source document",
+        "#f3f3f3": "support/context"
+    };
+    return roles[safeString(fillColor)] || "SABSA A1 catalogue";
+}
+
+function truncate(value, maxLength) {
+    var text = trim(value);
+    if (text.length <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength - 3) + "...";
+}
+
+function getRowPrimaryValue(data) {
+    var keys = Object.keys(data || {});
+    var i;
+
+    for (i = 0; i < keys.length; i++) {
+        if (trim(data[keys[i]])) {
+            return stripMarkup(data[keys[i]]);
+        }
+    }
+
+    return "Row";
+}
+
+function getRowFill(data) {
+    var combined = stripMarkup(Object.keys(data || {}).map(function (key) {
+        return data[key];
+    }).join(" "));
+
+    if (combined.indexOf("[PRIMARY]") >= 0) {
+        return CONST.Style.PhysicalFill;
+    }
+    if (combined.indexOf("[SUPPORT]") >= 0) {
+        return CONST.Style.LogicalFill;
+    }
+    if (combined.indexOf("[ASSUMPTION]") >= 0) {
+        return CONST.Style.ManagementFill;
+    }
+    if (combined.indexOf("[CAUTION]") >= 0) {
+        return CONST.Style.ColumnFill;
+    }
+    if (combined.indexOf("[TRACE]") >= 0) {
+        return CONST.Style.ConceptualFill;
+    }
+
+    return CONST.Style.SupportFill;
+}
+
+function inferConceptTypeForSabsaType(typeName) {
+    var type = safeString(typeName);
+
+    if (type.indexOf("Authority") >= 0 || type === "Stakeholder") {
+        return "business-role";
+    }
+    if (type === "Event" || type === "Implementation_Event") {
+        return "business-event";
+    }
+    if (type.indexOf("Consequence") >= 0 || type === "Outcome") {
+        return "outcome";
+    }
+    if (type.indexOf("Treatment") >= 0 || type.indexOf("Strategy") >= 0) {
+        return "course-of-action";
+    }
+    if (type.indexOf("Objective") >= 0 || type === "Attribute" || type === "Business_Objective") {
+        return "goal";
+    }
+    if (type.indexOf("Requirement") >= 0 || type.indexOf("Control_Objective") >= 0) {
+        return "requirement";
+    }
+    if (type.indexOf("Criteria") >= 0 || type.indexOf("Rule") >= 0) {
+        return "constraint";
+    }
+    if (type.indexOf("Risk") >= 0 || type.indexOf("Assessment") >= 0 || type.indexOf("Rating") >= 0 ||
+        type.indexOf("Evaluation") >= 0 || type.indexOf("KRI") >= 0 || type.indexOf("Scorecard") >= 0 ||
+        type.indexOf("Aggregation") >= 0 || type.indexOf("Evidence_Confidence") >= 0 ||
+        type.indexOf("Finding") >= 0 || type.indexOf("Opinion") >= 0) {
+        return "assessment";
+    }
+    if (type.indexOf("Capability") >= 0 || type.indexOf("Shared_Service") >= 0) {
+        return "capability";
+    }
+
+    return "grouping";
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+    try {
+        visual.labelExpression = "${name}";
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply label settings.", { error: String(error) }, "sabsa.a1.catalogue.visual.label.skipped");
+    }
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    try {
+        visual.labelExpression = safeString(concept.prop(CONST.Property.DefaultLabelExpression)) || CONST.LabelExpression.Stereotype;
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply stereotype label expression.", { error: String(error) }, "sabsa.a1.catalogue.visual.stereotype.label.skipped");
+    }
+    return visual;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    if (!relationship || !sourceVisual || !targetVisual) {
+        return null;
+    }
+
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+    try {
+        connection.labelExpression = CONST.LabelExpression.Stereotype;
+    } catch (error) {
+        logger.debug("Could not apply relationship label expression.", { error: String(error) }, "sabsa.a1.catalogue.connection.label.skipped");
+    }
+    return connection;
+}
+
+function gridPosition(index, columns, startX, startY, width, height) {
+    return {
+        x: startX + ((index % columns) * (width + CONST.Layout.GapX)),
+        y: startY + (Math.floor(index / columns) * (height + CONST.Layout.GapY))
+    };
+}
+
+function createSourceConcept(markdown) {
+    var rows = extractTableAfterMarker(markdown, "Table 10.7.11-01 - Document Control");
+    var props = {
+        SabsaA1CatalogueKind: "Source",
+        SourceSection: "Table 10.7.11-01",
+        VisualFillColor: CONST.Style.SourceFill,
+        VisualColorRole: getColorRole(CONST.Style.SourceFill)
+    };
+
+    rows.forEach(function (row) {
+        var data = rowToObject(row);
+        if (data.Field) {
+            props["DocumentControl_" + slugify(data.Field)] = data.Value;
+        }
+    });
+
+    return ensureConcept(
+        "grouping",
+        "Generic SABSA A1 Metamodel Field Catalogue",
+        "catalogue:source:generic-sabsa-a1-metamodel-field-catalogue",
+        props,
+        buildDocumentation("Source markdown for the generic SABSA A1 metamodel field catalogue.", props)
+    );
+}
+
+function createCompleteTableCatalogueConcepts(markdown, sourceConcept) {
+    var blocks = parseMarkdownTableBlocks(markdown);
+    var tableConcepts = [];
+    var tablesById = {};
+    var rowsByTableId = {};
+
+    blocks.forEach(function (block) {
+        var tableFill = CONST.Style.RepresentationFill;
+        var tableKey = "catalogue:table:" + slugify(block.id);
+        var tableConcept = ensureConcept("grouping", block.id + " - " + block.title, tableKey, {
+            SabsaA1CatalogueKind: "Table",
+            TableId: block.id,
+            TableTitle: block.title,
+            RowCount: String(block.rows.length),
+            HeaderColumns: block.headers.join("; "),
+            Caption: block.caption,
+            SourceSection: "Table " + block.id,
+            SourceLine: block.startLine,
+            VisualFillColor: tableFill,
+            VisualColorRole: getColorRole(tableFill)
+        }, buildDocumentation("Markdown table extracted from the complete field catalogue.", {
+            TableId: block.id,
+            TableTitle: block.title,
+            RowCount: String(block.rows.length),
+            HeaderColumns: block.headers.join("; "),
+            Caption: block.caption
+        }));
+        applyFieldCatalogueProperties(tableConcept, block.rows, block.id);
+
+        ensureRelationship("association-relationship", sourceConcept, tableConcept, "catalogue:source:table:" + slugify(block.id), "contains", {
+            SabsaA1CatalogueRelationKind: "SourceTableTrace",
+            SourceSection: "Table " + block.id
+        });
+
+        tableConcepts.push(tableConcept);
+        tablesById[block.id] = tableConcept;
+        rowsByTableId[block.id] = [];
+        stats.genericTables++;
+
+        block.rows.forEach(function (data, rowIndex) {
+            var rowFill = getRowFill(data);
+            var rowNumber = rowIndex + 1;
+            var rowName = block.id + " row " + rowNumber + " - " + truncate(getRowPrimaryValue(data), 70);
+            var rowConcept = ensureConcept("business-object", rowName, "catalogue:table-row:" + slugify(block.id) + ":" + rowNumber, {
+                SabsaA1CatalogueKind: "TableRow",
+                TableId: block.id,
+                TableTitle: block.title,
+                RowIndex: String(rowNumber),
+                PrimaryValue: getRowPrimaryValue(data),
+                SourceSection: "Table " + block.id,
+                SourceLine: block.startLine,
+                VisualFillColor: rowFill,
+                VisualColorRole: getColorRole(rowFill)
+            }, buildDocumentation("Markdown table row extracted from " + block.id + ".", data));
+
+            applyTableProperties(rowConcept, data);
+            if (isFieldCatalogueRow(data)) {
+                rowConcept.prop("FieldName", stripMarkup(data.Field));
+                rowConcept.prop("FieldDatatype", data.Datatype);
+                rowConcept.prop("FieldRequired", data.Required);
+                rowConcept.prop("FieldKeyRole", data["Key Role"]);
+                rowConcept.prop("FieldTemplateFamily", data["Template Family"]);
+                rowConcept.prop("FieldDescription", data.Note);
+                rowConcept.prop("FieldDefinition", buildFieldDescriptor(data));
+                stats.fieldDefinitions++;
+            }
+            ensureRelationship("composition-relationship", tableConcept, rowConcept, "catalogue:table:" + slugify(block.id) + ":row:" + rowNumber, "row", {
+                SabsaA1CatalogueRelationKind: "TableRow",
+                TableId: block.id,
+                RowIndex: String(rowNumber),
+                SourceSection: "Table " + block.id
+            });
+            rowsByTableId[block.id].push({
+                concept: rowConcept,
+                data: data,
+                rowIndex: rowNumber
+            });
+            stats.genericRows++;
+        });
+    });
+
+    return {
+        tables: tableConcepts,
+        tablesById: tablesById,
+        rowsByTableId: rowsByTableId
+    };
+}
+
+function createLayerConcepts(markdown, sourceConcept) {
+    var rows = extractTableAfterMarker(markdown, "Table 10.7.11-LA01 - Metamodel Layer Architecture");
+    var concepts = [];
+
+    rows.forEach(function (row, index) {
+        var data = rowToObject(row);
+        var layer = data.Layer || ("Layer " + (index + 1));
+        var fillColor = getLayerFill(layer);
+        var concept = ensureConcept("grouping", layer + " - " + data.Purpose, "catalogue:layer:" + slugify(layer), {
+            SabsaA1CatalogueKind: "Layer",
+            Layer: layer,
+            Purpose: data.Purpose,
+            Content: data.Content,
+            BoundaryRule: data["Boundary Rule"],
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor),
+            SourceSection: "Table 10.7.11-LA01"
+        }, buildDocumentation("Metamodel layer extracted from Table 10.7.11-LA01.", data));
+        applyTableProperties(concept, data);
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:layer:" + slugify(layer), "defines", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Table 10.7.11-LA01"
+        });
+        concepts.push(concept);
+        stats.layers++;
+    });
+
+    return concepts;
+}
+
+function createCoreTypeConcepts(markdown, sourceConcept) {
+    var rows = extractTableAfterMarker(markdown, "Table 10.7.11-03 - Core Type Inventory");
+    var concepts = {};
+
+    rows.forEach(function (row) {
+        var data = rowToObject(row);
+        var typeName = data.Type;
+        var conceptType;
+        var concept;
+
+        if (!typeName || typeName === "Other support types") {
+            return;
+        }
+
+        conceptType = inferConceptTypeForSabsaType(typeName);
+        var fillColor = getCoreTypeFill(typeName, conceptType);
+        concept = ensureConcept(conceptType, typeName, "catalogue:type:" + typeName, {
+            SabsaA1CatalogueKind: "CoreType",
+            SabsaType: typeName,
+            Rows: data.Rows,
+            MainUse: data["Main Use"],
+            SourceSection: "Table 10.7.11-03",
+            RecommendedArchiMateType: conceptType,
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor)
+        }, buildDocumentation("Core type extracted from Table 10.7.11-03.", data));
+        applyTableProperties(concept, data);
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Table 10.7.11-03"
+        });
+        concepts[typeName] = concept;
+        stats.coreTypes++;
+    });
+
+    return concepts;
+}
+
+function parseRelationshipExpression(expression) {
+    var parts = safeString(expression).split("->").map(function (part) {
+        return stripMarkup(part);
+    });
+
+    return {
+        source: trim(parts[0] || ""),
+        target: trim(parts[1] || ""),
+        label: parts.length > 1 ? parts[0] + " -> " + parts[1] : expression
+    };
+}
+
+function normalizeTypeName(value) {
+    return stripMarkup(value).replace(/\s+/g, "_");
+}
+
+function getCoreTypeConcept(coreTypeConcepts, typeName) {
+    var exact = stripMarkup(typeName);
+    var normalized = normalizeTypeName(typeName);
+    return coreTypeConcepts[exact] || coreTypeConcepts[normalized] || null;
+}
+
+function getCoreTypeConceptsForTitle(coreTypeConcepts, title) {
+    var result = [];
+    var seen = {};
+    var parts = stripMarkup(title).split(/\s*\/\s*|\s+\band\b\s+/i);
+
+    function add(typeName) {
+        var concept = getCoreTypeConcept(coreTypeConcepts, typeName);
+        var key;
+
+        if (!concept) {
+            return;
+        }
+
+        key = safeString(concept.prop("SabsaA1CatalogueKey"));
+        if (!seen[key]) {
+            result.push(concept);
+            seen[key] = true;
+        }
+    }
+
+    add(title);
+    parts.forEach(add);
+    return result;
+}
+
+function splitCamelCase(value) {
+    return safeString(value).replace(/([a-z0-9])([A-Z])/g, "$1_$2");
+}
+
+function addUniqueConcept(result, seen, concept) {
+    var key;
+
+    if (!concept) {
+        return;
+    }
+
+    key = safeString(concept.prop("SabsaA1CatalogueKey"));
+    if (!seen[key]) {
+        result.push(concept);
+        seen[key] = true;
+    }
+}
+
+function getReferencedCoreTypeConcepts(coreTypeConcepts, fieldData) {
+    var result = [];
+    var seen = {};
+    var note = safeString(fieldData && fieldData.Note);
+    var fieldName = stripMarkup(fieldData && fieldData.Field);
+    var regex = /`([^`]+)`/g;
+    var match;
+    var inferred;
+
+    if (safeString(fieldData && fieldData["Key Role"]) !== "FK") {
+        return result;
+    }
+
+    while ((match = regex.exec(note)) !== null) {
+        addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, match[1]));
+    }
+
+    inferred = fieldName
+        .replace(/_ids$/i, "")
+        .replace(/_id$/i, "")
+        .replace(/_fk$/i, "");
+    if (inferred && inferred !== fieldName) {
+        addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, inferred));
+        addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, splitCamelCase(inferred)));
+    }
+
+    return result;
+}
+
+function buildSemanticRelationLabel(parsed, data) {
+    var cardinality = safeString(data.Cardinality);
+    var semantics = truncate(safeString(data.Semantics), 70);
+
+    if (semantics && cardinality) {
+        return semantics + " [" + cardinality + "]";
+    }
+    if (semantics) {
+        return semantics;
+    }
+    if (cardinality) {
+        return parsed.source + " -> " + parsed.target + " [" + cardinality + "]";
+    }
+    return parsed.source + " -> " + parsed.target;
+}
+
+function buildFkRelationLabel(fieldData, targetConcept) {
+    var fieldName = stripMarkup(fieldData.Field);
+    var required = safeString(fieldData.Required);
+    var targetName = safeString(targetConcept && targetConcept.name);
+
+    if (targetName) {
+        return fieldName + " -> " + targetName + (required ? " [" + required + "]" : "");
+    }
+
+    return fieldName;
+}
+
+function buildSampleValue(fieldName, datatype, description) {
+    var type = safeString(datatype).toLowerCase();
+    var note = stripMarkup(description);
+    var enumCandidate = note.split(",")[0].replace(/\.$/, "").trim();
+
+    if (type === "date") {
+        return "2026-06-10";
+    }
+    if (type === "integer" || type === "number") {
+        return "1";
+    }
+    if (type === "boolean") {
+        return "True";
+    }
+    if (type === "enum") {
+        return enumCandidate || "Sample";
+    }
+    if (type === "list") {
+        return "sample_ref";
+    }
+    if (type === "formula") {
+        return "sample_formula";
+    }
+    if (type === "text") {
+        return "Sample " + fieldName + ".";
+    }
+
+    return "sample_" + propertyKey(fieldName);
+}
+
+function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
+    var fieldList = safeString(metaConcept.prop("FieldList")).split(/\s*;\s*/).filter(function (fieldName) {
+        return !!fieldName;
+    });
+
+    fieldList.forEach(function (fieldName) {
+        var prefix = getFieldPropertyPrefix(fieldName);
+        var datatype = metaConcept.prop(prefix + "_Datatype");
+        var description = metaConcept.prop(prefix + "_Description");
+        sampleConcept.prop(fieldName, buildSampleValue(fieldName, datatype, description));
+        sampleConcept.prop(prefix + "_Datatype", datatype);
+        sampleConcept.prop(prefix + "_Required", metaConcept.prop(prefix + "_Required"));
+        sampleConcept.prop(prefix + "_KeyRole", metaConcept.prop(prefix + "_KeyRole"));
+        sampleConcept.prop(prefix + "_TemplateFamily", metaConcept.prop(prefix + "_TemplateFamily"));
+        sampleConcept.prop(prefix + "_Description", description);
+    });
+}
+
+function createSampleConcepts(coreTypeConcepts) {
+    var samplesByType = {};
+
+    Object.keys(coreTypeConcepts).forEach(function (typeName) {
+        var metaConcept = coreTypeConcepts[typeName];
+        var conceptType = safeString(metaConcept.prop("RecommendedArchiMateType")) || "grouping";
+        var sampleName = "Sample " + typeName;
+        var sample = ensureConcept(conceptType, sampleName, "catalogue:sample:type:" + typeName, {
+            SabsaA1CatalogueKind: "Sample",
+            SabsaType: typeName,
+            TypeName: typeName,
+            SourceSection: "Generated sample from " + typeName,
+            MetaElementKey: metaConcept.prop("SabsaA1CatalogueKey"),
+            VisualFillColor: getConceptFill(metaConcept, CONST.Style.TypeFill),
+            VisualColorRole: getColorRole(getConceptFill(metaConcept, CONST.Style.TypeFill))
+        }, "Sample element for SABSA A1 overlay stereotype " + typeName + ".");
+
+        applySamplePropertiesFromMeta(sample, metaConcept);
+        ensureRelationship("association-relationship", sample, metaConcept, "catalogue:sample:meta:" + typeName, "uses stereotype " + typeName, {
+            SabsaA1CatalogueRelationKind: "SampleUsesMetaType",
+            RelationshipKind: CONST.Kind.SampleRelationship,
+            RelationshipTypeName: "SampleUsesMetaType",
+            RelationshipLabel: "uses stereotype " + typeName,
+            SourceSection: "Generated sample"
+        });
+
+        samplesByType[typeName] = sample;
+        stats.samples++;
+    });
+
+    return samplesByType;
+}
+
+function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
+    var sampleRelationships = [];
+
+    (tableData.rowsByTableId["10.7.11-03B"] || []).forEach(function (rowEntry) {
+        var parsed = parseRelationshipExpression(rowEntry.data.Relationship);
+        var sourceMeta = getCoreTypeConcept(coreTypeConcepts, parsed.source);
+        var targetMeta = getCoreTypeConcept(coreTypeConcepts, parsed.target);
+        var sourceSample = sourceMeta ? samplesByType[sourceMeta.name] : null;
+        var targetSample = targetMeta ? samplesByType[targetMeta.name] : null;
+        var label = buildSemanticRelationLabel(parsed, rowEntry.data);
+        var relationship;
+
+        if (!sourceSample || !targetSample) {
+            return;
+        }
+
+        relationship = ensureRelationship("association-relationship", sourceSample, targetSample, "catalogue:sample:relationship:" + slugify(parsed.label), label, {
+            SabsaA1CatalogueRelationKind: "SampleSemanticRelationship",
+            RelationshipKind: CONST.Kind.SampleRelationship,
+            RelationshipTypeName: specializationName(parsed.label),
+            RelationshipLabel: label,
+            RelationshipExpression: parsed.label,
+            SourceType: parsed.source,
+            TargetType: parsed.target,
+            Cardinality: rowEntry.data.Cardinality,
+            Semantics: rowEntry.data.Semantics,
+            ValidationImpact: rowEntry.data["Validation Impact"],
+            SourceSection: "Table 10.7.11-03B"
+        });
+        sampleRelationships.push(relationship);
+        stats.sampleRelationships++;
+    });
+
+    return sampleRelationships;
+}
+
+function createSampleOverviewView(samplesByType, sampleRelationships) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.SampleOverviewViewName));
+    var visuals = {};
+    var sampleKeys = Object.keys(samplesByType);
+
+    view.documentation = "Generated SABSA A1 overlay sample elements and stereotyped sample relationships.";
+    moveViewToFolder(view);
+
+    sampleKeys.forEach(function (typeName, index) {
+        var concept = samplesByType[typeName];
+        var pos = gridPosition(index, CONST.Layout.TypeColumns, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        visuals[typeName] = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.TypeFill));
+    });
+
+    sampleRelationships.forEach(function (relationship) {
+        var sourceType = safeString(relationship.prop("SourceType"));
+        var targetType = safeString(relationship.prop("TargetType"));
+        var sourceVisual = visuals[sourceType];
+        var targetVisual = visuals[targetType];
+
+        if (!sourceVisual) {
+            Object.keys(visuals).forEach(function (key) {
+                if (!sourceVisual && normalizeTypeName(key) === normalizeTypeName(sourceType)) {
+                    sourceVisual = visuals[key];
+                }
+            });
+        }
+        if (!targetVisual) {
+            Object.keys(visuals).forEach(function (key) {
+                if (!targetVisual && normalizeTypeName(key) === normalizeTypeName(targetType)) {
+                    targetVisual = visuals[key];
+                }
+            });
+        }
+
+        addConnection(view, relationship, sourceVisual, targetVisual);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function buildTemplateIndex(coreTypeConcepts) {
+    var entries = [];
+
+    Object.keys(coreTypeConcepts).forEach(function (typeName) {
+        var concept = coreTypeConcepts[typeName];
+        entries.push({
+            Namespace: CONST.Namespace,
+            Kind: CONST.Kind.MetaType,
+            TypeName: typeName,
+            BaseType: safeString(concept.prop("RecommendedArchiMateType")),
+            ConceptType: safeString(concept.prop("RecommendedArchiMateType")),
+            Stereotype: "«SABSA A1 " + typeName + "»",
+            DefaultLabelExpression: CONST.LabelExpression.Stereotype,
+            MetaElementKey: safeString(concept.prop("SabsaA1CatalogueKey")),
+            FieldList: safeString(concept.prop("FieldList"))
+        });
+    });
+
+    return entries;
+}
+
+function buildRelationshipIndex(relationshipConcepts) {
+    return relationshipConcepts.map(function (concept) {
+        return {
+            Namespace: CONST.Namespace,
+            Kind: CONST.Kind.MetaRelationship,
+            TypeName: safeString(concept.prop(CONST.Property.TypeName)) || specializationName(concept.name),
+            BaseType: "association-relationship",
+            ConceptType: "association-relationship",
+            Stereotype: safeString(concept.prop(CONST.Property.Stereotype)),
+            DefaultLabelExpression: CONST.LabelExpression.Stereotype,
+            MetaElementKey: safeString(concept.prop("SabsaA1CatalogueKey")),
+            RelationshipExpression: safeString(concept.prop("Relationship")),
+            SourceType: safeString(concept.prop("SourceType")),
+            TargetType: safeString(concept.prop("TargetType"))
+        };
+    });
+}
+
+function persistOverlayIndexes(coreTypeConcepts, relationshipConcepts) {
+    model.prop(CONST.Property.TemplateIndexJson, JSON.stringify(buildTemplateIndex(coreTypeConcepts), null, 2));
+    model.prop(CONST.Property.RelationshipIndexJson, JSON.stringify(buildRelationshipIndex(relationshipConcepts), null, 2));
+}
+
+function findLayerConcept(layerConcepts, layerName) {
+    var wanted = slugify(layerName);
+    var found = null;
+
+    layerConcepts.forEach(function (concept) {
+        if (!found && slugify(safeString(concept.prop("Layer"))) === wanted) {
+            found = concept;
+        }
+    });
+
+    return found;
+}
+
+function indexRelationshipConcepts(relationshipConcepts) {
+    var result = {};
+
+    relationshipConcepts.forEach(function (concept) {
+        result[slugify(concept.name)] = concept;
+    });
+
+    return result;
+}
+
+function indexViewpointConcepts(viewpointConcepts) {
+    var result = {};
+
+    viewpointConcepts.forEach(function (concept) {
+        result[slugify(safeString(concept.prop("Viewpoint")))] = concept;
+    });
+
+    return result;
+}
+
+function createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts) {
+    var rows = extractTableAfterMarker(markdown, "Table 10.7.11-03B - Relationship Catalogue");
+    var concepts = [];
+
+    rows.forEach(function (row, index) {
+        var data = rowToObject(row);
+        var parsed = parseRelationshipExpression(data.Relationship);
+        var name = parsed.label || ("Relationship " + (index + 1));
+        var fillColor = CONST.Style.RelationshipFill;
+        var concept = ensureConcept("business-object", name, "catalogue:relationship:" + slugify(name), {
+            SabsaA1CatalogueKind: "Relationship",
+            Relationship: name,
+            SourceType: parsed.source,
+            TargetType: parsed.target,
+            Cardinality: data.Cardinality,
+            Semantics: data.Semantics,
+            ValidationImpact: data["Validation Impact"],
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor),
+            SourceSection: "Table 10.7.11-03B"
+        }, buildDocumentation("Relationship definition extracted from Table 10.7.11-03B.", data));
+        applyTableProperties(concept, data);
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:relationship:" + slugify(name), "defines", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Table 10.7.11-03B"
+        });
+
+        if (coreTypeConcepts[parsed.source]) {
+            ensureRelationship("association-relationship", concept, coreTypeConcepts[parsed.source], "catalogue:relationship:" + slugify(name) + ":source", "source", {
+                SabsaA1CatalogueRelationKind: "RelationshipSource",
+                SourceSection: "Table 10.7.11-03B"
+            });
+        }
+
+        if (coreTypeConcepts[parsed.target]) {
+            ensureRelationship("association-relationship", concept, coreTypeConcepts[parsed.target], "catalogue:relationship:" + slugify(name) + ":target", "target", {
+                SabsaA1CatalogueRelationKind: "RelationshipTarget",
+                SourceSection: "Table 10.7.11-03B"
+            });
+        }
+
+        concepts.push(concept);
+        stats.relationships++;
+    });
+
+    return concepts;
+}
+
+function createViewpointConcepts(markdown, sourceConcept) {
+    var rows = extractTableAfterMarker(markdown, "Table 10.7.11-03D - Recommended Architecture Viewpoints");
+    var concepts = [];
+
+    rows.forEach(function (row) {
+        var data = rowToObject(row);
+        var viewpoint = data.Viewpoint;
+        var concept;
+
+        if (!viewpoint) {
+            return;
+        }
+
+        var fillColor = CONST.Style.ViewpointFill;
+        concept = ensureConcept("grouping", viewpoint, "catalogue:viewpoint:" + slugify(viewpoint), {
+            SabsaA1CatalogueKind: "Viewpoint",
+            Viewpoint: viewpoint,
+            MainQuestion: data["Main Question"],
+            UseFor: data["Use For"],
+            RequiredBackLink: data["Required Back-Link"],
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor),
+            SourceSection: "Table 10.7.11-03D"
+        }, buildDocumentation("Recommended architecture viewpoint extracted from Table 10.7.11-03D.", data));
+        applyTableProperties(concept, data);
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:viewpoint:" + slugify(viewpoint), "defines", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Table 10.7.11-03D"
+        });
+        concepts.push(concept);
+        stats.viewpoints++;
+    });
+
+    return concepts;
+}
+
+function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts) {
+    var relationshipIndex = indexRelationshipConcepts(relationshipConcepts);
+    var viewpointIndex = indexViewpointConcepts(viewpointConcepts);
+
+    function linkRow(tableId, rowEntry, targetConcept, relationKind, label) {
+        if (!rowEntry || !rowEntry.concept || !targetConcept) {
+            return;
+        }
+
+        ensureRelationship("association-relationship", rowEntry.concept, targetConcept, "catalogue:row-link:" + slugify(tableId) + ":" + rowEntry.rowIndex + ":" + slugify(relationKind), label, {
+            SabsaA1CatalogueRelationKind: relationKind,
+            TableId: tableId,
+            RowIndex: String(rowEntry.rowIndex),
+            SourceSection: "Table " + tableId
+        });
+    }
+
+    function linkTable(tableId, targetConcept, relationKind, label) {
+        if (!tableData.tablesById[tableId] || !targetConcept) {
+            return;
+        }
+
+        ensureRelationship("association-relationship", tableData.tablesById[tableId], targetConcept, "catalogue:table-link:" + slugify(tableId) + ":" + safeString(targetConcept.prop("SabsaA1CatalogueKey")) + ":" + slugify(relationKind), label, {
+            SabsaA1CatalogueRelationKind: relationKind,
+            TableId: tableId,
+            SourceSection: "Table " + tableId
+        });
+    }
+
+    (tableData.rowsByTableId["10.7.11-LA01"] || []).forEach(function (rowEntry) {
+        var target = findLayerConcept(layerConcepts, rowEntry.data.Layer);
+        linkRow("10.7.11-LA01", rowEntry, target, "RowDefinesLayer", "defines layer");
+        linkTable("10.7.11-LA01", target, "TableDefinesLayer", "defines layer");
+    });
+
+    (tableData.rowsByTableId["10.7.11-03"] || []).forEach(function (rowEntry) {
+        var target = getCoreTypeConcept(coreTypeConcepts, rowEntry.data.Type);
+        linkRow("10.7.11-03", rowEntry, target, "RowDefinesCoreType", "defines type");
+        linkTable("10.7.11-03", target, "TableDefinesCoreType", "defines type");
+    });
+
+    (tableData.rowsByTableId["10.7.11-03B"] || []).forEach(function (rowEntry) {
+        var parsed = parseRelationshipExpression(rowEntry.data.Relationship);
+        var relationshipConcept = relationshipIndex[slugify(parsed.label)];
+        var sourceType = getCoreTypeConcept(coreTypeConcepts, parsed.source);
+        var targetType = getCoreTypeConcept(coreTypeConcepts, parsed.target);
+
+        linkRow("10.7.11-03B", rowEntry, relationshipConcept, "RowDefinesRelationship", "defines relationship");
+        linkTable("10.7.11-03B", relationshipConcept, "TableDefinesRelationship", "defines relationship");
+
+        if (sourceType && targetType) {
+            ensureRelationship("association-relationship", sourceType, targetType, "catalogue:type-relation:" + slugify(parsed.label), buildSemanticRelationLabel(parsed, rowEntry.data), {
+                SabsaA1CatalogueRelationKind: "CoreTypeSemanticRelationship",
+                RelationshipLabel: buildSemanticRelationLabel(parsed, rowEntry.data),
+                RelationshipExpression: parsed.label,
+                SourceType: parsed.source,
+                TargetType: parsed.target,
+                Cardinality: rowEntry.data.Cardinality,
+                Semantics: rowEntry.data.Semantics,
+                ValidationImpact: rowEntry.data["Validation Impact"],
+                SourceSection: "Table 10.7.11-03B"
+            });
+            stats.elementRelations++;
+        }
+    });
+
+    (tableData.rowsByTableId["10.7.11-03D"] || []).forEach(function (rowEntry) {
+        var target = viewpointIndex[slugify(rowEntry.data.Viewpoint)];
+        linkRow("10.7.11-03D", rowEntry, target, "RowDefinesViewpoint", "defines viewpoint");
+        linkTable("10.7.11-03D", target, "TableDefinesViewpoint", "defines viewpoint");
+    });
+
+    tableData.tables.forEach(function (tableConcept) {
+        var title = safeString(tableConcept.prop("TableTitle"));
+        var tableId = safeString(tableConcept.prop("TableId"));
+        var rowEntries = tableData.rowsByTableId[tableId] || [];
+        var rows = rowEntries.map(function (rowEntry) {
+            return rowEntry.data;
+        });
+        var targets = getCoreTypeConceptsForTitle(coreTypeConcepts, title);
+
+        targets.forEach(function (target) {
+            applyFieldCatalogueProperties(target, rows, tableId);
+
+            ensureRelationship("association-relationship", tableConcept, target, "catalogue:table-detail:" + slugify(tableId) + ":" + safeString(target.prop("SabsaA1CatalogueKey")), "details type", {
+                SabsaA1CatalogueRelationKind: "TableDetailsCoreType",
+                TableId: tableId,
+                TableTitle: title,
+                TargetCoreType: target.name,
+                SourceSection: "Table " + tableId
+            });
+
+            rowEntries.forEach(function (rowEntry) {
+                linkRow(tableId, rowEntry, target, "FieldRowBelongsToCoreType", isFieldCatalogueRow(rowEntry.data) ? "field " + stripMarkup(rowEntry.data.Field) + " of " + target.name : "field of type");
+
+                if (isFieldCatalogueRow(rowEntry.data)) {
+                    ensureRelationship("association-relationship", target, rowEntry.concept, "catalogue:core-type-field:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex, "has field " + stripMarkup(rowEntry.data.Field), {
+                        SabsaA1CatalogueRelationKind: "CoreTypeHasField",
+                        RelationshipLabel: "has field " + stripMarkup(rowEntry.data.Field),
+                        FieldName: stripMarkup(rowEntry.data.Field),
+                        Datatype: rowEntry.data.Datatype,
+                        Required: rowEntry.data.Required,
+                        KeyRole: rowEntry.data["Key Role"],
+                        TemplateFamily: rowEntry.data["Template Family"],
+                        Description: rowEntry.data.Note,
+                        SourceSection: "Table " + tableId
+                    });
+
+                    getReferencedCoreTypeConcepts(coreTypeConcepts, rowEntry.data).forEach(function (referencedType) {
+                        ensureRelationship("association-relationship", target, referencedType, "catalogue:fk:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex + ":" + safeString(referencedType.prop("SabsaA1CatalogueKey")), buildFkRelationLabel(rowEntry.data, referencedType), {
+                            SabsaA1CatalogueRelationKind: "CoreTypeForeignKeyReference",
+                            RelationshipLabel: buildFkRelationLabel(rowEntry.data, referencedType),
+                            SourceType: target.name,
+                            TargetType: referencedType.name,
+                            FieldName: stripMarkup(rowEntry.data.Field),
+                            Datatype: rowEntry.data.Datatype,
+                            Required: rowEntry.data.Required,
+                            KeyRole: rowEntry.data["Key Role"],
+                            TemplateFamily: rowEntry.data["Template Family"],
+                            Description: rowEntry.data.Note,
+                            SourceSection: "Table " + tableId
+                        });
+                        stats.elementRelations++;
+                    });
+                }
+            });
+        });
+    });
+}
+
+function createGridView(baseName, sourceConcept, concepts, fillColor, columns) {
+    var view = model.createArchimateView(buildUniqueViewName(baseName));
+    var sourceVisual;
+
+    view.documentation = "Generated from " + CONST.SourceMarkdownPath + ".";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+
+    function sourceTraceKey(concept) {
+        var kind = safeString(concept.prop("SabsaA1CatalogueKind"));
+
+        if (kind === "Layer") {
+            return "catalogue:source:layer:" + slugify(safeString(concept.prop("Layer")));
+        }
+
+        if (kind === "CoreType") {
+            return "catalogue:source:type:" + safeString(concept.prop("SabsaType"));
+        }
+
+        if (kind === "Viewpoint") {
+            return "catalogue:source:viewpoint:" + slugify(safeString(concept.prop("Viewpoint")));
+        }
+
+        if (kind === "Table") {
+            return "catalogue:source:table:" + slugify(safeString(concept.prop("TableId")));
+        }
+
+        return "";
+    }
+
+    concepts.forEach(function (concept, index) {
+        var pos = gridPosition(index, columns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        var visual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, fillColor));
+        addConnection(view, findRelationshipByKey(sourceTraceKey(concept)), sourceVisual, visual);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function createTypeView(sourceConcept, typeConcepts) {
+    return createGridView(CONST.TypeViewName, sourceConcept, Object.keys(typeConcepts).map(function (key) {
+        return typeConcepts[key];
+    }), CONST.Style.TypeFill, CONST.Layout.TypeColumns);
+}
+
+function createTableIndexView(sourceConcept, tableConcepts) {
+    return createGridView(CONST.TableIndexViewName, sourceConcept, tableConcepts, CONST.Style.RepresentationFill, CONST.Layout.TypeColumns);
+}
+
+function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.RelationshipViewName));
+    var sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+    var visuals = {};
+
+    view.documentation = "Generated from the relationship catalogue in " + CONST.SourceMarkdownPath + ".";
+    moveViewToFolder(view);
+
+    relationshipConcepts.forEach(function (concept, index) {
+        var pos = gridPosition(index, CONST.Layout.Columns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        visuals[concept.name] = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.RelationshipFill));
+        addConnection(view, findRelationshipByKey("catalogue:source:relationship:" + slugify(concept.name)), sourceVisual, visuals[concept.name]);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function validateCounts(summary) {
+    if (!summary.genericTables || !summary.genericRows || !summary.layers || !summary.coreTypes || !summary.relationships) {
+        throw new Error("The field catalogue did not yield layers, core types and relationships.");
+    }
+}
+
+function confirmExecution(summary) {
+    return dialogs.confirmInfo(
+        "This script will parse the Generic SABSA A1 Metamodel Field Catalogue and create ArchiMate catalogue elements." +
+        "\n\nSource Markdown: " + CONST.SourceMarkdownPath +
+        "\nAll catalogue tables: " + summary.genericTables +
+        "\nAll catalogue rows: " + summary.genericRows +
+        "\nField definitions: " + summary.fieldDefinitions +
+        "\nNamed element relations: generated from relationship and FK catalogue rows" +
+        "\nOverlay samples: generated after stereotype metadata is built" +
+        "\nLayers: " + summary.layers +
+        "\nCore types: " + summary.coreTypes +
+        "\nRelationships: " + summary.relationships +
+        "\nViewpoints: " + summary.viewpoints +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Field Catalogue Generator"
+    );
+}
+
+function main() {
+    var markdown = readUtf8Text(CONST.SourceMarkdownPath);
+    var parsedTableBlocks = parseMarkdownTableBlocks(markdown);
+    var summary = {
+        genericTables: parsedTableBlocks.length,
+        genericRows: parsedTableBlocks.reduce(function (sum, block) {
+            return sum + block.rows.length;
+        }, 0),
+        fieldDefinitions: parsedTableBlocks.reduce(function (sum, block) {
+            return sum + block.rows.filter(isFieldCatalogueRow).length;
+        }, 0),
+        layers: extractTableAfterMarker(markdown, "Table 10.7.11-LA01 - Metamodel Layer Architecture").length,
+        coreTypes: extractTableAfterMarker(markdown, "Table 10.7.11-03 - Core Type Inventory").length,
+        relationships: extractTableAfterMarker(markdown, "Table 10.7.11-03B - Relationship Catalogue").length,
+        viewpoints: extractTableAfterMarker(markdown, "Table 10.7.11-03D - Recommended Architecture Viewpoints").length
+    };
+    var sourceConcept;
+    var tableData;
+    var layerConcepts;
+    var coreTypeConcepts;
+    var relationshipConcepts;
+    var viewpointConcepts;
+    var samplesByType;
+    var sampleRelationships;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    validateCounts(summary);
+
+    if (!confirmExecution(summary)) {
+        logger.info("SABSA A1 field catalogue generation cancelled by user.", {
+            source_markdown: CONST.SourceMarkdownPath
+        }, "sabsa.a1.catalogue.generation.cancelled");
+        return;
+    }
+
+    logger.start("SABSA A1 field catalogue generation started.", {
+        source_markdown: CONST.SourceMarkdownPath
+    });
+
+    sourceConcept = createSourceConcept(markdown);
+    tableData = createCompleteTableCatalogueConcepts(markdown, sourceConcept);
+    layerConcepts = createLayerConcepts(markdown, sourceConcept);
+    coreTypeConcepts = createCoreTypeConcepts(markdown, sourceConcept);
+    relationshipConcepts = createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts);
+    viewpointConcepts = createViewpointConcepts(markdown, sourceConcept);
+    linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
+    samplesByType = createSampleConcepts(coreTypeConcepts);
+    sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
+    persistOverlayIndexes(coreTypeConcepts, relationshipConcepts);
+
+    createTableIndexView(sourceConcept, tableData.tables);
+    createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
+    createTypeView(sourceConcept, coreTypeConcepts);
+    createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
+    createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
+    createSampleOverviewView(samplesByType, sampleRelationships);
+
+    logger.finish("SABSA A1 field catalogue generation finished.", {
+        layers: stats.layers,
+        core_types: stats.coreTypes,
+        relationships: stats.relationships,
+        viewpoints: stats.viewpoints,
+        generic_tables: stats.genericTables,
+        generic_rows: stats.genericRows,
+        field_definitions: stats.fieldDefinitions,
+        named_element_relations: stats.elementRelations,
+        samples: stats.samples,
+        sample_relationships: stats.sampleRelationships,
+        views: stats.views,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(
+        "Generated views: " + stats.views +
+        "\nAll catalogue tables: " + stats.genericTables +
+        "\nAll catalogue rows: " + stats.genericRows +
+        "\nField definitions: " + stats.fieldDefinitions +
+        "\nNamed element relations: " + stats.elementRelations +
+        "\nSamples: " + stats.samples +
+        "\nSample relationships: " + stats.sampleRelationships +
+        "\nLayers: " + stats.layers +
+        "\nCore types: " + stats.coreTypes +
+        "\nRelationships: " + stats.relationships +
+        "\nViewpoints: " + stats.viewpoints +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused,
+        "SABSA A1 Metamodel Field Catalogue"
+    );
+}
+
+main();
