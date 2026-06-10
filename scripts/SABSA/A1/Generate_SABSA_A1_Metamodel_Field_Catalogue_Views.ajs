@@ -455,7 +455,7 @@ function parseMarkdownTableBlocks(markdown) {
     while (i < lines.length) {
         var line = trim(lines[i]);
 
-        if (line.indexOf("**Table 1") === 0) {
+        if (line.indexOf("**Table ") === 0) {
             lastCaption = line;
             i++;
             continue;
@@ -1141,7 +1141,7 @@ function createCompleteTableCatalogueConcepts(markdown, sourceConcept) {
 }
 
 function createLayerConcepts(markdown, sourceConcept) {
-    var rows = extractTableAfterMarker(markdown, "Table 1-LA01 - SABSA Architecture Layer Alignment");
+    var rows = extractTableAfterMarker(markdown, "Table 3-LA01 - SABSA Architecture Layer Alignment");
     var concepts = [];
 
     rows.forEach(function (row, index) {
@@ -1156,13 +1156,13 @@ function createLayerConcepts(markdown, sourceConcept) {
             BoundaryRule: data["Boundary Rule"],
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor),
-            SourceSection: "Table 1-LA01"
-        }, buildDocumentation("SABSA architecture layer extracted from Table 1-LA01.", data));
+            SourceSection: "Table 3-LA01"
+        }, buildDocumentation("SABSA architecture layer extracted from Table 3-LA01.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:layer:" + slugify(layer), "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
-            SourceSection: "Table 1-LA01"
+            SourceSection: "Table 3-LA01"
         });
         concepts.push(concept);
         stats.layers++;
@@ -1172,8 +1172,8 @@ function createLayerConcepts(markdown, sourceConcept) {
 }
 
 function createCoreTypeConcepts(markdown, sourceConcept) {
-    var rows = extractTableAfterMarker(markdown, "Table 1-03 - Core Type Inventory");
-    var promotedRows = extractTableAfterMarker(markdown, "Table 1-03A - Core Type Promotion And Extension");
+    var rows = extractTableAfterMarker(markdown, "Table 6-01 - Core Type Inventory");
+    var promotedRows = extractTableAfterMarker(markdown, "Table 6-02 - Core Type Promotion And Extension");
     var concepts = {};
 
     rows.forEach(function (row) {
@@ -1193,16 +1193,16 @@ function createCoreTypeConcepts(markdown, sourceConcept) {
             SabsaType: typeName,
             Rows: data.Rows,
             MainUse: data["Main Use"],
-            SourceSection: "Table 1-03",
+            SourceSection: "Table 6-01",
             RecommendedArchiMateType: conceptType,
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor)
-        }, buildDocumentation("Core type extracted from Table 1-03.", data));
+        }, buildDocumentation("Core type extracted from Table 6-01.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
-            SourceSection: "Table 1-03"
+            SourceSection: "Table 6-01"
         });
         concepts[typeName] = concept;
         stats.coreTypes++;
@@ -1227,16 +1227,16 @@ function createCoreTypeConcepts(markdown, sourceConcept) {
             PromotionStatus: stripMarkup(data["v1.6 Status"]),
             WhyItMatters: data["Why It Matters"],
             DownstreamImpact: data["Downstream Impact"],
-            SourceSection: "Table 1-03A",
+            SourceSection: "Table 6-02",
             RecommendedArchiMateType: conceptType,
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor)
-        }, buildDocumentation("Promoted or support type extracted from Table 1-03A.", data));
+        }, buildDocumentation("Promoted or support type extracted from Table 6-02.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
-            SourceSection: "Table 1-03A"
+            SourceSection: "Table 6-02"
         });
         concepts[typeName] = concept;
         stats.coreTypes++;
@@ -1595,7 +1595,7 @@ function createSampleConcepts(coreTypeConcepts) {
 function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
     var sampleRelationships = [];
 
-    (tableData.rowsByTableId["1-03B"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["6-03"] || []).forEach(function (rowEntry) {
         var parsed = parseRelationshipExpression(rowEntry.data.Relationship);
         var sourceMeta = getCoreTypeConcept(coreTypeConcepts, parsed.source);
         var targetMeta = getCoreTypeConcept(coreTypeConcepts, parsed.target);
@@ -1619,7 +1619,7 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
             Cardinality: rowEntry.data.Cardinality,
             Semantics: rowEntry.data.Semantics,
             ValidationImpact: rowEntry.data["Validation Impact"],
-            SourceSection: "Table 1-03B"
+            SourceSection: "Table 6-03"
         });
         sampleRelationships.push(relationship);
         stats.sampleRelationships++;
@@ -1781,7 +1781,7 @@ function indexViewpointConcepts(viewpointConcepts) {
 }
 
 function createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts) {
-    var rows = extractTableAfterMarker(markdown, "Table 1-03B - Relationship Catalogue");
+    var rows = extractTableAfterMarker(markdown, "Table 6-03 - Relationship Catalogue");
     var concepts = [];
 
     rows.forEach(function (row, index) {
@@ -1799,26 +1799,26 @@ function createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts) {
             ValidationImpact: data["Validation Impact"],
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor),
-            SourceSection: "Table 1-03B"
-        }, buildDocumentation("Relationship definition extracted from Table 1-03B.", data));
+            SourceSection: "Table 6-03"
+        }, buildDocumentation("Relationship definition extracted from Table 6-03.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:relationship:" + slugify(name), "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
-            SourceSection: "Table 1-03B"
+            SourceSection: "Table 6-03"
         });
 
         if (coreTypeConcepts[parsed.source]) {
             ensureRelationship("association-relationship", concept, coreTypeConcepts[parsed.source], "catalogue:relationship:" + slugify(name) + ":source", "source", {
                 SabsaA1CatalogueRelationKind: "RelationshipSource",
-                SourceSection: "Table 1-03B"
+                SourceSection: "Table 6-03"
             });
         }
 
         if (coreTypeConcepts[parsed.target]) {
             ensureRelationship("association-relationship", concept, coreTypeConcepts[parsed.target], "catalogue:relationship:" + slugify(name) + ":target", "target", {
                 SabsaA1CatalogueRelationKind: "RelationshipTarget",
-                SourceSection: "Table 1-03B"
+                SourceSection: "Table 6-03"
             });
         }
 
@@ -1830,7 +1830,7 @@ function createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts) {
 }
 
 function createViewpointConcepts(markdown, sourceConcept) {
-    var rows = extractTableAfterMarker(markdown, "Table 1-03D - Recommended Architecture Viewpoints");
+    var rows = extractTableAfterMarker(markdown, "Table 6-05 - Recommended Architecture Viewpoints");
     var concepts = [];
 
     rows.forEach(function (row) {
@@ -1851,13 +1851,13 @@ function createViewpointConcepts(markdown, sourceConcept) {
             RequiredBackLink: data["Required Back-Link"],
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor),
-            SourceSection: "Table 1-03D"
-        }, buildDocumentation("Recommended architecture viewpoint extracted from Table 1-03D.", data));
+            SourceSection: "Table 6-05"
+        }, buildDocumentation("Recommended architecture viewpoint extracted from Table 6-05.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:viewpoint:" + slugify(viewpoint), "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
-            SourceSection: "Table 1-03D"
+            SourceSection: "Table 6-05"
         });
         concepts.push(concept);
         stats.viewpoints++;
@@ -1895,32 +1895,32 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
         });
     }
 
-    (tableData.rowsByTableId["1-LA01"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["3-LA01"] || []).forEach(function (rowEntry) {
         var target = findLayerConcept(layerConcepts, rowEntry.data.Layer);
-        linkRow("1-LA01", rowEntry, target, "RowDefinesLayer", "defines layer");
-        linkTable("1-LA01", target, "TableDefinesLayer", "defines layer");
+        linkRow("3-LA01", rowEntry, target, "RowDefinesLayer", "defines layer");
+        linkTable("3-LA01", target, "TableDefinesLayer", "defines layer");
     });
 
-    (tableData.rowsByTableId["1-03"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["6-01"] || []).forEach(function (rowEntry) {
         var target = getCoreTypeConcept(coreTypeConcepts, rowEntry.data.Type);
-        linkRow("1-03", rowEntry, target, "RowDefinesCoreType", "defines type");
-        linkTable("1-03", target, "TableDefinesCoreType", "defines type");
+        linkRow("6-01", rowEntry, target, "RowDefinesCoreType", "defines type");
+        linkTable("6-01", target, "TableDefinesCoreType", "defines type");
     });
 
-    (tableData.rowsByTableId["1-03A"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["6-02"] || []).forEach(function (rowEntry) {
         var target = getCoreTypeConcept(coreTypeConcepts, rowEntry.data["Type / Pattern"]);
-        linkRow("1-03A", rowEntry, target, "RowDefinesPromotedCoreType", "defines promoted/support type");
-        linkTable("1-03A", target, "TableDefinesPromotedCoreType", "defines promoted/support type");
+        linkRow("6-02", rowEntry, target, "RowDefinesPromotedCoreType", "defines promoted/support type");
+        linkTable("6-02", target, "TableDefinesPromotedCoreType", "defines promoted/support type");
     });
 
-    (tableData.rowsByTableId["1-03B"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["6-03"] || []).forEach(function (rowEntry) {
         var parsed = parseRelationshipExpression(rowEntry.data.Relationship);
         var relationshipConcept = relationshipIndex[slugify(parsed.label)];
         var sourceType = getCoreTypeConcept(coreTypeConcepts, parsed.source);
         var targetType = getCoreTypeConcept(coreTypeConcepts, parsed.target);
 
-        linkRow("1-03B", rowEntry, relationshipConcept, "RowDefinesRelationship", "defines relationship");
-        linkTable("1-03B", relationshipConcept, "TableDefinesRelationship", "defines relationship");
+        linkRow("6-03", rowEntry, relationshipConcept, "RowDefinesRelationship", "defines relationship");
+        linkTable("6-03", relationshipConcept, "TableDefinesRelationship", "defines relationship");
 
         if (sourceType && targetType) {
             ensureRelationship("association-relationship", sourceType, targetType, "catalogue:type-relation:" + slugify(parsed.label), buildSemanticRelationLabel(parsed, rowEntry.data), {
@@ -1932,16 +1932,16 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
                 Cardinality: rowEntry.data.Cardinality,
                 Semantics: rowEntry.data.Semantics,
                 ValidationImpact: rowEntry.data["Validation Impact"],
-                SourceSection: "Table 1-03B"
+                SourceSection: "Table 6-03"
             });
             stats.elementRelations++;
         }
     });
 
-    (tableData.rowsByTableId["1-03D"] || []).forEach(function (rowEntry) {
+    (tableData.rowsByTableId["6-05"] || []).forEach(function (rowEntry) {
         var target = viewpointIndex[slugify(rowEntry.data.Viewpoint)];
-        linkRow("1-03D", rowEntry, target, "RowDefinesViewpoint", "defines viewpoint");
-        linkTable("1-03D", target, "TableDefinesViewpoint", "defines viewpoint");
+        linkRow("6-05", rowEntry, target, "RowDefinesViewpoint", "defines viewpoint");
+        linkTable("6-05", target, "TableDefinesViewpoint", "defines viewpoint");
     });
 
     tableData.tables.forEach(function (tableConcept) {
@@ -2261,10 +2261,10 @@ function main() {
         fieldDefinitions: parsedTableBlocks.reduce(function (sum, block) {
             return sum + block.rows.filter(isFieldCatalogueRow).length;
         }, 0),
-        layers: extractTableAfterMarker(markdown, "Table 1-LA01 - SABSA Architecture Layer Alignment").length,
-        coreTypes: extractTableAfterMarker(markdown, "Table 1-03 - Core Type Inventory").length,
-        relationships: extractTableAfterMarker(markdown, "Table 1-03B - Relationship Catalogue").length,
-        viewpoints: extractTableAfterMarker(markdown, "Table 1-03D - Recommended Architecture Viewpoints").length
+        layers: extractTableAfterMarker(markdown, "Table 3-LA01 - SABSA Architecture Layer Alignment").length,
+        coreTypes: extractTableAfterMarker(markdown, "Table 6-01 - Core Type Inventory").length,
+        relationships: extractTableAfterMarker(markdown, "Table 6-03 - Relationship Catalogue").length,
+        viewpoints: extractTableAfterMarker(markdown, "Table 6-05 - Recommended Architecture Viewpoints").length
     };
     var sourceConcept;
     var tableData;
