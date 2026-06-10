@@ -18,6 +18,19 @@ The script creates or reuses:
 - traceability and mapping relationships
 - folders under `Views/SABSA/A1`, `Business/SABSA/A1/...`, `Other/SABSA/A1/...`, and `Relations/SABSA/A1/...`
 
+## Generate_SABSA_A1_Risk_Strategy_Framework_View.ajs
+
+Generates a SABSA A1 Risk Strategy Framework view in the style of the A1 training diagram:
+
+- side elements for `Attributes` and `Domains`
+- central sections for `Risk Context`, `Risk Assessment`, `Risk Treatment Strategy`, and `Risk Treatment`
+- concrete A1 elements inside the sections, such as risk appetite, domain authorities, identify/analyse/evaluate risk, enablement/control objectives, enablers and controls
+- flow and input relationships between the side elements and the central framework sections
+
+The script creates stable framework elements under `SABSA/A1/Risk Strategy Framework` and generates:
+
+- `SABSA A1 - Risk Strategy Framework`
+
 ## NIBOCJ Assumption
 
 `NIBOCJ` is currently interpreted as a working cross-reference mnemonic:
