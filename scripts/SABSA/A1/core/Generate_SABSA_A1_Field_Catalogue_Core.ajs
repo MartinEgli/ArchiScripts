@@ -425,11 +425,24 @@ function resolveConceptPlacement(conceptType, properties) {
 }
 
 function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
     if (!objectToMove) {
         return null;
     }
 
-    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    try {
+        targetFolder.add(objectToMove);
+    } catch (error) {
+        logger.warn("Could not move object to generated A1 folder. Keeping the existing Archi folder.", {
+            object_name: safeString(objectToMove.name),
+            object_type: safeString(objectToMove.type),
+            target_root: safeString(rootName),
+            target_path: safeString((pathSegments || []).join("/")),
+            error: String(error)
+        }, "sabsa.a1.folder.move.skipped");
+    }
     return objectToMove;
 }
 
