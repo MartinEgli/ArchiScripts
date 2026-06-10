@@ -6,14 +6,18 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
-var SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views";
+var SCRIPT_NAME = typeof SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME === "undefined"
+    ? "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views"
+    : String(SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME);
 var LOG_LEVEL = "WARN";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
     clearConsole: true,
     minimumLevel: LOG_LEVEL
 });
 var dialogs = ArchiDialogs.createDialogService(logger, {
-    title: "SABSA A1 Metamodel Field Catalogue"
+    title: typeof SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE === "undefined"
+        ? "SABSA A1 Metamodel Field Catalogue"
+        : String(SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE)
 });
 
 var CONST = {
@@ -151,6 +155,42 @@ var stats = {
 
 function safeString(value) {
     return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function getExecutionMode() {
+    var mode = typeof SABSA_A1_FIELD_CATALOGUE_MODE === "undefined"
+        ? "combined"
+        : safeString(SABSA_A1_FIELD_CATALOGUE_MODE).toLowerCase();
+
+    if (mode === "table") {
+        return "tables";
+    }
+    if (mode === "metamodel") {
+        return "meta";
+    }
+    if (mode === "tables" || mode === "meta" || mode === "combined") {
+        return mode;
+    }
+
+    throw new Error("Unsupported SABSA A1 field catalogue mode: " + mode);
+}
+
+function shouldGenerateTables(mode) {
+    return mode === "tables" || mode === "combined";
+}
+
+function shouldGenerateMeta(mode) {
+    return mode === "meta" || mode === "combined";
+}
+
+function modeLabel(mode) {
+    if (mode === "tables") {
+        return "Table Catalogue";
+    }
+    if (mode === "meta") {
+        return "Metamodel Overlay";
+    }
+    return "Complete Catalogue";
 }
 
 function trim(value) {
@@ -1346,6 +1386,48 @@ function createCompleteTableCatalogueConcepts(markdown, sourceConcept) {
     };
 }
 
+function createTableCatalogueReferenceData(markdown) {
+    var blocks = parseMarkdownTableBlocks(markdown);
+    var tableConcepts = [];
+    var tablesById = {};
+    var rowsByTableId = {};
+
+    blocks.forEach(function (block) {
+        var tableKey = "catalogue:table:" + slugify(block.id);
+        var tableConcept = findConceptByKey("grouping", tableKey);
+
+        if (tableConcept) {
+            tableConcepts.push(tableConcept);
+            tablesById[block.id] = tableConcept;
+        }
+
+        rowsByTableId[block.id] = [];
+        stats.genericTables++;
+
+        block.rows.forEach(function (data, rowIndex) {
+            var rowNumber = rowIndex + 1;
+            var rowConcept = findConceptByKey("business-object", "catalogue:table-row:" + slugify(block.id) + ":" + rowNumber);
+
+            if (isFieldCatalogueRow(data)) {
+                stats.fieldDefinitions++;
+            }
+
+            rowsByTableId[block.id].push({
+                concept: rowConcept || null,
+                data: data,
+                rowIndex: rowNumber
+            });
+            stats.genericRows++;
+        });
+    });
+
+    return {
+        tables: tableConcepts,
+        tablesById: tablesById,
+        rowsByTableId: rowsByTableId
+    };
+}
+
 function createLayerConcepts(markdown, sourceConcept) {
     var rows = extractTableAfterMarker(markdown, "Table 3-LA01 - SABSA Architecture Layer Alignment");
     var concepts = [];
@@ -2322,17 +2404,19 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
                 linkRow(tableId, rowEntry, target, "FieldRowBelongsToCoreType", fieldRoleLabel);
 
                 if (isFieldCatalogueRow(rowEntry.data)) {
-                    ensureRelationship("association-relationship", target, rowEntry.concept, "catalogue:core-type-field:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex, fieldRoleLabel, {
-                        SabsaA1CatalogueRelationKind: "CoreTypeHasField",
-                        RelationshipLabel: fieldRoleLabel,
-                        FieldName: stripMarkup(rowEntry.data.Field),
-                        Datatype: rowEntry.data.Datatype,
-                        Required: rowEntry.data.Required,
-                        KeyRole: rowEntry.data["Key Role"],
-                        TemplateFamily: rowEntry.data["Template Family"],
-                        Description: rowEntry.data.Note,
-                        SourceSection: "Table " + tableId
-                    });
+                    if (rowEntry.concept) {
+                        ensureRelationship("association-relationship", target, rowEntry.concept, "catalogue:core-type-field:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex, fieldRoleLabel, {
+                            SabsaA1CatalogueRelationKind: "CoreTypeHasField",
+                            RelationshipLabel: fieldRoleLabel,
+                            FieldName: stripMarkup(rowEntry.data.Field),
+                            Datatype: rowEntry.data.Datatype,
+                            Required: rowEntry.data.Required,
+                            KeyRole: rowEntry.data["Key Role"],
+                            TemplateFamily: rowEntry.data["Template Family"],
+                            Description: rowEntry.data.Note,
+                            SourceSection: "Table " + tableId
+                        });
+                    }
 
                     getReferencedCoreTypeConcepts(coreTypeConcepts, rowEntry.data).forEach(function (referencedType) {
                         ensureRelationship("association-relationship", target, referencedType, "catalogue:fk:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex + ":" + safeString(referencedType.prop("SabsaA1CatalogueKey")), buildFkRelationLabel(rowEntry.data, referencedType), {
@@ -2352,22 +2436,24 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
                             SourceSection: "Table " + tableId
                         });
 
-                        ensureRelationship("association-relationship", rowEntry.concept, referencedType, "catalogue:fk-row:" + safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")) + ":" + safeString(referencedType.prop("SabsaA1CatalogueKey")), buildFkRelationLabel(rowEntry.data, referencedType), {
-                            SabsaA1CatalogueRelationKind: "FieldRowForeignKeyReference",
-                            RelationshipLabel: buildFkRelationLabel(rowEntry.data, referencedType),
-                            SourceType: target.name,
-                            TargetType: referencedType.name,
-                            TableId: tableId,
-                            RowIndex: String(rowEntry.rowIndex),
-                            FieldRowKey: safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")),
-                            FieldName: stripMarkup(rowEntry.data.Field),
-                            Datatype: rowEntry.data.Datatype,
-                            Required: rowEntry.data.Required,
-                            KeyRole: rowEntry.data["Key Role"],
-                            TemplateFamily: rowEntry.data["Template Family"],
-                            Description: rowEntry.data.Note,
-                            SourceSection: "Table " + tableId
-                        });
+                        if (rowEntry.concept) {
+                            ensureRelationship("association-relationship", rowEntry.concept, referencedType, "catalogue:fk-row:" + safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")) + ":" + safeString(referencedType.prop("SabsaA1CatalogueKey")), buildFkRelationLabel(rowEntry.data, referencedType), {
+                                SabsaA1CatalogueRelationKind: "FieldRowForeignKeyReference",
+                                RelationshipLabel: buildFkRelationLabel(rowEntry.data, referencedType),
+                                SourceType: target.name,
+                                TargetType: referencedType.name,
+                                TableId: tableId,
+                                RowIndex: String(rowEntry.rowIndex),
+                                FieldRowKey: safeString(rowEntry.concept.prop("SabsaA1CatalogueKey")),
+                                FieldName: stripMarkup(rowEntry.data.Field),
+                                Datatype: rowEntry.data.Datatype,
+                                Required: rowEntry.data.Required,
+                                KeyRole: rowEntry.data["Key Role"],
+                                TemplateFamily: rowEntry.data["Template Family"],
+                                Description: rowEntry.data.Note,
+                                SourceSection: "Table " + tableId
+                            });
+                        }
                         stats.elementRelations++;
                     });
                 }
@@ -2725,31 +2811,36 @@ function createOverlayTemplateLibraryView(samplesByType) {
     return view;
 }
 
-function validateCounts(summary) {
-    if (!summary.genericTables || !summary.genericRows || !summary.layers || !summary.coreTypes || !summary.relationships) {
+function validateCounts(summary, mode) {
+    if (!summary.genericTables || !summary.genericRows) {
+        throw new Error("The field catalogue did not yield tables and rows.");
+    }
+    if (shouldGenerateMeta(mode) && (!summary.layers || !summary.coreTypes || !summary.relationships)) {
         throw new Error("The field catalogue did not yield layers, core types and relationships.");
     }
 }
 
-function confirmExecution(summary) {
+function confirmExecution(summary, mode) {
     return dialogs.confirmInfo(
-        "This script will parse the Generic SABSA A1 Metamodel Field Catalogue and create ArchiMate catalogue elements." +
+        "This script will parse the Generic SABSA A1 Metamodel Field Catalogue and create " + modeLabel(mode) + " ArchiMate elements/views." +
         "\n\nSource Markdown: " + CONST.SourceMarkdownPath +
+        "\nMode: " + mode +
         "\nAll catalogue tables: " + summary.genericTables +
         "\nAll catalogue rows: " + summary.genericRows +
         "\nField definitions: " + summary.fieldDefinitions +
-        "\nNamed element relations: generated from relationship and FK catalogue rows" +
-        "\nOverlay samples: generated after stereotype metadata is built" +
+        (shouldGenerateMeta(mode) ? "\nNamed element relations: generated from relationship and FK catalogue rows" : "") +
+        (shouldGenerateMeta(mode) ? "\nOverlay samples: generated after stereotype metadata is built" : "") +
         "\nLayers: " + summary.layers +
         "\nCore types: " + summary.coreTypes +
         "\nRelationships: " + summary.relationships +
         "\nViewpoints: " + summary.viewpoints +
         "\n\nDo you want to continue?",
-        "Run SABSA A1 Field Catalogue Generator"
+        "Run SABSA A1 " + modeLabel(mode) + " Generator"
     );
 }
 
 function main() {
+    var mode = getExecutionMode();
     var markdown = readUtf8Text(CONST.SourceMarkdownPath);
     var parsedTableBlocks = parseMarkdownTableBlocks(markdown);
     var summary = {
@@ -2778,44 +2869,55 @@ function main() {
         throw new Error("No active model is open.");
     }
 
-    validateCounts(summary);
+    validateCounts(summary, mode);
 
-    if (!confirmExecution(summary)) {
+    if (!confirmExecution(summary, mode)) {
         logger.info("SABSA A1 field catalogue generation cancelled by user.", {
-            source_markdown: CONST.SourceMarkdownPath
+            source_markdown: CONST.SourceMarkdownPath,
+            mode: mode
         }, "sabsa.a1.catalogue.generation.cancelled");
         return;
     }
 
     logger.start("SABSA A1 field catalogue generation started.", {
-        source_markdown: CONST.SourceMarkdownPath
+        source_markdown: CONST.SourceMarkdownPath,
+        mode: mode
     });
 
     sourceConcept = createSourceConcept(markdown);
-    tableData = createCompleteTableCatalogueConcepts(markdown, sourceConcept);
-    layerConcepts = createLayerConcepts(markdown, sourceConcept);
-    coreTypeConcepts = createCoreTypeConcepts(markdown, sourceConcept);
-    relationshipConcepts = createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts);
-    viewpointConcepts = createViewpointConcepts(markdown, sourceConcept);
-    linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
-    applyCoreTypeSpecializationMetadata(coreTypeConcepts);
-    samplesByType = createSampleConcepts(coreTypeConcepts);
-    sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
-    cleanupNonMetaFieldMetadataProperties();
-    persistOverlayIndexes(coreTypeConcepts, relationshipConcepts);
 
-    createTableIndexView(sourceConcept, tableData.tables);
-    createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
-    createTypeView(sourceConcept, coreTypeConcepts);
-    createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts);
-    createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
-    createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
-    createSampleOverviewView(samplesByType, sampleRelationships);
-    createOverlayLibraryOverviewView();
-    createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts);
-    createOverlayTemplateLibraryView(samplesByType);
+    if (shouldGenerateTables(mode)) {
+        tableData = createCompleteTableCatalogueConcepts(markdown, sourceConcept);
+        createTableIndexView(sourceConcept, tableData.tables);
+    } else {
+        tableData = createTableCatalogueReferenceData(markdown);
+    }
+
+    if (shouldGenerateMeta(mode)) {
+        layerConcepts = createLayerConcepts(markdown, sourceConcept);
+        coreTypeConcepts = createCoreTypeConcepts(markdown, sourceConcept);
+        relationshipConcepts = createRelationshipConcepts(markdown, sourceConcept, coreTypeConcepts);
+        viewpointConcepts = createViewpointConcepts(markdown, sourceConcept);
+        linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, relationshipConcepts, viewpointConcepts);
+        applyCoreTypeSpecializationMetadata(coreTypeConcepts);
+        samplesByType = createSampleConcepts(coreTypeConcepts);
+        sampleRelationships = createSampleRelationships(tableData, coreTypeConcepts, samplesByType);
+        cleanupNonMetaFieldMetadataProperties();
+        persistOverlayIndexes(coreTypeConcepts, relationshipConcepts);
+
+        createGridView(CONST.LayerViewName, sourceConcept, layerConcepts, CONST.Style.LayerFill, CONST.Layout.Columns);
+        createTypeView(sourceConcept, coreTypeConcepts);
+        createForeignKeyRelationView(sourceConcept, tableData, coreTypeConcepts);
+        createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
+        createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
+        createSampleOverviewView(samplesByType, sampleRelationships);
+        createOverlayLibraryOverviewView();
+        createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts);
+        createOverlayTemplateLibraryView(samplesByType);
+    }
 
     logger.finish("SABSA A1 field catalogue generation finished.", {
+        mode: mode,
         layers: stats.layers,
         core_types: stats.coreTypes,
         relationships: stats.relationships,
@@ -2838,6 +2940,7 @@ function main() {
 
     dialogs.showInfo(
         "Generated views: " + stats.views +
+        "\nMode: " + mode +
         "\nAll catalogue tables: " + stats.genericTables +
         "\nAll catalogue rows: " + stats.genericRows +
         "\nField definitions: " + stats.fieldDefinitions +
@@ -2855,7 +2958,7 @@ function main() {
         "\nField metadata properties removed: " + stats.fieldMetadataPropertiesRemoved +
         "\nView connections created: " + stats.viewConnectionsCreated +
         "\nView connections skipped: " + stats.viewConnectionsSkipped,
-        "SABSA A1 Metamodel Field Catalogue"
+        "SABSA A1 " + modeLabel(mode)
     );
 }
 

@@ -1,0 +1,19 @@
+/*
+===============================================================================
+Generate SABSA A1 Metamodel Field Catalogue Meta Views
+===============================================================================
+
+Runs the shared Generic SABSA A1 Metamodel Field Catalogue generator in meta
+mode. This creates or reuses metamodel, overlay, sample and relationship
+elements. Existing table and table-row catalogue elements are reused when
+present, but this mode does not create new table catalogue elements.
+===============================================================================
+*/
+
+var File = Java.type("java.io.File");
+
+var SABSA_A1_FIELD_CATALOGUE_MODE = "meta";
+var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views";
+var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Metamodel Field Catalogue - Meta";
+
+load(new File(__DIR__ + "Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs").getCanonicalPath());
