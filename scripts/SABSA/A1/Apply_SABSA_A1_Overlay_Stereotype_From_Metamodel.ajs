@@ -254,6 +254,7 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
 
     tryCreateSpecialization(typeName, concept.type);
     concept.specialization = typeName;
+    concept.name = displayName(concept.name) || safeString(concept.name);
 
     concept.prop(CONST.Property.Namespace, CONST.Namespace);
     concept.prop(CONST.Property.Kind, "SabsaA1OverlayTypedElement");

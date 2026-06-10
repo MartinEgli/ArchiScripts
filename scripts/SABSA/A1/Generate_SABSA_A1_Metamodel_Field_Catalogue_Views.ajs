@@ -339,7 +339,7 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
 
     if (!concept) {
         var placement = resolveConceptPlacement(conceptType, properties);
-        concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        concept = model.createElement(conceptType, displayName(name) || safeString(name), ensureFolderPath(placement.rootName, placement.pathSegments));
         conceptCreated = true;
         stats.conceptsCreated++;
     } else {
@@ -379,9 +379,9 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
 
     if (!relationship) {
         try {
-            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship(relationshipType, displayName(name) || safeString(name), sourceConcept, targetConcept);
         } catch (error) {
-            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship("association-relationship", displayName(name) || safeString(name), sourceConcept, targetConcept);
         }
         relationshipCreated = true;
         stats.relationshipsCreated++;

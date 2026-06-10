@@ -96,6 +96,13 @@ function trim(value) {
     return safeString(value).replace(/^\s+|\s+$/g, "");
 }
 
+function displayName(value) {
+    return trim(value)
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function normalizeId(value) {
     return trim(value)
         .toLowerCase()
@@ -290,9 +297,9 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
 
     if (!concept) {
         if (placement) {
-            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+            concept = model.createElement(conceptType, displayName(name) || safeString(name), ensureFolderPath(placement.rootName, placement.pathSegments));
         } else {
-            concept = model.createElement(conceptType, name);
+            concept = model.createElement(conceptType, displayName(name) || safeString(name));
         }
         conceptCreated = true;
         stats.conceptsCreated++;
@@ -300,7 +307,7 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
         stats.conceptsReused++;
     }
 
-    concept.name = name;
+    concept.name = displayName(name) || safeString(name);
     concept.documentation = documentation || "";
     concept.prop("SabsaA1SchemaKey", key);
 
@@ -330,14 +337,14 @@ function ensureRelationship(sourceConcept, targetConcept, key, name, properties)
     }
 
     if (!relationship) {
-        relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+        relationship = model.createRelationship("association-relationship", displayName(name) || safeString(name), sourceConcept, targetConcept);
         relationshipCreated = true;
         stats.relationshipsCreated++;
     } else {
         stats.relationshipsReused++;
     }
 
-    relationship.name = name || "";
+    relationship.name = displayName(name) || safeString(name);
     relationship.prop("SabsaA1SchemaKey", key);
 
     Object.keys(properties || {}).forEach(function (propertyName) {

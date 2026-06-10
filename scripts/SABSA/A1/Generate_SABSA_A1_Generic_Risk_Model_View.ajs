@@ -88,6 +88,13 @@ function trim(value) {
     return safeString(value).replace(/^\s+|\s+$/g, "");
 }
 
+function displayName(value) {
+    return trim(value)
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function normalizeFolderName(folderName) {
     return safeString(folderName)
         .toLowerCase()
@@ -278,9 +285,9 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
 
     if (!concept) {
         if (placement) {
-            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+            concept = model.createElement(conceptType, displayName(name) || safeString(name), ensureFolderPath(placement.rootName, placement.pathSegments));
         } else {
-            concept = model.createElement(conceptType, name);
+            concept = model.createElement(conceptType, displayName(name) || safeString(name));
         }
         conceptCreated = true;
         stats.conceptsCreated++;
@@ -288,7 +295,7 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
         stats.conceptsReused++;
     }
 
-    concept.name = name;
+    concept.name = displayName(name) || safeString(name);
     concept.documentation = documentation || "";
     concept.prop("SabsaA1GenericKey", key);
 
@@ -315,9 +322,9 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
 
     if (!relationship) {
         try {
-            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship(relationshipType, displayName(name) || safeString(name), sourceConcept, targetConcept);
         } catch (error) {
-            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship("association-relationship", displayName(name) || safeString(name), sourceConcept, targetConcept);
             logger.debug("Preferred relationship type is not valid. Falling back to association.", {
                 preferred_type: relationshipType,
                 key: key,
@@ -330,7 +337,7 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
         stats.relationshipsReused++;
     }
 
-    relationship.name = name || "";
+    relationship.name = displayName(name) || safeString(name);
     relationship.prop("SabsaA1GenericKey", key);
 
     Object.keys(properties || {}).forEach(function (propertyName) {

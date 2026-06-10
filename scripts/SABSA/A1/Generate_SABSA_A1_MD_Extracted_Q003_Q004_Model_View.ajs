@@ -79,6 +79,13 @@ function trim(value) {
     return safeString(value).replace(/^\s+|\s+$/g, "");
 }
 
+function displayName(value) {
+    return trim(value)
+        .replace(/_/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function slugify(value) {
     return trim(value)
         .toLowerCase()
@@ -258,14 +265,14 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
 
     if (!concept) {
         var placement = resolveConceptPlacement(conceptType, properties);
-        concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        concept = model.createElement(conceptType, displayName(name) || safeString(name), ensureFolderPath(placement.rootName, placement.pathSegments));
         conceptCreated = true;
         stats.conceptsCreated++;
     } else {
         stats.conceptsReused++;
     }
 
-    concept.name = name;
+    concept.name = displayName(name) || safeString(name);
     concept.documentation = documentation || "";
     concept.prop("SabsaA1MdKey", key);
     setCommonSourceProperties(concept, safeString(properties && properties.SabsaA1MdKind));
@@ -296,9 +303,9 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
 
     if (!relationship) {
         try {
-            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship(relationshipType, displayName(name) || safeString(name), sourceConcept, targetConcept);
         } catch (error) {
-            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+            relationship = model.createRelationship("association-relationship", displayName(name) || safeString(name), sourceConcept, targetConcept);
             logger.debug("Preferred relationship type failed; association fallback used.", {
                 preferred_type: relationshipType,
                 key: key,
@@ -311,7 +318,7 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
         stats.relationshipsReused++;
     }
 
-    relationship.name = name || "";
+    relationship.name = displayName(name) || safeString(name);
     relationship.prop("SabsaA1MdKey", key);
     setCommonSourceProperties(relationship, "Relationship");
     setProperties(relationship, properties);
