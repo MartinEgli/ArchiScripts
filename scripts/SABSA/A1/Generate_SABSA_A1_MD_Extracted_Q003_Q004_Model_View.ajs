@@ -17,10 +17,11 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
+    SourceJsonPath: new File(__DIR__ + "../../../../reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json").getCanonicalPath(),
     SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md").getCanonicalPath(),
-    SourceDocumentName: "08_q003_q004_end_to_end_gesamtmodell.md",
-    MermaidViewName: "SABSA A1 - MD Extracted Mermaid Model",
-    RiskViewName: "SABSA A1 - MD Extracted Risk Governance Map",
+    SourceDocumentName: "10_q003_q004_usecase_archimate_exchange_model.json",
+    MermaidViewName: "SABSA A1 - JSON Extracted Model",
+    RiskViewName: "SABSA A1 - JSON Extracted Risk Governance Map",
     Folder: {
         Root: "SABSA",
         A1: "A1",
@@ -62,6 +63,8 @@ var stats = {
     mermaidBlocks: 0,
     mermaidNodes: 0,
     mermaidEdges: 0,
+    jsonElements: 0,
+    jsonRelationships: 0,
     tableRows: 0,
     conceptsCreated: 0,
     conceptsReused: 0,
@@ -573,7 +576,7 @@ function setProperties(target, properties) {
 }
 
 function setCommonSourceProperties(target, sourceKind) {
-    target.prop("SourceMarkdown", CONST.SourceMarkdownPath);
+    target.prop("SourceJson", CONST.SourceJsonPath);
     target.prop("SourceDocumentName", CONST.SourceDocumentName);
     target.prop("ExtractorScript", SCRIPT_NAME);
     if (sourceKind) {
@@ -949,65 +952,208 @@ function createRiskView(riskData, sourceConcept) {
     return view;
 }
 
+function jsonArrayValue(value) {
+    if (value && typeof value.join === "function") {
+        return value.join("; ");
+    }
+    return safeString(value);
+}
+
+function setJsonObjectProperties(target, prefix, data) {
+    Object.keys(data || {}).forEach(function (key) {
+        target.prop(prefix + key, jsonArrayValue(data[key]));
+    });
+}
+
+function createJsonSourceConcept(data) {
+    var props = {
+        SabsaA1MdKind: "SourceDocument",
+        DocumentTitle: safeString(data.model_id),
+        ModelVersion: safeString(data.model_version),
+        Created: safeString(data.created),
+        Status: safeString(data.status),
+        SchemaRef: safeString(data.schema_ref),
+        Purpose: safeString(data.purpose),
+        SourceSection: "JSON model root"
+    };
+
+    setJsonObjectProperties({ prop: function (key, value) { props[key] = value; } }, "ExportBoundary_", data.export_boundary);
+
+    return ensureConcept(
+        "grouping",
+        safeString(data.model_id) || "Q003 Q004 JSON Extract",
+        "source:json:" + slugify(data.model_id || "q003-q004-usecase-archimate-exchange-model"),
+        props,
+        buildDocumentation("JSON extract source document for generated SABSA A1 model.", props)
+    );
+}
+
+function createJsonConcepts(data, sourceConcept) {
+    var concepts = {};
+
+    (data.elements || []).forEach(function (element) {
+        var conceptType = safeString(element.archimate_type) || "grouping";
+        var props = {
+            SabsaA1MdKind: safeString(element.sabsa_type) || "JsonElement",
+            SabsaType: safeString(element.sabsa_type),
+            JsonElementId: safeString(element.id),
+            ArchiMateType: conceptType,
+            ArchiMateLayer: safeString(element.archimate_layer),
+            DescriptionEn: safeString(element.description_en),
+            DescriptionDe: safeString(element.description_de),
+            SourceRefs: jsonArrayValue(element.source_refs),
+            Tags: jsonArrayValue(element.tags),
+            SourceSection: "JSON elements"
+        };
+        var concept;
+
+        setJsonObjectProperties({ prop: function (key, value) { props[key] = value; } }, "JsonProperty_", element.properties);
+
+        concept = ensureConcept(
+            conceptType,
+            element.name || element.id,
+            "json-element:" + safeString(element.id),
+            props,
+            buildDocumentation("Element imported from JSON extract.", element)
+        );
+        concept.prop("VisualFillColor", getVisualFill(props.SabsaA1MdKind));
+        concept.prop("VisualColorRole", getColorRole(concept.prop("VisualFillColor")));
+        concepts[safeString(element.id)] = concept;
+        stats.jsonElements++;
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "source:json-element:" + safeString(element.id), "extracts", {
+            SabsaA1MdRelationKind: "SourceTrace",
+            JsonElementId: safeString(element.id),
+            SourceSection: "JSON elements"
+        });
+    });
+
+    return concepts;
+}
+
+function createJsonRelationships(data, concepts) {
+    var relationships = {};
+
+    (data.relationships || []).forEach(function (entry) {
+        var sourceConcept = concepts[safeString(entry.source)];
+        var targetConcept = concepts[safeString(entry.target)];
+        var relationship = ensureRelationship(
+            safeString(entry.archimate_relationship) || "association-relationship",
+            sourceConcept,
+            targetConcept,
+            "json-relationship:" + safeString(entry.id),
+            entry.name || entry.relationship_type || entry.id,
+            {
+                SabsaA1MdRelationKind: "JsonRelationship",
+                JsonRelationshipId: safeString(entry.id),
+                RelationshipType: safeString(entry.relationship_type),
+                SourceElementId: safeString(entry.source),
+                TargetElementId: safeString(entry.target),
+                DescriptionEn: safeString(entry.description_en),
+                SourceSection: "JSON relationships"
+            }
+        );
+
+        if (relationship) {
+            setJsonObjectProperties(relationship, "JsonProperty_", entry.properties);
+            relationships[safeString(entry.id)] = relationship;
+            stats.jsonRelationships++;
+        }
+    });
+
+    return relationships;
+}
+
+function createJsonViews(data, concepts, relationships) {
+    (data.views || []).forEach(function (viewSpec) {
+        var view = model.createArchimateView(buildUniqueViewName(displayName(viewSpec.name) || safeString(viewSpec.id)));
+        var visuals = {};
+
+        view.documentation = buildDocumentation("Generated from JSON extract view specification.", {
+            ViewId: viewSpec.id,
+            ViewpointType: viewSpec.viewpoint_type,
+            PurposeEn: viewSpec.purpose_en,
+            Layout: viewSpec.jarchi_hint && viewSpec.jarchi_hint.layout
+        });
+        moveViewToFolder(view);
+
+        (viewSpec.nodes || []).forEach(function (node, index) {
+            var concept = concepts[safeString(node.element)];
+            var x = typeof node.x === "number" ? node.x : CONST.Layout.StartX + (index * (CONST.Layout.NodeWidth + CONST.Layout.GapX));
+            var y = typeof node.y === "number" ? node.y : CONST.Layout.StartY;
+            var width = typeof node.w === "number" ? node.w : CONST.Layout.NodeWidth;
+            var height = typeof node.h === "number" ? node.h : CONST.Layout.NodeHeight;
+
+            if (!concept) {
+                return;
+            }
+
+            visuals[safeString(node.element)] = addStyledVisual(view, concept, x, y, width, height, concept.prop("VisualFillColor") || getVisualFill(concept.prop("SabsaA1MdKind")));
+        });
+
+        (viewSpec.relationships || []).forEach(function (relationshipId) {
+            var relationship = relationships[safeString(relationshipId)];
+
+            if (!relationship) {
+                return;
+            }
+
+            addConnection(view, relationship, visuals[safeString(relationship.prop("SourceElementId"))], visuals[safeString(relationship.prop("TargetElementId"))]);
+        });
+
+        stats.views++;
+    });
+}
+
 function confirmExecution(modelSummary) {
     return dialogs.confirmInfo(
-        "This script will parse the Q003/Q004 Gesamtmodell markdown and create ArchiMate elements with source properties." +
-        "\n\nSource Markdown: " + CONST.SourceMarkdownPath +
-        "\nMermaid blocks: " + modelSummary.mermaidBlocks +
-        "\nRisk-map rows: " + modelSummary.riskRows +
-        "\nGovernance/source-control rows: " + modelSummary.governanceRows +
+        "This script will import the Q003/Q004 JSON extract and create ArchiMate elements, relationships and views." +
+        "\n\nSource JSON: " + CONST.SourceJsonPath +
+        "\nElements: " + modelSummary.elements +
+        "\nRelationships: " + modelSummary.relationships +
+        "\nViews: " + modelSummary.views +
         "\n\nDo you want to continue?",
-        "Run SABSA A1 MD Extraction Generator"
+        "Run SABSA A1 JSON Extract Generator"
     );
 }
 
 function main() {
-    var markdown;
+    var sourceText;
+    var data;
     var sourceConcept;
-    var mermaidRows;
-    var riskRows;
-    var governanceRows;
-    var mermaidData;
-    var riskData;
+    var concepts;
+    var relationships;
 
     if (!model) {
         throw new Error("No active model is open.");
     }
 
-    markdown = readUtf8Text(CONST.SourceMarkdownPath);
-    mermaidRows = extractMermaidBlocks(markdown);
-    riskRows = extractTableAfterMarker(markdown, "Table 16.8.8-03 - Q3 Risk To Q4 Governance Map");
-    governanceRows = extractTableAfterMarker(markdown, "Table 16.8.8-04 - Source And Assumption Control")
-        .concat(extractTableAfterMarker(markdown, "Table 16.8.8-05 - Anonymised Use Case Capsule Mapping"))
-        .concat(extractTableAfterMarker(markdown, "Table 16.8.8-06 - v1.8 Taxonomy Governance Thread"));
+    sourceText = readUtf8Text(CONST.SourceJsonPath);
+    data = JSON.parse(sourceText);
 
     if (!confirmExecution({
-        mermaidBlocks: mermaidRows.length,
-        riskRows: riskRows.length,
-        governanceRows: governanceRows.length
+        elements: (data.elements || []).length,
+        relationships: (data.relationships || []).length,
+        views: (data.views || []).length
     })) {
-        logger.info("SABSA A1 MD extraction cancelled by user.", {
-            source_markdown: CONST.SourceMarkdownPath
-        }, "sabsa.a1.md.generation.cancelled");
+        logger.info("SABSA A1 JSON extract import cancelled by user.", {
+            source_json: CONST.SourceJsonPath
+        }, "sabsa.a1.json.generation.cancelled");
         return;
     }
 
-    logger.start("SABSA A1 MD extraction started.", {
-        source_markdown: CONST.SourceMarkdownPath
+    logger.start("SABSA A1 JSON extract import started.", {
+        source_json: CONST.SourceJsonPath
     });
 
-    sourceConcept = createSourceConcept(markdown);
-    mermaidData = createMermaidConcepts(markdown, sourceConcept);
-    riskData = createRiskMapConcepts(markdown, sourceConcept);
-    createGovernanceTableConcepts(markdown, sourceConcept);
-    createMermaidView(mermaidData, sourceConcept);
-    createRiskView(riskData, sourceConcept);
+    sourceConcept = createJsonSourceConcept(data);
+    concepts = createJsonConcepts(data, sourceConcept);
+    relationships = createJsonRelationships(data, concepts);
+    createJsonViews(data, concepts, relationships);
 
-    logger.finish("SABSA A1 MD extraction finished.", {
-        mermaid_blocks: stats.mermaidBlocks,
-        mermaid_nodes: stats.mermaidNodes,
-        mermaid_edges: stats.mermaidEdges,
-        table_rows: stats.tableRows,
+    logger.finish("SABSA A1 JSON extract import finished.", {
+        json_elements: stats.jsonElements,
+        json_relationships: stats.jsonRelationships,
         views: stats.views,
         relationships_created_or_reused: stats.relationships,
         concepts_created: stats.conceptsCreated,
@@ -1018,15 +1164,13 @@ function main() {
 
     dialogs.showInfo(
         "Generated views: " + stats.views +
-        "\nMermaid blocks: " + stats.mermaidBlocks +
-        "\nMermaid nodes: " + stats.mermaidNodes +
-        "\nMermaid edges: " + stats.mermaidEdges +
-        "\nRisk-map rows: " + stats.tableRows +
+        "\nJSON elements: " + stats.jsonElements +
+        "\nJSON relationships: " + stats.jsonRelationships +
         "\nConcepts created: " + stats.conceptsCreated +
         "\nConcepts reused: " + stats.conceptsReused +
         "\nRelationships created: " + stats.relationshipsCreated +
         "\nRelationships reused: " + stats.relationshipsReused,
-        "SABSA A1 MD Extracted Model"
+        "SABSA A1 JSON Extracted Model"
     );
 }
 
