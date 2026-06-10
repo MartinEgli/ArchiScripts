@@ -27,9 +27,13 @@ var CONST = {
     ViewpointViewName: "SABSA A1 - Metamodel Viewpoint Catalogue",
     TableIndexViewName: "SABSA A1 - Metamodel Complete Table Index",
     SampleOverviewViewName: "SABSA A1 - Overlay Sample Relationship Overview",
+    OverlayOverviewViewName: "SABSA A1 Overlay - Overview",
+    OverlayTypeModelViewName: "SABSA A1 Overlay - Type Model",
+    OverlayTemplateLibraryViewName: "SABSA A1 Overlay - Template Library",
     Folder: {
         Root: "SABSA",
         A1: "A1",
+        OverlayModel: "Overlay Model",
         ModelName: "Metamodel Field Catalogue",
         Layers: "Layers",
         CoreTypes: "Core Types",
@@ -76,7 +80,19 @@ var CONST = {
         GapX: 26,
         GapY: 22,
         Columns: 4,
-        TypeColumns: 5
+        TypeColumns: 5,
+        LibraryGroupX: 40,
+        LibraryGroupY: 150,
+        LibraryGroupWidth: 1460,
+        LibraryGroupInnerX: 22,
+        LibraryGroupInnerY: 36,
+        LibraryGroupGapY: 28,
+        LibraryGroupColumns: 4,
+        LibraryHeaderWidth: 980,
+        LibraryHeaderHeight: 88,
+        OverviewCardWidth: 420,
+        OverviewCardHeight: 94,
+        OverviewGapX: 460
     },
     Style: {
         SourceFill: "#fff7cc",
@@ -94,6 +110,10 @@ var CONST = {
         RelationshipFill: "#ffcc64",
         ViewpointFill: "#ccff9a",
         SupportFill: "#f3f3f3",
+        LibraryHeaderFill: "#eef5ff",
+        LibraryGroupFill: "#f9f9f9",
+        LibraryTypeGroupFill: "#eaf0ff",
+        LibraryTemplateGroupFill: "#f8f5ea",
         LineColor: "#111111",
         FontColor: "#111111",
         LayerFillByPrefix: {
@@ -229,7 +249,7 @@ function ensureFolderPath(rootName, pathSegments) {
 }
 
 function getModelFolderSegments(extraSegments) {
-    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+    var segments = [CONST.Folder.OverlayModel, CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
 
     (extraSegments || []).forEach(function (segment) {
         segments.push(segment);
@@ -283,7 +303,7 @@ function moveRelationshipToFolder(relationship) {
 }
 
 function moveViewToFolder(viewObject) {
-    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.A1], viewObject);
+    return moveObjectToFolder("Views", [CONST.Folder.OverlayModel, CONST.Folder.Root, CONST.Folder.A1], viewObject);
 }
 
 function buildUniqueViewName(baseName) {
@@ -673,6 +693,7 @@ function applyOverlayStereotype(target, conceptType, properties) {
 
     target.prop(CONST.Property.Namespace, CONST.Namespace);
     target.prop(CONST.Property.Kind, getOverlayKind(properties));
+    target.prop(CONST.Property.BaseType, conceptType);
     target.prop(CONST.Property.TypeName, typeName);
     target.prop(CONST.Property.ConceptType, conceptType);
     target.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
@@ -712,6 +733,7 @@ function applyRelationshipStereotype(relationship, relationshipType, properties)
 
     relationship.prop(CONST.Property.Namespace, CONST.Namespace);
     relationship.prop(CONST.Property.Kind, safeString(properties && properties.RelationshipKind) || CONST.Kind.MetaRelationship);
+    relationship.prop(CONST.Property.BaseType, relationshipType);
     relationship.prop(CONST.Property.TypeName, typeName);
     relationship.prop(CONST.Property.ConceptType, relationshipType);
     relationship.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
@@ -985,6 +1007,56 @@ function addStyledVisual(container, concept, x, y, width, height, fillColor) {
     } catch (error) {
         logger.debug("Could not apply stereotype label expression.", { error: String(error) }, "sabsa.a1.catalogue.visual.stereotype.label.skipped");
     }
+    return visual;
+}
+
+function styleLibraryShape(shape, fillColor) {
+    shape.fillColor = fillColor;
+    shape.lineColor = CONST.Style.LineColor;
+    shape.fontColor = CONST.Style.FontColor;
+    shape.opacity = 255;
+    shape.outlineOpacity = 255;
+}
+
+function addLibraryNote(container, text, x, y, width, height, fillColor) {
+    var note = container.createObject("note", x, y, width, height);
+    note.text = text;
+    styleLibraryShape(note, fillColor);
+    return note;
+}
+
+function addLibraryGroup(view, name, x, y, width, height, fillColor) {
+    var group = view.createObject("group", x, y, width, height);
+    group.name = name;
+    styleLibraryShape(group, fillColor);
+    return group;
+}
+
+function calculateLibraryGroupHeight(itemCount) {
+    var rows = Math.max(1, Math.ceil(itemCount / CONST.Layout.LibraryGroupColumns));
+    return CONST.Layout.LibraryGroupInnerY +
+        (rows * CONST.Layout.CardHeight) +
+        ((rows - 1) * CONST.Layout.GapY) +
+        CONST.Layout.LibraryGroupGapY;
+}
+
+function nextLibraryGroupY(currentY, groupHeight) {
+    return currentY + groupHeight + CONST.Layout.LibraryGroupGapY;
+}
+
+function addLibraryConcept(group, concept, index, fillColor, labelExpression) {
+    var row = Math.floor(index / CONST.Layout.LibraryGroupColumns);
+    var col = index % CONST.Layout.LibraryGroupColumns;
+    var x = CONST.Layout.LibraryGroupInnerX + (col * (CONST.Layout.CardWidth + CONST.Layout.GapX));
+    var y = CONST.Layout.LibraryGroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY));
+    var visual = addStyledVisual(group, concept, x, y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, fillColor);
+
+    try {
+        visual.labelExpression = labelExpression;
+    } catch (error) {
+        logger.debug("Could not apply library label expression.", { error: String(error) }, "sabsa.a1.overlay.library.label.skipped");
+    }
+
     return visual;
 }
 
@@ -2277,6 +2349,150 @@ function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeCon
     return view;
 }
 
+function createOverlayLibraryOverviewView() {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.OverlayOverviewViewName));
+    var group;
+
+    view.documentation = "Generated SABSA A1 overlay overview following the security overlay library pattern.";
+    moveViewToFolder(view);
+
+    addLibraryNote(
+        view,
+        "SABSA A1 Overlay Overview\n" +
+        "This generator creates metamodel detail views plus an Overlay Type Model and an Overlay Template Library.\n" +
+        "Field_* metadata belongs only to CoreType meta elements.",
+        CONST.Layout.StartX,
+        CONST.Layout.StartY,
+        CONST.Layout.LibraryHeaderWidth,
+        CONST.Layout.LibraryHeaderHeight,
+        CONST.Style.LibraryHeaderFill
+    );
+
+    group = addLibraryGroup(
+        view,
+        "Created Overlay Library Views",
+        CONST.Layout.LibraryGroupX,
+        CONST.Layout.LibraryGroupY,
+        CONST.Layout.LibraryGroupWidth,
+        160,
+        CONST.Style.LibraryGroupFill
+    );
+
+    addLibraryNote(group, "Overlay Type Model\nMeta types and meta relationships.", CONST.Layout.LibraryGroupInnerX, CONST.Layout.LibraryGroupInnerY, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Style.LibraryTypeGroupFill);
+    addLibraryNote(group, "Overlay Template Library\nSample/template elements with concrete field values only.", CONST.Layout.LibraryGroupInnerX + CONST.Layout.OverviewGapX, CONST.Layout.LibraryGroupInnerY, CONST.Layout.OverviewCardWidth, CONST.Layout.OverviewCardHeight, CONST.Style.LibraryTemplateGroupFill);
+
+    stats.views++;
+    return view;
+}
+
+function groupCoreTypesByBaseType(coreTypeConcepts) {
+    var grouped = {};
+
+    Object.keys(coreTypeConcepts || {}).forEach(function (typeName) {
+        var concept = coreTypeConcepts[typeName];
+        var baseType = safeString(concept.prop(CONST.Property.BaseType)) || safeString(concept.prop("RecommendedArchiMateType")) || concept.type || "grouping";
+
+        if (!grouped[baseType]) {
+            grouped[baseType] = [];
+        }
+        grouped[baseType].push(concept);
+    });
+
+    return grouped;
+}
+
+function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.OverlayTypeModelViewName));
+    var grouped = groupCoreTypesByBaseType(coreTypeConcepts);
+    var currentY = CONST.Layout.LibraryGroupY;
+    var typeLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
+    var relationshipLabel = "«Relationship Type»\n${name}\n${property:BaseType}";
+
+    view.documentation = "Generated SABSA A1 overlay type model. Meta elements define the available overlay types.";
+    moveViewToFolder(view);
+
+    addLibraryNote(
+        view,
+        "SABSA A1 Overlay Type Model\nMeta CoreType elements own Field_* metadata. Relationship catalogue entries are shown as relationship-type cards.",
+        CONST.Layout.StartX,
+        CONST.Layout.StartY,
+        CONST.Layout.LibraryHeaderWidth,
+        CONST.Layout.LibraryHeaderHeight,
+        CONST.Style.LibraryHeaderFill
+    );
+
+    Object.keys(grouped).sort().forEach(function (baseType) {
+        var concepts = grouped[baseType];
+        var groupHeight = calculateLibraryGroupHeight(concepts.length);
+        var group = addLibraryGroup(view, baseType, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
+
+        concepts.forEach(function (concept, index) {
+            addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), typeLabel);
+        });
+
+        currentY = nextLibraryGroupY(currentY, groupHeight);
+    });
+
+    if (relationshipConcepts && relationshipConcepts.length) {
+        var relationshipGroupHeight = calculateLibraryGroupHeight(relationshipConcepts.length);
+        var relationshipGroup = addLibraryGroup(view, "Relationship Types", CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, relationshipGroupHeight, CONST.Style.RelationshipFill);
+
+        relationshipConcepts.forEach(function (concept, index) {
+            addLibraryConcept(relationshipGroup, concept, index, getConceptFill(concept, CONST.Style.RelationshipFill), relationshipLabel);
+        });
+    }
+
+    stats.views++;
+    return view;
+}
+
+function createOverlayTemplateLibraryView(samplesByType) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.OverlayTemplateLibraryViewName));
+    var samples = Object.keys(samplesByType || {}).sort().map(function (typeName) {
+        return samplesByType[typeName];
+    });
+    var grouped = {};
+    var currentY = CONST.Layout.LibraryGroupY;
+    var templateLabel = "«${specialization}»\n${name}\n${property:BaseType}";
+
+    view.documentation = "Generated SABSA A1 overlay template library. Templates carry concrete field values only.";
+    moveViewToFolder(view);
+
+    addLibraryNote(
+        view,
+        "SABSA A1 Overlay Template Library\nSample/template elements are specialized and carry concrete field values. Field_* metadata stays on the linked CoreType meta element.",
+        CONST.Layout.StartX,
+        CONST.Layout.StartY,
+        CONST.Layout.LibraryHeaderWidth,
+        CONST.Layout.LibraryHeaderHeight,
+        CONST.Style.LibraryHeaderFill
+    );
+
+    samples.forEach(function (sample) {
+        var baseType = safeString(sample.prop(CONST.Property.BaseType)) || sample.type || "grouping";
+
+        if (!grouped[baseType]) {
+            grouped[baseType] = [];
+        }
+        grouped[baseType].push(sample);
+    });
+
+    Object.keys(grouped).sort().forEach(function (baseType) {
+        var concepts = grouped[baseType];
+        var groupHeight = calculateLibraryGroupHeight(concepts.length);
+        var group = addLibraryGroup(view, baseType, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTemplateGroupFill);
+
+        concepts.forEach(function (concept, index) {
+            addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), templateLabel);
+        });
+
+        currentY = nextLibraryGroupY(currentY, groupHeight);
+    });
+
+    stats.views++;
+    return view;
+}
+
 function validateCounts(summary) {
     if (!summary.genericTables || !summary.genericRows || !summary.layers || !summary.coreTypes || !summary.relationships) {
         throw new Error("The field catalogue did not yield layers, core types and relationships.");
@@ -2362,6 +2578,9 @@ function main() {
     createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts);
     createGridView(CONST.ViewpointViewName, sourceConcept, viewpointConcepts, CONST.Style.ViewpointFill, CONST.Layout.Columns);
     createSampleOverviewView(samplesByType, sampleRelationships);
+    createOverlayLibraryOverviewView();
+    createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts);
+    createOverlayTemplateLibraryView(samplesByType);
 
     logger.finish("SABSA A1 field catalogue generation finished.", {
         layers: stats.layers,
