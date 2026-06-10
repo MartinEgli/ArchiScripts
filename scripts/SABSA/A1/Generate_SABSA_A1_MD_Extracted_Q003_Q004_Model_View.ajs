@@ -1,0 +1,1026 @@
+var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View";
+var LOG_LEVEL = "WARN";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: LOG_LEVEL
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 MD Extracted Q003/Q004 Model"
+});
+
+var CONST = {
+    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md").getCanonicalPath(),
+    SourceDocumentName: "08_q003_q004_end_to_end_gesamtmodell.md",
+    MermaidViewName: "SABSA A1 - MD Extracted Mermaid Model",
+    RiskViewName: "SABSA A1 - MD Extracted Risk Governance Map",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "MD Extracted Q003 Q004 Gesamtmodell",
+        Relations: {
+            Mermaid: "Mermaid Relations",
+            RiskMap: "Risk Map Relations",
+            SourceTrace: "Source Trace"
+        }
+    },
+    Layout: {
+        StartX: 40,
+        StartY: 40,
+        NodeWidth: 220,
+        NodeHeight: 64,
+        GapX: 38,
+        GapY: 24,
+        MermaidColumns: 5,
+        MermaidBlockGap: 90,
+        RiskRowHeight: 125,
+        RiskColGap: 24
+    },
+    Style: {
+        SourceFill: "#fff7cc",
+        ContextFill: "#ff9aff",
+        ProcessFill: "#ffff9a",
+        RiskFill: "#ffff64",
+        AttributeFill: "#ccccff",
+        RoleFill: "#ffcc64",
+        TreatmentFill: "#ccff9a",
+        EvidenceFill: "#ffffcc",
+        AssuranceFill: "#ffffcc",
+        LineColor: "#111111",
+        FontColor: "#111111"
+    }
+};
+
+var stats = {
+    mermaidBlocks: 0,
+    mermaidNodes: 0,
+    mermaidEdges: 0,
+    tableRows: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0,
+    relationships: 0,
+    views: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function slugify(value) {
+    return trim(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function readUtf8Text(absolutePath) {
+    return String(new java.lang.String(
+        Files.readAllBytes(Paths.get(absolutePath)),
+        StandardCharsets.UTF_8
+    ));
+}
+
+function cleanLabel(value) {
+    return trim(value)
+        .replace(/<br\s*\/?>/gi, " ")
+        .replace(/\\n/g, " ")
+        .replace(/\s+/g, " ");
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Motivation": ["Motivation"],
+        "Strategy": ["Strategy"],
+        "Technology & Physical": ["Technology & Physical", "Technology and Physical", "Technology"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var wantedNames = (aliasesByFolderName[rootName] || [rootName]).map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    if (!objectToMove) {
+        return null;
+    }
+
+    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    return objectToMove;
+}
+
+function resolveConceptPlacement(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaA1MdKind);
+    var folder = kind || "Extracted";
+
+    if (conceptType === "goal" || conceptType === "requirement" || conceptType === "constraint" ||
+        conceptType === "assessment" || conceptType === "outcome" || conceptType === "driver") {
+        return { rootName: "Motivation", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "capability" || conceptType === "course-of-action") {
+        return { rootName: "Strategy", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "artifact") {
+        return { rootName: "Technology & Physical", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "deliverable" || conceptType === "work-package") {
+        return { rootName: "Implementation & Migration", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    if (conceptType === "grouping" || conceptType === "location") {
+        return { rootName: "Other", pathSegments: getModelFolderSegments([folder]) };
+    }
+
+    return { rootName: "Business", pathSegments: getModelFolderSegments([folder]) };
+}
+
+function moveConceptToFolder(concept, conceptType, properties) {
+    var placement = resolveConceptPlacement(conceptType, properties);
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.A1], viewObject);
+}
+
+function resolveRelationshipFolder(properties) {
+    var kind = safeString(properties && properties.SabsaA1MdRelationKind);
+    var folderName = kind === "RiskMap" ? CONST.Folder.Relations.RiskMap :
+        kind === "SourceTrace" ? CONST.Folder.Relations.SourceTrace :
+            CONST.Folder.Relations.Mermaid;
+
+    return { rootName: "Relations", pathSegments: getModelFolderSegments([folderName]) };
+}
+
+function moveRelationshipToFolder(relationship, properties) {
+    var placement = resolveRelationshipFolder(properties);
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaA1MdKey")) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation) {
+    var concept = findConceptByKey(conceptType, key);
+    var conceptCreated = false;
+
+    if (!concept) {
+        var placement = resolveConceptPlacement(conceptType, properties);
+        concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        conceptCreated = true;
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaA1MdKey", key);
+    setCommonSourceProperties(concept, safeString(properties && properties.SabsaA1MdKind));
+    setProperties(concept, properties);
+    concept.prop("VisualFillColor", getVisualFill(safeString(properties && properties.SabsaA1MdKind)));
+    concept.prop("VisualColorRole", getColorRole(concept.prop("VisualFillColor")));
+
+    if (conceptCreated) {
+        moveConceptToFolder(concept, conceptType, properties);
+    }
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1MdKey")) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(relationshipType, sourceConcept, targetConcept, key, name, properties) {
+    var relationship = findRelationshipByKey(key);
+    var relationshipCreated = false;
+
+    if (!sourceConcept || !targetConcept) {
+        return null;
+    }
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(relationshipType, name || "", sourceConcept, targetConcept);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+            logger.debug("Preferred relationship type failed; association fallback used.", {
+                preferred_type: relationshipType,
+                key: key,
+                error: String(error)
+            }, "sabsa.a1.md.relationship.fallback");
+        }
+        relationshipCreated = true;
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = name || "";
+    relationship.prop("SabsaA1MdKey", key);
+    setCommonSourceProperties(relationship, "Relationship");
+    setProperties(relationship, properties);
+
+    if (relationshipCreated) {
+        moveRelationshipToFolder(relationship, properties);
+    }
+
+    stats.relationships++;
+    return relationship;
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    try {
+        visual.labelExpression = "${name}";
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply visual label options.", { error: String(error) }, "sabsa.a1.md.visual.label.skipped");
+    }
+    return visual;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    if (!relationship || !sourceVisual || !targetVisual) {
+        return null;
+    }
+
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+    return connection;
+}
+
+function getVisualFill(kind) {
+    if (kind === "SourceDocument") {
+        return CONST.Style.SourceFill;
+    }
+    if (kind === "RiskThread" || kind === "Assessment" || kind === "State" || kind === "Risk") {
+        return CONST.Style.RiskFill;
+    }
+    if (kind === "Attribute") {
+        return CONST.Style.AttributeFill;
+    }
+    if (kind === "Role" || kind === "Authority") {
+        return CONST.Style.RoleFill;
+    }
+    if (kind === "Treatment") {
+        return CONST.Style.TreatmentFill;
+    }
+    if (kind === "Evidence") {
+        return CONST.Style.EvidenceFill;
+    }
+    if (kind === "Assurance") {
+        return CONST.Style.AssuranceFill;
+    }
+    if (kind === "Process" || kind === "Event") {
+        return CONST.Style.ProcessFill;
+    }
+    return CONST.Style.ContextFill;
+}
+
+function inferMermaidConceptType(label) {
+    var text = cleanLabel(label).toLowerCase();
+
+    if (text.indexOf("event") >= 0) {
+        return { type: "business-event", kind: "Event", sabsaType: "Event" };
+    }
+    if (text.indexOf("consequence") >= 0) {
+        return { type: "outcome", kind: "Consequence", sabsaType: "Consequence" };
+    }
+    if (text.indexOf("risk") >= 0 || text.indexOf("assessment") >= 0 || text.indexOf("evaluation") >= 0 ||
+        text.indexOf("state") >= 0 || text.indexOf("scorecard") >= 0 || text.indexOf("kri") >= 0) {
+        return { type: "assessment", kind: "Assessment", sabsaType: "Assessment" };
+    }
+    if (text.indexOf("treatment") >= 0 || text.indexOf("control") >= 0 || text.indexOf("enabler") >= 0) {
+        return { type: "course-of-action", kind: "Treatment", sabsaType: "Risk_Treatment" };
+    }
+    if (text.indexOf("assurance") >= 0) {
+        return { type: "requirement", kind: "Assurance", sabsaType: "Assurance_Requirement" };
+    }
+    if (text.indexOf("authority") >= 0 || text.indexOf("owner") >= 0) {
+        return { type: "business-role", kind: "Authority", sabsaType: "Domain_Authority" };
+    }
+    if (text.indexOf("availability") >= 0 || text.indexOf("integrity") >= 0 || text.indexOf("confidentiality") >= 0 ||
+        text.indexOf("recoverability") >= 0 || text.indexOf("reliability") >= 0 || text.indexOf("compliance") >= 0) {
+        return { type: "goal", kind: "Attribute", sabsaType: "Attribute" };
+    }
+    if (text.indexOf("pos") >= 0 || text.indexOf("integration") >= 0 || text.indexOf("logistics") >= 0 ||
+        text.indexOf("security") >= 0 || text.indexOf("finance") >= 0 || text.indexOf("shared service") >= 0) {
+        return { type: "capability", kind: "Capability", sabsaType: "Shared_Service_Dependency" };
+    }
+    if (text.indexOf("journey") >= 0 || text.indexOf("governance") >= 0 || text.indexOf("operate") >= 0 ||
+        text.indexOf("transition") >= 0 || text.indexOf("transform") >= 0 || text.indexOf("adopt") >= 0) {
+        return { type: "business-process", kind: "Process", sabsaType: "Process" };
+    }
+
+    return { type: "grouping", kind: "Context", sabsaType: "Risk_Context" };
+}
+
+function getRiskThreadId(threadText, rowIndex) {
+    var match = safeString(threadText).match(/Q3-RT\d+/i);
+    return match ? match[0].toUpperCase() : "Q3-RT" + ("0" + rowIndex).slice(-2);
+}
+
+function parseMarkdownTableLines(lines) {
+    var rows = [];
+    var headers = [];
+
+    lines.forEach(function (line, index) {
+        var cells;
+
+        if (line.indexOf("|") < 0) {
+            return;
+        }
+
+        cells = line.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(function (cell) {
+            return trim(cell);
+        });
+
+        if (index === 0) {
+            headers = cells;
+            return;
+        }
+
+        if (cells.join("").replace(/-/g, "").replace(/:/g, "") === "") {
+            return;
+        }
+
+        rows.push({
+            headers: headers,
+            cells: cells
+        });
+    });
+
+    return rows;
+}
+
+function extractTableAfterMarker(markdown, marker) {
+    var markerIndex = markdown.indexOf(marker);
+    var lines;
+    var tableLines = [];
+    var started = false;
+    var stopped = false;
+
+    if (markerIndex < 0) {
+        return [];
+    }
+
+    lines = markdown.substring(markerIndex).split(/\r?\n/);
+    lines.forEach(function (line) {
+        if (stopped) {
+            return;
+        }
+
+        if (trim(line).indexOf("|") === 0) {
+            tableLines.push(line);
+            started = true;
+            return;
+        }
+
+        if (started) {
+            stopped = true;
+            return;
+        }
+    });
+
+    return parseMarkdownTableLines(tableLines);
+}
+
+function extractMermaidBlocks(markdown) {
+    var blocks = [];
+    var regex = /```mermaid\s*([\s\S]*?)```/g;
+    var match;
+
+    while ((match = regex.exec(markdown)) !== null) {
+        blocks.push(match[1]);
+    }
+
+    return blocks;
+}
+
+function parseMermaidBlock(blockText, blockIndex) {
+    var nodes = {};
+    var edges = [];
+    var lines = blockText.split(/\r?\n/);
+    var nodeRegex = /([A-Za-z0-9_]+)\s*\["([^"]+)"\]/g;
+
+    lines.forEach(function (line) {
+        var nodeMatch;
+        var edgeMatch;
+        var normalizedLine = trim(line);
+
+        while ((nodeMatch = nodeRegex.exec(normalizedLine)) !== null) {
+            nodes[nodeMatch[1]] = cleanLabel(nodeMatch[2]);
+        }
+
+        edgeMatch = normalizedLine.match(/^([A-Za-z0-9_]+)\s*(-->|-.+?\.->)\s*([A-Za-z0-9_]+)/);
+        if (edgeMatch) {
+            edges.push({
+                source: edgeMatch[1],
+                target: edgeMatch[3],
+                raw: normalizedLine,
+                label: cleanLabel((normalizedLine.match(/"([^"]+)"/) || ["", ""])[1]),
+                blockIndex: blockIndex
+            });
+        }
+    });
+
+    return {
+        blockIndex: blockIndex,
+        nodes: nodes,
+        edges: edges
+    };
+}
+
+function splitCellValues(value) {
+    return safeString(value).split(/\s*;\s*|\s*\/\s*/).map(trim).filter(function (entry) {
+        return !!entry;
+    });
+}
+
+function rowToObject(row) {
+    var result = {};
+    row.headers.forEach(function (header, index) {
+        result[header] = row.cells[index] || "";
+    });
+    return result;
+}
+
+function buildDocumentation(title, properties) {
+    var lines = [title, ""];
+    Object.keys(properties || {}).forEach(function (key) {
+        lines.push(key + ": " + safeString(properties[key]));
+    });
+    return lines.join("\n");
+}
+
+function setProperties(target, properties) {
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        target.prop(propertyName, safeString(properties[propertyName]));
+    });
+}
+
+function setCommonSourceProperties(target, sourceKind) {
+    target.prop("SourceMarkdown", CONST.SourceMarkdownPath);
+    target.prop("SourceDocumentName", CONST.SourceDocumentName);
+    target.prop("ExtractorScript", SCRIPT_NAME);
+    if (sourceKind) {
+        target.prop("SourceKind", sourceKind);
+    }
+}
+
+function applyTableProperties(target, data) {
+    Object.keys(data || {}).forEach(function (columnName) {
+        target.prop("Table_" + slugify(columnName), data[columnName]);
+    });
+}
+
+function getColorRole(fillColor) {
+    var roles = {
+        "#ff9aff": "SABSA contextual architecture",
+        "#ccccff": "SABSA conceptual architecture",
+        "#ccffff": "SABSA logical architecture",
+        "#ccff9a": "SABSA physical/treatment architecture",
+        "#ffff9a": "SABSA component/workflow architecture",
+        "#ffcc64": "SABSA management/relationship architecture",
+        "#ff9a69": "SABSA column/event/validation marker",
+        "#ffff64": "SABSA cell/risk-assessment marker",
+        "#ffffcc": "SABSA representation/evidence marker",
+        "#fff7cc": "source document",
+        "#f3f3f3": "support/context"
+    };
+    return roles[safeString(fillColor)] || "SABSA A1 extracted model";
+}
+
+function createSourceConcept(markdown) {
+    var documentControl = extractTableAfterMarker(markdown, "## 16.8.8.1 Document Control");
+    var props = {
+        SabsaA1MdKind: "SourceDocument",
+        DocumentTitle: "16.8.8 Q003/Q004 End-To-End Gesamtmodell",
+        SourceSection: "Document Control"
+    };
+
+    documentControl.forEach(function (row) {
+        var entry = rowToObject(row);
+        if (entry.Feld && entry.Inhalt) {
+            props["DocumentControl_" + slugify(entry.Feld)] = entry.Inhalt;
+        }
+    });
+
+    return ensureConcept(
+        "grouping",
+        "Q003/Q004 End-To-End Gesamtmodell MD",
+        "source:md:q003-q004-end-to-end",
+        props,
+        buildDocumentation("Markdown source document for extracted SABSA A1 model.", props)
+    );
+}
+
+function createMermaidConcepts(markdown, sourceConcept) {
+    var blocks = extractMermaidBlocks(markdown);
+    var concepts = {};
+    var relationships = [];
+
+    blocks.forEach(function (block, blockIndex) {
+        var parsed = parseMermaidBlock(block, blockIndex + 1);
+        stats.mermaidBlocks++;
+
+        Object.keys(parsed.nodes).forEach(function (alias) {
+            var label = parsed.nodes[alias];
+            var inferred = inferMermaidConceptType(label);
+            var key = "mermaid:" + (blockIndex + 1) + ":" + alias;
+            var concept = ensureConcept(inferred.type, label, key, {
+                SabsaA1MdKind: inferred.kind,
+                SabsaType: inferred.sabsaType,
+                MermaidAlias: alias,
+                MermaidBlock: String(blockIndex + 1),
+                SourceSection: "Mermaid block " + (blockIndex + 1),
+                OriginalLabel: label
+            }, "Extracted from Mermaid block " + (blockIndex + 1) + " in the Q003/Q004 Gesamtmodell.");
+            concepts[key] = concept;
+            stats.mermaidNodes++;
+
+            relationships.push(ensureRelationship("association-relationship", sourceConcept, concept, "source:mermaid:" + key, "extracts", {
+                SabsaA1MdRelationKind: "SourceTrace",
+                SourceSection: "Mermaid block " + (blockIndex + 1)
+            }));
+        });
+
+        parsed.edges.forEach(function (edge, edgeIndex) {
+            var sourceKey = "mermaid:" + (blockIndex + 1) + ":" + edge.source;
+            var targetKey = "mermaid:" + (blockIndex + 1) + ":" + edge.target;
+            var relationshipType = edge.raw.indexOf("-->") >= 0 ? "association-relationship" : "serving-relationship";
+            var relationship = ensureRelationship(relationshipType, concepts[sourceKey], concepts[targetKey], "mermaid-edge:" + (blockIndex + 1) + ":" + edgeIndex, edge.label, {
+                SabsaA1MdRelationKind: "Mermaid",
+                MermaidBlock: String(blockIndex + 1),
+                SourceSection: "Mermaid block " + (blockIndex + 1),
+                OriginalLine: edge.raw
+            });
+            relationships.push(relationship);
+            stats.mermaidEdges++;
+        });
+    });
+
+    return {
+        blocks: blocks,
+        concepts: concepts,
+        relationships: relationships
+    };
+}
+
+function createRiskMapConcepts(markdown, sourceConcept) {
+    var rows = extractTableAfterMarker(markdown, "Table 16.8.8-03 - Q3 Risk To Q4 Governance Map");
+    var result = {
+        risks: [],
+        concepts: {},
+        relationships: []
+    };
+
+    rows.forEach(function (row, index) {
+        var data = rowToObject(row);
+        var rowIndex = index + 1;
+        var riskId = getRiskThreadId(data["Q3 Risk Thread"], rowIndex);
+        var risk = ensureConcept("assessment", data["Q3 Risk Thread"], "risk-map:risk:" + riskId, {
+            SabsaA1MdKind: "RiskThread",
+            SabsaType: "Risk",
+            RiskThreadId: riskId,
+            AssessmentEvaluation: data["Q3 Assessment / Evaluation"],
+            SourceSection: "Table 16.8.8-03",
+            RowIndex: String(rowIndex)
+        }, buildDocumentation("Q3 risk thread extracted from Table 16.8.8-03.", data));
+        applyTableProperties(risk, data);
+
+        result.risks.push({ id: riskId, data: data, risk: risk });
+        result.concepts["risk:" + riskId] = risk;
+        stats.tableRows++;
+
+        splitCellValues(data["Primary Attribute"]).forEach(function (attributeName) {
+            var key = "risk-map:attribute:" + slugify(attributeName);
+            var attribute = result.concepts[key] || ensureConcept("goal", attributeName, key, {
+                SabsaA1MdKind: "Attribute",
+                SabsaType: "Attribute",
+                SourceSection: "Table 16.8.8-03",
+                OriginalCell: data["Primary Attribute"]
+            }, "Primary attribute extracted from Q3 Risk To Q4 Governance Map.");
+            result.concepts[key] = attribute;
+            result.relationships.push(ensureRelationship("influence-relationship", risk, attribute, "risk-map:" + riskId + ":affects:" + slugify(attributeName), "affects", {
+                SabsaA1MdRelationKind: "RiskMap",
+                RiskThreadId: riskId,
+                SourceSection: "Table 16.8.8-03"
+            }));
+        });
+
+        splitCellValues(data["Q4 Governance Owner"]).forEach(function (ownerName) {
+            var key = "risk-map:owner:" + slugify(ownerName);
+            var owner = result.concepts[key] || ensureConcept("business-role", ownerName, key, {
+                SabsaA1MdKind: "Role",
+                SabsaType: "Domain_Authority",
+                SourceSection: "Table 16.8.8-03",
+                OriginalCell: data["Q4 Governance Owner"]
+            }, "Governance owner extracted from Q3 Risk To Q4 Governance Map.");
+            result.concepts[key] = owner;
+            result.relationships.push(ensureRelationship("assignment-relationship", owner, risk, "risk-map:" + riskId + ":owner:" + slugify(ownerName), "owns", {
+                SabsaA1MdRelationKind: "RiskMap",
+                RiskThreadId: riskId,
+                SourceSection: "Table 16.8.8-03"
+            }));
+        });
+
+        var treatment = ensureConcept("course-of-action", data["Treatment / Control Objective"], "risk-map:treatment:" + riskId, {
+            SabsaA1MdKind: "Treatment",
+            SabsaType: "Risk_Treatment",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }, buildDocumentation("Treatment or control objective extracted from Table 16.8.8-03.", data));
+        var evidence = ensureConcept("artifact", data["Management Evidence"], "risk-map:evidence:" + riskId, {
+            SabsaA1MdKind: "Evidence",
+            SabsaType: "Evidence_Item",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }, buildDocumentation("Management evidence extracted from Table 16.8.8-03.", data));
+        var assurance = ensureConcept("requirement", data["Assurance Focus"], "risk-map:assurance:" + riskId, {
+            SabsaA1MdKind: "Assurance",
+            SabsaType: "Assurance_Requirement",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }, buildDocumentation("Assurance focus extracted from Table 16.8.8-03.", data));
+        applyTableProperties(treatment, data);
+        applyTableProperties(evidence, data);
+        applyTableProperties(assurance, data);
+
+        result.concepts["treatment:" + riskId] = treatment;
+        result.concepts["evidence:" + riskId] = evidence;
+        result.concepts["assurance:" + riskId] = assurance;
+
+        result.relationships.push(ensureRelationship("realization-relationship", treatment, risk, "risk-map:" + riskId + ":treats", "treats", {
+            SabsaA1MdRelationKind: "RiskMap",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }));
+        result.relationships.push(ensureRelationship("association-relationship", evidence, treatment, "risk-map:" + riskId + ":evidences-treatment", "evidences", {
+            SabsaA1MdRelationKind: "RiskMap",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }));
+        result.relationships.push(ensureRelationship("association-relationship", assurance, evidence, "risk-map:" + riskId + ":assures-evidence", "assures", {
+            SabsaA1MdRelationKind: "RiskMap",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }));
+        result.relationships.push(ensureRelationship("association-relationship", sourceConcept, risk, "source:table-03:" + riskId, "extracts", {
+            SabsaA1MdRelationKind: "SourceTrace",
+            RiskThreadId: riskId,
+            SourceSection: "Table 16.8.8-03"
+        }));
+    });
+
+    return result;
+}
+
+function createGovernanceTableConcepts(markdown, sourceConcept) {
+    var tableSpecs = [
+        {
+            marker: "Table 16.8.8-04 - Source And Assumption Control",
+            key: "source-control",
+            kind: "SourceControl",
+            type: "assessment",
+            nameColumn: "Model Element"
+        },
+        {
+            marker: "Table 16.8.8-05 - Anonymised Use Case Capsule Mapping",
+            key: "capsule",
+            kind: "UseCaseCapsule",
+            type: "grouping",
+            nameColumn: "Capsule Element"
+        },
+        {
+            marker: "Table 16.8.8-06 - v1.8 Taxonomy Governance Thread",
+            key: "taxonomy",
+            kind: "TaxonomyGovernance",
+            type: "grouping",
+            nameColumn: "v1.8 Control"
+        }
+    ];
+    var concepts = [];
+
+    tableSpecs.forEach(function (spec) {
+        extractTableAfterMarker(markdown, spec.marker).forEach(function (row, index) {
+            var data = rowToObject(row);
+            var name = data[spec.nameColumn] || (spec.kind + " " + (index + 1));
+            var concept = ensureConcept(spec.type, name, "md-table:" + spec.key + ":" + slugify(name), {
+                SabsaA1MdKind: spec.kind,
+                SabsaType: spec.kind,
+                SourceSection: spec.marker,
+                RowIndex: String(index + 1),
+                OriginalColumns: row.headers.join("; ")
+            }, buildDocumentation("Extracted from " + spec.marker + ".", data));
+
+            Object.keys(data).forEach(function (columnName) {
+                concept.prop("Table_" + slugify(columnName), data[columnName]);
+            });
+
+            ensureRelationship("association-relationship", sourceConcept, concept, "source:" + spec.key + ":" + slugify(name), "extracts", {
+                SabsaA1MdRelationKind: "SourceTrace",
+                SourceSection: spec.marker
+            });
+            concepts.push(concept);
+        });
+    });
+
+    return concepts;
+}
+
+function createMermaidView(mermaidData, sourceConcept) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.MermaidViewName));
+    var visuals = {};
+    var yOffset = CONST.Layout.StartY;
+    var sourceVisual;
+
+    view.documentation = "Generated by parsing Mermaid code blocks from " + CONST.SourceMarkdownPath + ".";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, yOffset, 320, 72, CONST.Style.SourceFill);
+    yOffset += 110;
+
+    mermaidData.blocks.forEach(function (block, blockIndex) {
+        var parsed = parseMermaidBlock(block, blockIndex + 1);
+        var aliases = Object.keys(parsed.nodes);
+
+        aliases.forEach(function (alias, index) {
+            var key = "mermaid:" + (blockIndex + 1) + ":" + alias;
+            var concept = mermaidData.concepts[key];
+            var inferred = inferMermaidConceptType(parsed.nodes[alias]);
+            var x = CONST.Layout.StartX + ((index % CONST.Layout.MermaidColumns) * (CONST.Layout.NodeWidth + CONST.Layout.GapX));
+            var y = yOffset + (Math.floor(index / CONST.Layout.MermaidColumns) * (CONST.Layout.NodeHeight + CONST.Layout.GapY));
+            visuals[key] = addStyledVisual(view, concept, x, y, CONST.Layout.NodeWidth, CONST.Layout.NodeHeight, getVisualFill(inferred.kind));
+        });
+
+        parsed.edges.forEach(function (edge, edgeIndex) {
+            var rel = findRelationshipByKey("mermaid-edge:" + (blockIndex + 1) + ":" + edgeIndex);
+            addConnection(view, rel, visuals["mermaid:" + (blockIndex + 1) + ":" + edge.source], visuals["mermaid:" + (blockIndex + 1) + ":" + edge.target]);
+        });
+
+        yOffset += (Math.ceil(Math.max(1, aliases.length) / CONST.Layout.MermaidColumns) * (CONST.Layout.NodeHeight + CONST.Layout.GapY)) + CONST.Layout.MermaidBlockGap;
+    });
+
+    stats.views++;
+    return view;
+}
+
+function createRiskView(riskData, sourceConcept) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.RiskViewName));
+    var visuals = {};
+    var sourceVisual;
+    var columns = [
+        { key: "risk", width: 230, fill: CONST.Style.RiskFill },
+        { key: "attribute", width: 200, fill: CONST.Style.AttributeFill },
+        { key: "owner", width: 220, fill: CONST.Style.RoleFill },
+        { key: "treatment", width: 260, fill: CONST.Style.TreatmentFill },
+        { key: "evidence", width: 260, fill: CONST.Style.EvidenceFill },
+        { key: "assurance", width: 260, fill: CONST.Style.AssuranceFill }
+    ];
+
+    function columnX(columnIndex) {
+        var x = CONST.Layout.StartX;
+        var i;
+        for (i = 0; i < columnIndex; i++) {
+            x += columns[i].width + CONST.Layout.RiskColGap;
+        }
+        return x;
+    }
+
+    view.documentation = "Generated from Table 16.8.8-03 in " + CONST.SourceMarkdownPath + ".";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, 320, 72, CONST.Style.SourceFill);
+
+    riskData.risks.forEach(function (entry, index) {
+        var y = CONST.Layout.StartY + 110 + (index * CONST.Layout.RiskRowHeight);
+        var riskId = entry.id;
+        var riskVisual = addStyledVisual(view, entry.risk, columnX(0), y, columns[0].width, 76, columns[0].fill);
+        var treatmentVisual = addStyledVisual(view, riskData.concepts["treatment:" + riskId], columnX(3), y, columns[3].width, 76, columns[3].fill);
+        var evidenceVisual = addStyledVisual(view, riskData.concepts["evidence:" + riskId], columnX(4), y, columns[4].width, 76, columns[4].fill);
+        var assuranceVisual = addStyledVisual(view, riskData.concepts["assurance:" + riskId], columnX(5), y, columns[5].width, 76, columns[5].fill);
+
+        visuals["risk:" + riskId] = riskVisual;
+        visuals["treatment:" + riskId] = treatmentVisual;
+        visuals["evidence:" + riskId] = evidenceVisual;
+        visuals["assurance:" + riskId] = assuranceVisual;
+
+        splitCellValues(entry.data["Primary Attribute"]).slice(0, 1).forEach(function (attributeName) {
+            var key = "risk-map:attribute:" + slugify(attributeName);
+            visuals["attribute:" + riskId] = addStyledVisual(view, riskData.concepts[key], columnX(1), y, columns[1].width, 76, columns[1].fill);
+        });
+
+        splitCellValues(entry.data["Q4 Governance Owner"]).slice(0, 1).forEach(function (ownerName) {
+            var key = "risk-map:owner:" + slugify(ownerName);
+            visuals["owner:" + riskId] = addStyledVisual(view, riskData.concepts[key], columnX(2), y, columns[2].width, 76, columns[2].fill);
+        });
+
+        addConnection(view, findRelationshipByKey("source:table-03:" + riskId), sourceVisual, riskVisual);
+        addConnection(view, findRelationshipByKey("risk-map:" + riskId + ":treats"), treatmentVisual, riskVisual);
+        addConnection(view, findRelationshipByKey("risk-map:" + riskId + ":evidences-treatment"), evidenceVisual, treatmentVisual);
+        addConnection(view, findRelationshipByKey("risk-map:" + riskId + ":assures-evidence"), assuranceVisual, evidenceVisual);
+    });
+
+    riskData.relationships.forEach(function (relationship) {
+        var key = safeString(relationship && relationship.prop && relationship.prop("SabsaA1MdKey"));
+        var parts;
+        if (!key || key.indexOf(":affects:") < 0) {
+            return;
+        }
+        parts = key.split(":");
+        addConnection(view, relationship, visuals["risk:" + parts[1]], visuals["attribute:" + parts[1]]);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function confirmExecution(modelSummary) {
+    return dialogs.confirmInfo(
+        "This script will parse the Q003/Q004 Gesamtmodell markdown and create ArchiMate elements with source properties." +
+        "\n\nSource Markdown: " + CONST.SourceMarkdownPath +
+        "\nMermaid blocks: " + modelSummary.mermaidBlocks +
+        "\nRisk-map rows: " + modelSummary.riskRows +
+        "\nGovernance/source-control rows: " + modelSummary.governanceRows +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 MD Extraction Generator"
+    );
+}
+
+function main() {
+    var markdown;
+    var sourceConcept;
+    var mermaidRows;
+    var riskRows;
+    var governanceRows;
+    var mermaidData;
+    var riskData;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    markdown = readUtf8Text(CONST.SourceMarkdownPath);
+    mermaidRows = extractMermaidBlocks(markdown);
+    riskRows = extractTableAfterMarker(markdown, "Table 16.8.8-03 - Q3 Risk To Q4 Governance Map");
+    governanceRows = extractTableAfterMarker(markdown, "Table 16.8.8-04 - Source And Assumption Control")
+        .concat(extractTableAfterMarker(markdown, "Table 16.8.8-05 - Anonymised Use Case Capsule Mapping"))
+        .concat(extractTableAfterMarker(markdown, "Table 16.8.8-06 - v1.8 Taxonomy Governance Thread"));
+
+    if (!confirmExecution({
+        mermaidBlocks: mermaidRows.length,
+        riskRows: riskRows.length,
+        governanceRows: governanceRows.length
+    })) {
+        logger.info("SABSA A1 MD extraction cancelled by user.", {
+            source_markdown: CONST.SourceMarkdownPath
+        }, "sabsa.a1.md.generation.cancelled");
+        return;
+    }
+
+    logger.start("SABSA A1 MD extraction started.", {
+        source_markdown: CONST.SourceMarkdownPath
+    });
+
+    sourceConcept = createSourceConcept(markdown);
+    mermaidData = createMermaidConcepts(markdown, sourceConcept);
+    riskData = createRiskMapConcepts(markdown, sourceConcept);
+    createGovernanceTableConcepts(markdown, sourceConcept);
+    createMermaidView(mermaidData, sourceConcept);
+    createRiskView(riskData, sourceConcept);
+
+    logger.finish("SABSA A1 MD extraction finished.", {
+        mermaid_blocks: stats.mermaidBlocks,
+        mermaid_nodes: stats.mermaidNodes,
+        mermaid_edges: stats.mermaidEdges,
+        table_rows: stats.tableRows,
+        views: stats.views,
+        relationships_created_or_reused: stats.relationships,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(
+        "Generated views: " + stats.views +
+        "\nMermaid blocks: " + stats.mermaidBlocks +
+        "\nMermaid nodes: " + stats.mermaidNodes +
+        "\nMermaid edges: " + stats.mermaidEdges +
+        "\nRisk-map rows: " + stats.tableRows +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused,
+        "SABSA A1 MD Extracted Model"
+    );
+}
+
+main();
