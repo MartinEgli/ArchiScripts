@@ -80,7 +80,7 @@ The script extracts:
 - all Markdown tables in the `1-*` catalogue as table elements
 - every extracted table row as a row element with `Table_*` properties
 - field definitions as explicit properties on the matching table and core-type elements, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
-- `Table 1-LA01 - Metamodel Layer Architecture`
+- `Table 1-LA01 - SABSA Architecture Layer Alignment`
 - `Table 1-03 - Core Type Inventory`
 - `Table 1-03A - Core Type Promotion And Extension`
 - `Table 1-03B - Relationship Catalogue`
@@ -89,7 +89,7 @@ The script extracts:
 It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
 
 - `SABSA A1 - Metamodel Complete Table Index`
-- `SABSA A1 - Metamodel Layer Architecture`
+- `SABSA A1 - SABSA Architecture Layer Alignment`
 - `SABSA A1 - Metamodel Core Type Inventory`
 - `SABSA A1 - Metamodel Field FK Relations`
 - `SABSA A1 - Metamodel Relationship Catalogue`
