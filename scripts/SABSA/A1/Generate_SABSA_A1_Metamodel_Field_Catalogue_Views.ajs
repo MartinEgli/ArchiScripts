@@ -1098,6 +1098,7 @@ function createLayerConcepts(markdown, sourceConcept) {
 
 function createCoreTypeConcepts(markdown, sourceConcept) {
     var rows = extractTableAfterMarker(markdown, "Table 10.7.11-03 - Core Type Inventory");
+    var promotedRows = extractTableAfterMarker(markdown, "Table 10.7.11-03A - Core Type Promotion And Extension");
     var concepts = {};
 
     rows.forEach(function (row) {
@@ -1127,6 +1128,40 @@ function createCoreTypeConcepts(markdown, sourceConcept) {
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines", {
             SabsaA1CatalogueRelationKind: "SourceTrace",
             SourceSection: "Table 10.7.11-03"
+        });
+        concepts[typeName] = concept;
+        stats.coreTypes++;
+    });
+
+    promotedRows.forEach(function (row) {
+        var data = rowToObject(row);
+        var typeName = stripMarkup(data["Type / Pattern"]);
+        var conceptType;
+        var concept;
+
+        if (!typeName || concepts[typeName]) {
+            return;
+        }
+
+        conceptType = inferConceptTypeForSabsaType(typeName);
+        var fillColor = getCoreTypeFill(typeName, conceptType);
+        concept = ensureConcept(conceptType, typeName, "catalogue:type:" + typeName, {
+            SabsaA1CatalogueKind: "CoreType",
+            SabsaType: typeName,
+            TypeName: typeName,
+            PromotionStatus: stripMarkup(data["v1.6 Status"]),
+            WhyItMatters: data["Why It Matters"],
+            DownstreamImpact: data["Downstream Impact"],
+            SourceSection: "Table 10.7.11-03A",
+            RecommendedArchiMateType: conceptType,
+            VisualFillColor: fillColor,
+            VisualColorRole: getColorRole(fillColor)
+        }, buildDocumentation("Promoted or support type extracted from Table 10.7.11-03A.", data));
+        applyTableProperties(concept, data);
+
+        ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:type:" + typeName, "defines", {
+            SabsaA1CatalogueRelationKind: "SourceTrace",
+            SourceSection: "Table 10.7.11-03A"
         });
         concepts[typeName] = concept;
         stats.coreTypes++;
@@ -1200,6 +1235,147 @@ function addUniqueConcept(result, seen, concept) {
     }
 }
 
+function getFkTargetAliases() {
+    return {
+        "access_opportunity": ["Access_Opportunity"],
+        "activity_catalogue": ["Assurance_Activity"],
+        "agent_specific_likelihood": ["Event_Likelihood"],
+        "aggregation_result": ["Aggregation_Result"],
+        "assurance_level": ["Assurance_Level"],
+        "assurance_requirement": ["Assurance_Requirement"],
+        "assurance_subject": ["Assurance_Evaluation_Subject"],
+        "attribute": ["Attribute"],
+        "attribute_metric": ["KRI"],
+        "capability": ["Treatment_Capability"],
+        "capability_rating": ["Event_Likelihood"],
+        "classification": ["Classification_Value"],
+        "consequence": ["Consequence"],
+        "consequence_taxonomy": ["Category_Taxonomy"],
+        "control_objective": ["Control_Objective"],
+        "da": ["Domain_Attribute"],
+        "da_dependency": ["DA_Dependency"],
+        "dependency": ["DA_Dependency"],
+        "dependencies": ["DA_Dependency"],
+        "domain": ["Domain"],
+        "domain_attribute": ["Domain_Attribute"],
+        "domain_authority": ["Domain_Authority"],
+        "enablement_objective": ["Enablement_Objective"],
+        "event": ["Event"],
+        "event_agent_map": ["Event_Agent_Map"],
+        "event_likelihood": ["Event_Likelihood"],
+        "event_taxonomy": ["Category_Taxonomy"],
+        "evidence": ["Evidence_Item"],
+        "evidence_item": ["Evidence_Item"],
+        "finding": ["Assurance_Finding"],
+        "kri": ["KRI"],
+        "library_item": ["Treatment_Library_Item"],
+        "motivation_rating": ["Event_Likelihood"],
+        "opportunity": ["Risk"],
+        "overall_likelihood": ["Overall_Likelihood"],
+        "parent_domain": ["Domain"],
+        "period": ["Risk_Period", "Monitoring_Period"],
+        "risk": ["Risk"],
+        "risk_assessment": ["Risk_Assessment"],
+        "risk_period": ["Risk_Period"],
+        "role": ["Stakeholder_Role"],
+        "role_or_stakeholder": ["Stakeholder_Role", "Stakeholder"],
+        "scenario": ["Scenario"],
+        "scorecard": ["Risk_Scorecard"],
+        "source": ["Source_Reference"],
+        "source_reference": ["Source_Reference"],
+        "stakeholder": ["Stakeholder"],
+        "state": ["State"],
+        "state_attribute": ["State_Attribute"],
+        "state_rating": ["State_Rating"],
+        "state_taxonomy": ["Category_Taxonomy"],
+        "taxonomy": ["Category_Taxonomy"],
+        "threshold": ["Risk_Appetite_Criteria"],
+        "treatment": ["Risk_Treatment"],
+        "treatment_library_item": ["Treatment_Library_Item"],
+        "trigger_factor": ["Trigger_Factor"]
+    };
+}
+
+function addReferencedCoreTypeCandidate(result, seen, coreTypeConcepts, candidate) {
+    var cleaned = stripMarkup(candidate)
+        .replace(/_ids?\b/ig, " ")
+        .replace(/\boptional\b/ig, " ")
+        .replace(/\bfks?\b/ig, " ")
+        .replace(/\bids?\b/ig, " ")
+        .replace(/\breferences?\b/ig, " ")
+        .replace(/\brelated\b/ig, " ")
+        .replace(/\binput\b/ig, " ")
+        .replace(/\btarget\b/ig, " ")
+        .replace(/\bfrom\b/ig, " ")
+        .replace(/\bto\b/ig, " ")
+        .replace(/\bsender\b/ig, " ")
+        .replace(/\breceiver\b/ig, " ")
+        .replace(/\bmonitored\b/ig, " ")
+        .replace(/\brequired\b/ig, " ")
+        .replace(/\bbroader\b/ig, " ")
+        .replace(/\bparent\b/ig, " parent ")
+        .replace(/\s+/g, " ")
+        .trim();
+    var aliases = getFkTargetAliases();
+    var aliasKey = propertyKey(cleaned);
+    var aliasValues = aliases[aliasKey] || [];
+    var concept;
+
+    if (!cleaned) {
+        return;
+    }
+
+    addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, cleaned));
+    addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, splitCamelCase(cleaned)));
+
+    aliasValues.forEach(function (aliasValue) {
+        addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, aliasValue));
+    });
+
+    Object.keys(coreTypeConcepts).forEach(function (typeName) {
+        var normalizedType = propertyKey(typeName);
+        if (aliasKey === normalizedType) {
+            addUniqueConcept(result, seen, coreTypeConcepts[typeName]);
+        }
+    });
+
+    concept = getCoreTypeConcept(coreTypeConcepts, cleaned.replace(/\s+/g, "_"));
+    addUniqueConcept(result, seen, concept);
+}
+
+function addReferencedCoreTypesFromDelimitedText(result, seen, coreTypeConcepts, text) {
+    stripMarkup(text)
+        .split(/\s*(?:,|;|\/|\bor\b|\band\b)\s*/i)
+        .forEach(function (part) {
+            addReferencedCoreTypeCandidate(result, seen, coreTypeConcepts, part);
+        });
+}
+
+function addReferencedCoreTypesFromFkText(result, seen, coreTypeConcepts, note) {
+    var text = stripMarkup(note);
+    var patterns = [
+        /\bfks?\s+to\s+([^.;]+)/ig,
+        /\boptional\s+fks?\s+to\s+([^.;]+)/ig,
+        /\boptional\s+([^.;]+?)\s+fks?\b/ig,
+        /\b([^.;]+?)\s+ids?\b/ig
+    ];
+
+    patterns.forEach(function (pattern) {
+        var match;
+        while ((match = pattern.exec(text)) !== null) {
+            addReferencedCoreTypesFromDelimitedText(result, seen, coreTypeConcepts, match[1]);
+        }
+    });
+
+    Object.keys(getFkTargetAliases()).forEach(function (aliasKey) {
+        var words = aliasKey.replace(/_/g, "[ _-]");
+        var regex = new RegExp("\\b" + words + "s?\\b", "i");
+        if (regex.test(text)) {
+            addReferencedCoreTypeCandidate(result, seen, coreTypeConcepts, aliasKey);
+        }
+    });
+}
+
 function getReferencedCoreTypeConcepts(coreTypeConcepts, fieldData) {
     var result = [];
     var seen = {};
@@ -1216,6 +1392,9 @@ function getReferencedCoreTypeConcepts(coreTypeConcepts, fieldData) {
     while ((match = regex.exec(note)) !== null) {
         addUniqueConcept(result, seen, getCoreTypeConcept(coreTypeConcepts, match[1]));
     }
+
+    addReferencedCoreTypesFromFkText(result, seen, coreTypeConcepts, note);
+    addReferencedCoreTypesFromDelimitedText(result, seen, coreTypeConcepts, fieldName);
 
     inferred = fieldName
         .replace(/_ids$/i, "")
@@ -1618,6 +1797,12 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
         var target = getCoreTypeConcept(coreTypeConcepts, rowEntry.data.Type);
         linkRow("10.7.11-03", rowEntry, target, "RowDefinesCoreType", "defines type");
         linkTable("10.7.11-03", target, "TableDefinesCoreType", "defines type");
+    });
+
+    (tableData.rowsByTableId["10.7.11-03A"] || []).forEach(function (rowEntry) {
+        var target = getCoreTypeConcept(coreTypeConcepts, rowEntry.data["Type / Pattern"]);
+        linkRow("10.7.11-03A", rowEntry, target, "RowDefinesPromotedCoreType", "defines promoted/support type");
+        linkTable("10.7.11-03A", target, "TableDefinesPromotedCoreType", "defines promoted/support type");
     });
 
     (tableData.rowsByTableId["10.7.11-03B"] || []).forEach(function (rowEntry) {
