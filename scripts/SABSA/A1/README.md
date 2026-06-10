@@ -86,7 +86,7 @@ The script extracts:
 - `Table 6-03 - Relationship Catalogue`
 - `Table 6-05 - Recommended Architecture Viewpoints`
 
-It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
+It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta core-type elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. The generator removes old `Field_*` metadata copies from SABSA A1 non-meta elements when it reuses or scans them. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
 
 - `SABSA A1 - Metamodel Complete Table Index`
 - `SABSA A1 - SABSA Architecture Layer Alignment`
@@ -100,4 +100,4 @@ The complete table model also creates relationships from source to table, table 
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
-Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values from the metamodel, leaves `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
+Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing field values from the metamodel, removes old `Field_*` metadata copies from the selected explicit element, leaves `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
