@@ -77,14 +77,14 @@ Parses the generic metamodel field catalogue from:
 
 The script extracts:
 
-- all Markdown tables in the `1-*` catalogue as table elements
+- all Markdown tables in the standalone chapter-numbered catalogue as table elements
 - every extracted table row as a row element with `Table_*` properties
 - field definitions as explicit properties on the matching table and core-type elements, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
-- `Table 1-LA01 - SABSA Architecture Layer Alignment`
-- `Table 1-03 - Core Type Inventory`
-- `Table 1-03A - Core Type Promotion And Extension`
-- `Table 1-03B - Relationship Catalogue`
-- `Table 1-03D - Recommended Architecture Viewpoints`
+- `Table 3-LA01 - SABSA Architecture Layer Alignment`
+- `Table 6-01 - Core Type Inventory`
+- `Table 6-02 - Core Type Promotion And Extension`
+- `Table 6-03 - Relationship Catalogue`
+- `Table 6-05 - Recommended Architecture Viewpoints`
 
 It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta elements and sample elements are typed as `SabsaA1Overlay` stereotypes and use the label form `«SABSA A1 ${specialization}»` followed by the element name. It generates seven views:
 
@@ -96,7 +96,7 @@ It creates source-traced ArchiMate catalogue elements with properties such as `S
 - `SABSA A1 - Metamodel Viewpoint Catalogue`
 - `SABSA A1 - Overlay Sample Relationship Overview`
 
-The complete table model also creates relationships from source to table, table to row, table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type, `CoreTypeHasField` links, named FK-based `CoreTypeForeignKeyReference` links, and direct named core-type semantic relationships from `Table 1-03B`. FK targets are resolved from backticked references, field names, free-text notes and catalogue aliases such as `Evidence` -> `Evidence_Item`, `Treatment` -> `Risk_Treatment`, and `Assurance Subject` -> `Assurance_Evaluation_Subject`. Relationship names carry the relationship semantics or field name, for example `risk_id -> Risk` or the relationship-catalogue semantics with cardinality. The type, FK, relationship and sample overview views render semantic and FK relationships through their actual ArchiMate relationship endpoints, and the completion dialog reports created and skipped view connections. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
+The complete table model also creates relationships from source to table, table to row, table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type, `CoreTypeHasField` links, named FK-based `CoreTypeForeignKeyReference` links, and direct named core-type semantic relationships from `Table 6-03`. FK targets are resolved from backticked references, field names, free-text notes and catalogue aliases such as `Evidence` -> `Evidence_Item`, `Treatment` -> `Risk_Treatment`, and `Assurance Subject` -> `Assurance_Evaluation_Subject`. Relationship names carry the relationship semantics or field name, for example `risk_id -> Risk` or the relationship-catalogue semantics with cardinality. The type, FK, relationship and sample overview views render semantic and FK relationships through their actual ArchiMate relationship endpoints, and the completion dialog reports created and skipped view connections. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
