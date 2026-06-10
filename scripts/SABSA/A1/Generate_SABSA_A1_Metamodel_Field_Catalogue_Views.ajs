@@ -773,6 +773,10 @@ function buildFieldDescriptor(data) {
     ].join("; ");
 }
 
+function getFieldRoleLabel(data) {
+    return stripMarkup(data && data["Key Role"]) || "Property";
+}
+
 function applyFieldCatalogueProperties(target, rows, sourceTableId) {
     var fieldNames = [];
     var requiredFieldNames = [];
@@ -2000,6 +2004,7 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
 
         ensureRelationship("association-relationship", rowEntry.concept, targetConcept, "catalogue:row-link:" + slugify(tableId) + ":" + rowEntry.rowIndex + ":" + slugify(relationKind), label, {
             SabsaA1CatalogueRelationKind: relationKind,
+            RelationshipLabel: label,
             TableId: tableId,
             RowIndex: String(rowEntry.rowIndex),
             SourceSection: "Table " + tableId
@@ -2088,12 +2093,14 @@ function linkTableRowsToConcepts(tableData, layerConcepts, coreTypeConcepts, rel
             });
 
             rowEntries.forEach(function (rowEntry) {
-                linkRow(tableId, rowEntry, target, "FieldRowBelongsToCoreType", isFieldCatalogueRow(rowEntry.data) ? "field " + stripMarkup(rowEntry.data.Field) + " of " + target.name : "field of type");
+                var fieldRoleLabel = isFieldCatalogueRow(rowEntry.data) ? getFieldRoleLabel(rowEntry.data) : "Property";
+
+                linkRow(tableId, rowEntry, target, "FieldRowBelongsToCoreType", fieldRoleLabel);
 
                 if (isFieldCatalogueRow(rowEntry.data)) {
-                    ensureRelationship("association-relationship", target, rowEntry.concept, "catalogue:core-type-field:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex, "has field " + stripMarkup(rowEntry.data.Field), {
+                    ensureRelationship("association-relationship", target, rowEntry.concept, "catalogue:core-type-field:" + safeString(target.prop("SabsaA1CatalogueKey")) + ":" + tableId + ":" + rowEntry.rowIndex, fieldRoleLabel, {
                         SabsaA1CatalogueRelationKind: "CoreTypeHasField",
-                        RelationshipLabel: "has field " + stripMarkup(rowEntry.data.Field),
+                        RelationshipLabel: fieldRoleLabel,
                         FieldName: stripMarkup(rowEntry.data.Field),
                         Datatype: rowEntry.data.Datatype,
                         Required: rowEntry.data.Required,
