@@ -31,6 +31,21 @@ The script creates stable framework elements under `SABSA/A1/Risk Strategy Frame
 
 - `SABSA A1 - Risk Strategy Framework`
 
+## Generate_SABSA_A1_Attribute_Profile_Framework_View.ajs
+
+Generates a SABSA A1 Attribute Profile Framework view in the style of the A1 training diagram:
+
+- `Context`
+- `Attribute Definition`
+- `Attribute Taxonomy`
+- `Attribute Profile`
+- `SABSA Attributes Taxonomy`
+- `SABSA Attributes Profile`
+
+The script creates stable framework elements under `SABSA/A1/Attribute Profile Framework` and generates:
+
+- `SABSA A1 - Attribute Profile Framework`
+
 ## NIBOCJ Assumption
 
 `NIBOCJ` is currently interpreted as a working cross-reference mnemonic:
