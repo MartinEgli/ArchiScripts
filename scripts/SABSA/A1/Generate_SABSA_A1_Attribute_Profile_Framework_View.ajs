@@ -1,0 +1,479 @@
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Attribute_Profile_Framework_View";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: "WARN"
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Attribute Profile Framework"
+});
+
+var CONST = {
+    ViewName: "SABSA A1 - Attribute Profile Framework",
+    Namespace: "SabsaA1AttributeProfileFramework",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Attribute Profile Framework",
+        Elements: "Elements",
+        Relations: "Attribute Profile Framework"
+    },
+    Property: {
+        Key: "SabsaA1AttributeProfileFrameworkKey",
+        Kind: "SabsaA1AttributeProfileFrameworkKind",
+        Namespace: "Namespace",
+        SabsaType: "SabsaType",
+        SourceView: "SourceView",
+        Layer: "SabsaLayer"
+    },
+    Layout: {
+        TitleX: 30,
+        TitleY: 24,
+        TitleWidth: 760,
+        TitleHeight: 48,
+        SubtitleX: 40,
+        SubtitleY: 78,
+        SubtitleWidth: 900,
+        SubtitleHeight: 42,
+        ContextX: 110,
+        ContextY: 150,
+        ContextWidth: 330,
+        ContextHeight: 68,
+        DefinitionX: 110,
+        DefinitionY: 260,
+        DefinitionWidth: 270,
+        DefinitionHeight: 126,
+        TaxonomyX: 480,
+        TaxonomyY: 260,
+        TaxonomyWidth: 270,
+        TaxonomyHeight: 126,
+        ProfileX: 110,
+        ProfileY: 430,
+        ProfileWidth: 330,
+        ProfileHeight: 150,
+        TaxonomyRefX: 820,
+        TaxonomyRefY: 250,
+        TaxonomyRefWidth: 360,
+        TaxonomyRefHeight: 172,
+        ProfileRefX: 580,
+        ProfileRefY: 455,
+        ProfileRefWidth: 500,
+        ProfileRefHeight: 150,
+        HeaderHeight: 38,
+        TextInsetX: 18,
+        TextInsetY: 58
+    },
+    Style: {
+        TitleFill: "#ffffff",
+        SubtitleFill: "#ffffff",
+        ContextFill: "#dff3f4",
+        ContextBorder: "#49b5c2",
+        DefinitionHeaderFill: "#1f2f74",
+        DefinitionBodyFill: "#e8f1f3",
+        TaxonomyHeaderFill: "#005f36",
+        TaxonomyBodyFill: "#e8f1f3",
+        ProfileHeaderFill: "#70a7ba",
+        ProfileBodyFill: "#e8f1f3",
+        ReferenceFill: "#007a3d",
+        ReferenceShadowFill: "#b8c6c6",
+        LineColor: "#174e58",
+        FontColor: "#003047",
+        HeaderFontColor: "#ffffff",
+        GreenFontColor: "#006c3b",
+        ReferenceFontColor: "#ffffff"
+    }
+};
+
+var ELEMENTS = [
+    {
+        id: "context",
+        name: "Context",
+        type: "Context",
+        conceptType: "business-object",
+        kind: "Context",
+        documentation: "Analysed, published or interpreted context for SABSA attribute work."
+    },
+    {
+        id: "attribute-definition",
+        name: "Attribute Definition",
+        type: "Attribute_Definition",
+        conceptType: "business-object",
+        kind: "Definition",
+        documentation: "Name and definition of a measurable SABSA business attribute."
+    },
+    {
+        id: "attribute-taxonomy",
+        name: "Attribute Taxonomy",
+        type: "Attribute_Taxonomy",
+        conceptType: "business-object",
+        kind: "Taxonomy",
+        documentation: "Classification structure used to group and visually present SABSA attributes."
+    },
+    {
+        id: "attribute-profile",
+        name: "Attribute Profile",
+        type: "Attribute_Profile",
+        conceptType: "business-object",
+        kind: "Profile",
+        documentation: "Measurable form of the attribute, including measurement approach, metric and performance target."
+    },
+    {
+        id: "sabsa-attributes-taxonomy",
+        name: "SABSA Attributes Taxonomy",
+        type: "SABSA_Attributes_Taxonomy",
+        conceptType: "business-object",
+        kind: "Reference",
+        documentation: "Classification and visual presentation of SABSA attributes or a subset catalogue."
+    },
+    {
+        id: "sabsa-attributes-profile",
+        name: "SABSA Attributes Profile",
+        type: "SABSA_Attributes_Profile",
+        conceptType: "business-object",
+        kind: "Reference",
+        documentation: "Full measurable form of SABSA attributes: name, definition, measurement approach, metric and performance target."
+    }
+];
+
+var FLOWS = [
+    { from: "context", to: "attribute-definition", type: "triggering-relationship", label: "informs" },
+    { from: "attribute-definition", to: "attribute-taxonomy", type: "association-relationship", label: "classified by" },
+    { from: "attribute-definition", to: "attribute-profile", type: "triggering-relationship", label: "measured as" },
+    { from: "sabsa-attributes-taxonomy", to: "attribute-taxonomy", type: "access-relationship", label: "defines classification" },
+    { from: "sabsa-attributes-profile", to: "attribute-profile", type: "access-relationship", label: "defines measurable profile" }
+];
+
+var stats = {
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function displayName(value) {
+    return safeString(value).replace(/_/g, " ").replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/^\s+|\s+$/g, "");
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var wantedNames = (aliasesByFolderName[rootName] || [rootName]).map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (!foundFolder && wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    return childFolder || parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    if (!objectToMove) {
+        return null;
+    }
+
+    ensureFolderPath(rootName, pathSegments).add(objectToMove);
+    return objectToMove;
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", getModelFolderSegments([]), viewObject);
+}
+
+function moveRelationshipToFolder(relationship) {
+    return moveObjectToFolder("Relations", getModelFolderSegments([CONST.Folder.Relations]), relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(data) {
+    var key = "attribute-profile-framework:element:" + data.id;
+    var concept = findConceptByKey(data.conceptType, key);
+
+    if (!concept) {
+        concept = model.createElement(data.conceptType, data.name, ensureFolderPath("Business", getModelFolderSegments([CONST.Folder.Elements])));
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = data.name;
+    concept.documentation = data.documentation;
+    concept.prop(CONST.Property.Key, key);
+    concept.prop(CONST.Property.Namespace, CONST.Namespace);
+    concept.prop(CONST.Property.Kind, data.kind);
+    concept.prop(CONST.Property.SabsaType, data.type);
+    concept.prop(CONST.Property.SourceView, CONST.ViewName);
+    concept.prop(CONST.Property.Layer, "Conceptual");
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop(CONST.Property.Key)) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(flow, concepts) {
+    var key = "attribute-profile-framework:relationship:" + flow.from + ":" + flow.to;
+    var relationship = findRelationshipByKey(key);
+
+    if (!relationship) {
+        try {
+            relationship = model.createRelationship(flow.type, flow.label, concepts[flow.from], concepts[flow.to]);
+        } catch (error) {
+            relationship = model.createRelationship("association-relationship", flow.label, concepts[flow.from], concepts[flow.to]);
+        }
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = flow.label;
+    relationship.prop(CONST.Property.Key, key);
+    relationship.prop(CONST.Property.Namespace, CONST.Namespace);
+    relationship.prop("SabsaA1AttributeProfileFrameworkRelationKind", "FrameworkFlow");
+    relationship.prop("SourceElement", flow.from);
+    relationship.prop("TargetElement", flow.to);
+    relationship.prop("RelationshipLabel", flow.label);
+    moveRelationshipToFolder(relationship);
+
+    return relationship;
+}
+
+function styleVisual(visual, fillColor, fontColor, lineColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = lineColor || CONST.Style.LineColor;
+    visual.fontColor = fontColor || CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+        visual.textPosition = 1;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.a1.attribute.profile.label.skipped");
+    }
+}
+
+function addVisual(view, concept, x, y, width, height, fillColor, fontColor, lineColor, labelExpression) {
+    var visual = view.add(concept, x, y, width, height);
+
+    styleVisual(visual, fillColor, fontColor, lineColor);
+    tryApplyLabelExpression(visual, labelExpression || "${name}");
+
+    return visual;
+}
+
+function addNote(container, text, x, y, width, height, fillColor, fontColor, lineColor) {
+    var note = container.createObject("note", x, y, width, height);
+
+    note.text = text;
+    styleVisual(note, fillColor, fontColor, lineColor);
+
+    return note;
+}
+
+function addCard(view, concept, x, y, width, height, headerFill, bodyFill, bodyText) {
+    var visual = addVisual(view, concept, x, y, width, height, bodyFill, CONST.Style.FontColor, headerFill, "");
+
+    addNote(visual, concept.name, 0, 0, width, CONST.Layout.HeaderHeight, headerFill, CONST.Style.HeaderFontColor, headerFill);
+    addNote(visual, bodyText, CONST.Layout.TextInsetX, CONST.Layout.TextInsetY, width - (2 * CONST.Layout.TextInsetX), height - CONST.Layout.TextInsetY - 8, bodyFill, CONST.Style.FontColor, bodyFill);
+
+    return visual;
+}
+
+function addReferenceCard(view, concept, x, y, width, height, title, subtitle, body) {
+    addNote(view, "", x + 8, y + 8, width, height, CONST.Style.ReferenceShadowFill, CONST.Style.ReferenceShadowFill, CONST.Style.ReferenceShadowFill);
+    var visual = addVisual(view, concept, x, y, width, height, CONST.Style.ReferenceFill, CONST.Style.ReferenceFontColor, CONST.Style.ReferenceFill, "");
+
+    addNote(visual, title, 24, 18, width - 48, 30, CONST.Style.ReferenceFill, CONST.Style.ReferenceFontColor, CONST.Style.ReferenceFill);
+    if (subtitle) {
+        addNote(visual, subtitle, 24, 52, width - 48, 24, CONST.Style.ReferenceFill, CONST.Style.ReferenceFontColor, CONST.Style.ReferenceFill);
+    }
+    addNote(visual, body, 24, subtitle ? 82 : 56, width - 48, height - (subtitle ? 92 : 66), CONST.Style.ReferenceFill, CONST.Style.ReferenceFontColor, CONST.Style.ReferenceFill);
+
+    return visual;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+
+    return connection;
+}
+
+function buildConcepts() {
+    var concepts = {};
+
+    ELEMENTS.forEach(function (entry) {
+        concepts[entry.id] = ensureConcept(entry);
+    });
+
+    return concepts;
+}
+
+function createFrameworkView(concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.ViewName));
+    var visuals = {};
+    var relationships = {};
+
+    view.documentation = "SABSA A1 attribute profile framework view showing how context, definition, taxonomy and profile make attributes measurable.";
+    moveViewToFolder(view);
+
+    addNote(view, "Assess Consequences", CONST.Layout.TitleX, CONST.Layout.TitleY, CONST.Layout.TitleWidth, CONST.Layout.TitleHeight, CONST.Style.TitleFill, CONST.Style.FontColor, CONST.Style.TitleFill);
+    addNote(view, "The SABSA Attributes Profile - Attributes are measurable", CONST.Layout.SubtitleX, CONST.Layout.SubtitleY, CONST.Layout.SubtitleWidth, CONST.Layout.SubtitleHeight, CONST.Style.SubtitleFill, CONST.Style.GreenFontColor, CONST.Style.SubtitleFill);
+
+    visuals.context = addVisual(view, concepts.context, CONST.Layout.ContextX, CONST.Layout.ContextY, CONST.Layout.ContextWidth, CONST.Layout.ContextHeight, CONST.Style.ContextFill, CONST.Style.FontColor, CONST.Style.ContextBorder, "Context\nAnalysed, Published or interpreted");
+    visuals["attribute-definition"] = addCard(view, concepts["attribute-definition"], CONST.Layout.DefinitionX, CONST.Layout.DefinitionY, CONST.Layout.DefinitionWidth, CONST.Layout.DefinitionHeight, CONST.Style.DefinitionHeaderFill, CONST.Style.DefinitionBodyFill, "Name:\nDefinition:");
+    visuals["attribute-taxonomy"] = addCard(view, concepts["attribute-taxonomy"], CONST.Layout.TaxonomyX, CONST.Layout.TaxonomyY, CONST.Layout.TaxonomyWidth, CONST.Layout.TaxonomyHeight, CONST.Style.TaxonomyHeaderFill, CONST.Style.TaxonomyBodyFill, "Classification:");
+    visuals["attribute-profile"] = addCard(view, concepts["attribute-profile"], CONST.Layout.ProfileX, CONST.Layout.ProfileY, CONST.Layout.ProfileWidth, CONST.Layout.ProfileHeight, CONST.Style.ProfileHeaderFill, CONST.Style.ProfileBodyFill, "Measurement Approach:\nMetric:\nPerformance Target:");
+    visuals["sabsa-attributes-taxonomy"] = addReferenceCard(
+        view,
+        concepts["sabsa-attributes-taxonomy"],
+        CONST.Layout.TaxonomyRefX,
+        CONST.Layout.TaxonomyRefY,
+        CONST.Layout.TaxonomyRefWidth,
+        CONST.Layout.TaxonomyRefHeight,
+        "SABSA Attributes Taxonomy",
+        "",
+        "The classification and visual\npresentation of the SABSA Attributes,\nor a subset of Attributes, catalogued to\nrepresent particular Enterprise aspects\nor stakeholder requirements"
+    );
+    visuals["sabsa-attributes-profile"] = addReferenceCard(
+        view,
+        concepts["sabsa-attributes-profile"],
+        CONST.Layout.ProfileRefX,
+        CONST.Layout.ProfileRefY,
+        CONST.Layout.ProfileRefWidth,
+        CONST.Layout.ProfileRefHeight,
+        "SABSA Attributes Profile",
+        "Attribute Definition + Attribute Measurement",
+        "The SABSA Attributes in full measurable form\ncomprised of Name, Definition, Measurement\nApproach, Metric, and Performance Target"
+    );
+
+    FLOWS.forEach(function (flow) {
+        relationships[flow.from + ":" + flow.to] = ensureRelationship(flow, concepts);
+        addConnection(view, relationships[flow.from + ":" + flow.to], visuals[flow.from], visuals[flow.to]);
+    });
+
+    return view;
+}
+
+function confirmExecution() {
+    return dialogs.confirmInfo(
+        "This script will generate or update the SABSA A1 Attribute Profile Framework view." +
+        "\n\nView: " + CONST.ViewName +
+        "\nElements: " + ELEMENTS.length +
+        "\nRelationships: " + FLOWS.length +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Attribute Profile Framework Generator"
+    );
+}
+
+function main() {
+    var concepts;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    if (!confirmExecution()) {
+        logger.info("SABSA A1 attribute profile framework generation cancelled by user.", {}, "sabsa.a1.attribute.profile.cancelled");
+        return;
+    }
+
+    concepts = buildConcepts();
+    view = createFrameworkView(concepts);
+
+    dialogs.showInfo(
+        "Generated view: " + view.name +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused,
+        "SABSA A1 Attribute Profile Framework"
+    );
+}
+
+main();
