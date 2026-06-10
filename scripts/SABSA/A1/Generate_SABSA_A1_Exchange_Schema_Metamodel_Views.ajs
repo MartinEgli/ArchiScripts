@@ -1,0 +1,890 @@
+var File = Java.type("java.io.File");
+var Files = Java.type("java.nio.file.Files");
+var Paths = Java.type("java.nio.file.Paths");
+var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
+
+load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+
+var SCRIPT_NAME = "Generate_SABSA_A1_Exchange_Schema_Metamodel_Views";
+var LOG_LEVEL = "WARN";
+var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
+    clearConsole: true,
+    minimumLevel: LOG_LEVEL
+});
+var dialogs = ArchiDialogs.createDialogService(logger, {
+    title: "SABSA A1 Exchange Schema Metamodel"
+});
+
+var CONST = {
+    SourceJsonPath: new File(__DIR__ + "../../../../reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json").getCanonicalPath(),
+    TypeMappingViewName: "SABSA A1 - Exchange Schema Type Mapping",
+    RelationshipViewName: "SABSA A1 - Exchange Schema Relationship Mapping",
+    Folder: {
+        Root: "SABSA",
+        A1: "A1",
+        ModelName: "Exchange Schema Metamodel",
+        Sources: "Sources",
+        SabsaTypes: "SABSA Types",
+        ArchiMateTypes: "ArchiMate Types",
+        RelationshipVerbs: "Relationship Verbs",
+        RelationshipDefinitions: "Relationship Definitions",
+        Relations: {
+            Source: "Source Trace",
+            TypeMapping: "Type Mapping",
+            RelationshipMapping: "Relationship Mapping",
+            RelationshipDefinition: "Relationship Definition"
+        }
+    },
+    Layout: {
+        StartX: 40,
+        StartY: 40,
+        SourceWidth: 360,
+        SourceHeight: 72,
+        SourceRefWidth: 260,
+        SourceRefHeight: 54,
+        SourceRefGap: 16,
+        TypeY: 170,
+        TypeWidth: 178,
+        TypeHeight: 44,
+        TypeGapX: 16,
+        TypeGapY: 14,
+        TypeColumns: 4,
+        ArchiMateTypeX: 920,
+        ArchiMateTypeColumns: 3,
+        RelationshipVerbY: 140,
+        RelationshipVerbWidth: 176,
+        RelationshipVerbHeight: 42,
+        RelationshipVerbColumns: 5,
+        DefinitionY: 330,
+        DefinitionWidth: 250,
+        DefinitionHeight: 54,
+        DefinitionColumns: 4
+    },
+    Style: {
+        SourceFill: "#fff7cc",
+        SourceRefFill: "#f3f3f3",
+        SabsaTypeFill: "#dff7ff",
+        ArchiMateTypeFill: "#ccff9a",
+        RelationshipVerbFill: "#ffcc64",
+        DefinitionRequiredFill: "#ffff9a",
+        DefinitionOptionalFill: "#fff6bf",
+        LineColor: "#111111",
+        FontColor: "#111111"
+    }
+};
+
+var stats = {
+    views: 0,
+    sourceRefs: 0,
+    sabsaTypes: 0,
+    archimateTypes: 0,
+    relationshipVerbs: 0,
+    relationshipDefinitions: 0,
+    relationships: 0,
+    conceptsCreated: 0,
+    conceptsReused: 0,
+    relationshipsCreated: 0,
+    relationshipsReused: 0
+};
+
+function safeString(value) {
+    return value === null || typeof value === "undefined" ? "" : String(value);
+}
+
+function trim(value) {
+    return safeString(value).replace(/^\s+|\s+$/g, "");
+}
+
+function normalizeId(value) {
+    return trim(value)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function normalizeFolderName(folderName) {
+    return safeString(folderName)
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function readUtf8Text(absolutePath) {
+    return String(new java.lang.String(
+        Files.readAllBytes(Paths.get(absolutePath)),
+        StandardCharsets.UTF_8
+    ));
+}
+
+function getTopLevelFolder(rootName) {
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Other": ["Other", "Connectors"],
+        "Views": ["Views"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+    var candidateNames = aliasesByFolderName[rootName] || [rootName];
+    var wantedNames = candidateNames.map(normalizeFolderName);
+    var foundFolder = null;
+
+    $(model).children("folder").each(function (folder) {
+        if (foundFolder) {
+            return;
+        }
+
+        if (wantedNames.indexOf(normalizeFolderName(folder.name)) >= 0) {
+            foundFolder = folder;
+        }
+    });
+
+    return foundFolder;
+}
+
+function ensureChildFolder(parentFolder, childName) {
+    var childFolder = $(parentFolder).children("folder").filter(function (folder) {
+        return safeString(folder.name) === safeString(childName);
+    }).first();
+
+    if (childFolder) {
+        return childFolder;
+    }
+
+    return parentFolder.createFolder(childName);
+}
+
+function ensureFolderPath(rootName, pathSegments) {
+    var currentFolder = getTopLevelFolder(rootName);
+
+    if (!currentFolder) {
+        throw new Error("Top-level folder not found: " + rootName);
+    }
+
+    (pathSegments || []).forEach(function (segment) {
+        currentFolder = ensureChildFolder(currentFolder, segment);
+    });
+
+    return currentFolder;
+}
+
+function moveObjectToFolder(rootName, pathSegments, objectToMove) {
+    var targetFolder;
+
+    if (!objectToMove) {
+        return null;
+    }
+
+    targetFolder = ensureFolderPath(rootName, pathSegments);
+    targetFolder.add(objectToMove);
+    return targetFolder;
+}
+
+function getModelFolderSegments(extraSegments) {
+    var segments = [CONST.Folder.Root, CONST.Folder.A1, CONST.Folder.ModelName];
+
+    (extraSegments || []).forEach(function (segment) {
+        segments.push(segment);
+    });
+
+    return segments;
+}
+
+function resolveConceptPlacement(conceptType, properties) {
+    var kind = safeString(properties && properties.SabsaA1SchemaKind);
+
+    if (kind === "RelationshipDefinition" || kind === "RelationshipVerb") {
+        return {
+            rootName: "Business",
+            pathSegments: getModelFolderSegments([
+                kind === "RelationshipDefinition" ? CONST.Folder.RelationshipDefinitions : CONST.Folder.RelationshipVerbs
+            ])
+        };
+    }
+
+    if (kind === "Source" || kind === "SourceReference" || kind === "SabsaType" || kind === "ArchiMateType") {
+        return {
+            rootName: "Other",
+            pathSegments: getModelFolderSegments([
+                kind === "Source" || kind === "SourceReference" ? CONST.Folder.Sources :
+                    kind === "SabsaType" ? CONST.Folder.SabsaTypes : CONST.Folder.ArchiMateTypes
+            ])
+        };
+    }
+
+    return null;
+}
+
+function moveConceptToFolder(concept, conceptType, properties) {
+    var placement = resolveConceptPlacement(conceptType, properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, concept);
+}
+
+function moveViewToFolder(viewObject) {
+    return moveObjectToFolder("Views", [CONST.Folder.Root, CONST.Folder.A1], viewObject);
+}
+
+function resolveRelationshipPlacement(properties) {
+    var kind = safeString(properties && properties.SabsaA1SchemaRelationKind);
+    var folderName = "";
+
+    if (kind === "Source") {
+        folderName = CONST.Folder.Relations.Source;
+    } else if (kind === "TypeMapping") {
+        folderName = CONST.Folder.Relations.TypeMapping;
+    } else if (kind === "RelationshipMapping") {
+        folderName = CONST.Folder.Relations.RelationshipMapping;
+    } else if (kind === "RelationshipDefinition") {
+        folderName = CONST.Folder.Relations.RelationshipDefinition;
+    } else {
+        return null;
+    }
+
+    return {
+        rootName: "Relations",
+        pathSegments: getModelFolderSegments([folderName])
+    };
+}
+
+function moveRelationshipToFolder(relationship, properties) {
+    var placement = resolveRelationshipPlacement(properties);
+
+    if (!placement) {
+        return null;
+    }
+
+    return moveObjectToFolder(placement.rootName, placement.pathSegments, relationship);
+}
+
+function buildUniqueViewName(baseName) {
+    var candidate = baseName;
+    var suffix = 2;
+
+    while ($("view").filter(function (viewObject) {
+        return safeString(viewObject.name) === candidate;
+    }).first()) {
+        candidate = baseName + " (" + suffix + ")";
+        suffix++;
+    }
+
+    return candidate;
+}
+
+function findConceptByKey(conceptType, key) {
+    return $(conceptType).filter(function (concept) {
+        return safeString(concept.prop("SabsaA1SchemaKey")) === safeString(key);
+    }).first();
+}
+
+function ensureConcept(conceptType, name, key, properties, documentation) {
+    var concept = findConceptByKey(conceptType, key);
+    var placement = resolveConceptPlacement(conceptType, properties);
+    var conceptCreated = false;
+
+    if (!concept) {
+        if (placement) {
+            concept = model.createElement(conceptType, name, ensureFolderPath(placement.rootName, placement.pathSegments));
+        } else {
+            concept = model.createElement(conceptType, name);
+        }
+        conceptCreated = true;
+        stats.conceptsCreated++;
+    } else {
+        stats.conceptsReused++;
+    }
+
+    concept.name = name;
+    concept.documentation = documentation || "";
+    concept.prop("SabsaA1SchemaKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        concept.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (conceptCreated) {
+        moveConceptToFolder(concept, conceptType, properties);
+    }
+
+    return concept;
+}
+
+function findRelationshipByKey(key) {
+    return $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1SchemaKey")) === safeString(key);
+    }).first();
+}
+
+function ensureRelationship(sourceConcept, targetConcept, key, name, properties) {
+    var relationship = findRelationshipByKey(key);
+    var relationshipCreated = false;
+
+    if (!sourceConcept || !targetConcept) {
+        return null;
+    }
+
+    if (!relationship) {
+        relationship = model.createRelationship("association-relationship", name || "", sourceConcept, targetConcept);
+        relationshipCreated = true;
+        stats.relationshipsCreated++;
+    } else {
+        stats.relationshipsReused++;
+    }
+
+    relationship.name = name || "";
+    relationship.prop("SabsaA1SchemaKey", key);
+
+    Object.keys(properties || {}).forEach(function (propertyName) {
+        relationship.prop(propertyName, safeString(properties[propertyName]));
+    });
+
+    if (relationshipCreated) {
+        moveRelationshipToFolder(relationship, properties);
+    }
+
+    stats.relationships++;
+    return relationship;
+}
+
+function styleVisual(visual, fillColor) {
+    visual.fillColor = fillColor;
+    visual.lineColor = CONST.Style.LineColor;
+    visual.fontColor = CONST.Style.FontColor;
+    visual.opacity = 255;
+    visual.outlineOpacity = 255;
+}
+
+function addStyledVisual(container, concept, x, y, width, height, fillColor) {
+    var visual = container.add(concept, x, y, width, height);
+    styleVisual(visual, fillColor);
+    return visual;
+}
+
+function addConnection(view, relationship, sourceVisual, targetVisual) {
+    if (!relationship || !sourceVisual || !targetVisual) {
+        return null;
+    }
+
+    var connection = view.add(relationship, sourceVisual, targetVisual);
+    connection.lineColor = CONST.Style.LineColor;
+    connection.fontColor = CONST.Style.FontColor;
+    return connection;
+}
+
+function tryApplyLabelExpression(visual, expression) {
+    try {
+        visual.labelExpression = expression;
+    } catch (error) {
+        logger.debug("Could not apply label expression.", {
+            expression: expression,
+            error: String(error)
+        }, "sabsa.a1.schema.label_expression.skipped");
+    }
+}
+
+function tryApplyTextPosition(visual, position) {
+    try {
+        visual.textPosition = position;
+    } catch (error) {
+        logger.debug("Could not apply text position.", {
+            position: position,
+            error: String(error)
+        }, "sabsa.a1.schema.text_position.skipped");
+    }
+}
+
+function getGridPosition(index, startX, startY, width, height, gapX, gapY, columns) {
+    return {
+        x: startX + ((index % columns) * (width + gapX)),
+        y: startY + (Math.floor(index / columns) * (height + gapY))
+    };
+}
+
+function unique(values) {
+    var seen = {};
+    var result = [];
+
+    (values || []).forEach(function (value) {
+        var normalized = safeString(value);
+        if (!normalized || seen[normalized]) {
+            return;
+        }
+        seen[normalized] = true;
+        result.push(normalized);
+    });
+
+    return result;
+}
+
+function buildSourceDocumentation(data) {
+    var lines = [];
+
+    lines.push(safeString(data.purpose));
+    lines.push("");
+    lines.push("Schema ID: " + safeString(data.schema_id));
+    lines.push("Schema version: " + safeString(data.schema_version));
+    lines.push("Created: " + safeString(data.created));
+    lines.push("Status: " + safeString(data.status));
+    lines.push("Source JSON: " + CONST.SourceJsonPath);
+
+    return lines.join("\n");
+}
+
+function buildSourceReferenceDocumentation(sourceReference) {
+    return "Source ID: " + safeString(sourceReference.source_id) +
+        "\nLabel: " + safeString(sourceReference.label) +
+        "\nPath: " + safeString(sourceReference.path);
+}
+
+function buildTypeMappingDocumentation(mapping) {
+    return "SABSA type: " + safeString(mapping.sabsa_type) +
+        "\nRecommended ArchiMate type: " + safeString(mapping.recommended_archimate_type) +
+        "\nMapping strength: " + safeString(mapping.mapping_strength) +
+        "\n\nRule: " + safeString(mapping.mapping_rule);
+}
+
+function buildRelationshipVerbDocumentation(mapping) {
+    return "SABSA relationship: " + safeString(mapping.sabsa_relationship) +
+        "\nRecommended ArchiMate relationship: " + safeString(mapping.recommended_archimate_relationship) +
+        "\n\nUse rule: " + safeString(mapping.use_rule);
+}
+
+function buildRelationshipDefinitionDocumentation(definition) {
+    return "Relationship ID: " + safeString(definition.relationship_id) +
+        "\nSource type: " + safeString(definition.source_type) +
+        "\nTarget type: " + safeString(definition.target_type) +
+        "\nSABSA relationship: " + safeString(definition.relationship_type) +
+        "\nRecommended ArchiMate relationship: " + safeString(definition.archimate_relationship) +
+        "\nRequired: " + safeString(definition.required) +
+        "\nCardinality: " + safeString(definition.source_cardinality) + " -> " + safeString(definition.target_cardinality) +
+        "\nFK hint: " + safeString(definition.fk_hint) +
+        "\n\n" + safeString(definition.description_en);
+}
+
+function createConcepts(data) {
+    var concepts = {
+        source: null,
+        sourceRefs: {},
+        sabsaTypes: {},
+        archimateTypes: {},
+        relationshipVerbs: {},
+        archimateRelationships: {},
+        relationshipDefinitions: {}
+    };
+    var archimateTypes = unique((data.archimate_type_mapping || []).map(function (mapping) {
+        return mapping.recommended_archimate_type;
+    }));
+    var archimateRelationships = unique((data.relationship_type_mapping || []).map(function (mapping) {
+        return mapping.recommended_archimate_relationship;
+    }).concat((data.relationship_definitions || []).map(function (definition) {
+        return definition.archimate_relationship;
+    })));
+    var allSabsaTypes = unique(
+        (data.archimate_type_mapping || []).map(function (mapping) {
+            return mapping.sabsa_type;
+        }).concat((data.relationship_definitions || []).map(function (definition) {
+            return definition.source_type;
+        })).concat((data.relationship_definitions || []).map(function (definition) {
+            return definition.target_type;
+        }))
+    ).filter(function (typeName) {
+        return typeName !== "Any";
+    });
+
+    concepts.source = ensureConcept("grouping", safeString(data.schema_id), "source:" + safeString(data.schema_id), {
+        id: "sabsa-a1-schema:source:" + safeString(data.schema_id),
+        SabsaA1SchemaKind: "Source",
+        SchemaId: safeString(data.schema_id),
+        SchemaVersion: safeString(data.schema_version),
+        SourceJson: CONST.SourceJsonPath
+    }, buildSourceDocumentation(data));
+
+    (data.source_references || []).forEach(function (sourceReference) {
+        var id = safeString(sourceReference.source_id);
+        concepts.sourceRefs[id] = ensureConcept("grouping", safeString(sourceReference.label || id), "source-ref:" + id, {
+            id: "sabsa-a1-schema:source-ref:" + id,
+            SabsaA1SchemaKind: "SourceReference",
+            SourceReferenceId: id,
+            SourcePath: safeString(sourceReference.path),
+            SourceJson: CONST.SourceJsonPath
+        }, buildSourceReferenceDocumentation(sourceReference));
+        stats.sourceRefs++;
+    });
+
+    allSabsaTypes.forEach(function (typeName) {
+        concepts.sabsaTypes[typeName] = ensureConcept("grouping", typeName, "sabsa-type:" + typeName, {
+            id: "sabsa-a1-schema:sabsa-type:" + typeName,
+            SabsaA1SchemaKind: "SabsaType",
+            SabsaType: typeName,
+            SourceJson: CONST.SourceJsonPath
+        }, "SABSA A1 schema type: " + typeName);
+        stats.sabsaTypes++;
+    });
+
+    archimateTypes.forEach(function (typeName) {
+        concepts.archimateTypes[typeName] = ensureConcept("grouping", typeName, "archimate-type:" + typeName, {
+            id: "sabsa-a1-schema:archimate-type:" + typeName,
+            SabsaA1SchemaKind: "ArchiMateType",
+            ArchiMateType: typeName,
+            SourceJson: CONST.SourceJsonPath
+        }, "Recommended ArchiMate element type: " + typeName);
+        stats.archimateTypes++;
+    });
+
+    archimateRelationships.forEach(function (relationshipType) {
+        concepts.archimateRelationships[relationshipType] = ensureConcept("grouping", relationshipType, "archimate-relationship:" + relationshipType, {
+            id: "sabsa-a1-schema:archimate-relationship:" + relationshipType,
+            SabsaA1SchemaKind: "ArchiMateType",
+            ArchiMateRelationship: relationshipType,
+            SourceJson: CONST.SourceJsonPath
+        }, "Recommended ArchiMate relationship type: " + relationshipType);
+    });
+
+    (data.relationship_type_mapping || []).forEach(function (mapping) {
+        var verb = safeString(mapping.sabsa_relationship);
+        concepts.relationshipVerbs[verb] = ensureConcept("business-object", verb, "relationship-verb:" + verb, {
+            id: "sabsa-a1-schema:relationship-verb:" + verb,
+            SabsaA1SchemaKind: "RelationshipVerb",
+            SabsaRelationship: verb,
+            RecommendedArchiMateRelationship: safeString(mapping.recommended_archimate_relationship),
+            SourceJson: CONST.SourceJsonPath
+        }, buildRelationshipVerbDocumentation(mapping));
+        stats.relationshipVerbs++;
+    });
+
+    (data.relationship_definitions || []).forEach(function (definition) {
+        var relationshipId = safeString(definition.relationship_id);
+        concepts.relationshipDefinitions[relationshipId] = ensureConcept("business-object", relationshipId, "relationship-definition:" + relationshipId, {
+            id: "sabsa-a1-schema:relationship-definition:" + relationshipId,
+            SabsaA1SchemaKind: "RelationshipDefinition",
+            RelationshipId: relationshipId,
+            SourceType: safeString(definition.source_type),
+            TargetType: safeString(definition.target_type),
+            SabsaRelationship: safeString(definition.relationship_type),
+            RecommendedArchiMateRelationship: safeString(definition.archimate_relationship),
+            Required: safeString(definition.required),
+            CardinalityLabel: safeString(definition.cardinality_label),
+            SourceJson: CONST.SourceJsonPath
+        }, buildRelationshipDefinitionDocumentation(definition));
+        stats.relationshipDefinitions++;
+    });
+
+    return concepts;
+}
+
+function createSourceRelationships(data, concepts) {
+    (data.source_references || []).forEach(function (sourceReference) {
+        var id = safeString(sourceReference.source_id);
+        ensureRelationship(concepts.source, concepts.sourceRefs[id], "source:contains:" + id, "references", {
+            SabsaA1SchemaRelationKind: "Source",
+            SourceJson: CONST.SourceJsonPath
+        });
+    });
+}
+
+function createMappingRelationships(data, concepts) {
+    (data.archimate_type_mapping || []).forEach(function (mapping) {
+        var sabsaType = safeString(mapping.sabsa_type);
+        var archimateType = safeString(mapping.recommended_archimate_type);
+        ensureRelationship(concepts.sabsaTypes[sabsaType], concepts.archimateTypes[archimateType], "type-map:" + sabsaType + ":" + archimateType, safeString(mapping.mapping_strength), {
+            SabsaA1SchemaRelationKind: "TypeMapping",
+            SabsaType: sabsaType,
+            RecommendedArchiMateType: archimateType,
+            MappingStrength: safeString(mapping.mapping_strength),
+            SourceJson: CONST.SourceJsonPath
+        });
+    });
+
+    (data.relationship_type_mapping || []).forEach(function (mapping) {
+        var verb = safeString(mapping.sabsa_relationship);
+        var archimateRelationship = safeString(mapping.recommended_archimate_relationship);
+        ensureRelationship(concepts.relationshipVerbs[verb], concepts.archimateRelationships[archimateRelationship], "relationship-map:" + verb + ":" + archimateRelationship, "maps", {
+            SabsaA1SchemaRelationKind: "RelationshipMapping",
+            SabsaRelationship: verb,
+            RecommendedArchiMateRelationship: archimateRelationship,
+            SourceJson: CONST.SourceJsonPath
+        });
+    });
+
+    (data.relationship_definitions || []).forEach(function (definition) {
+        var relationshipId = safeString(definition.relationship_id);
+        var relationshipConcept = concepts.relationshipDefinitions[relationshipId];
+        var sourceType = safeString(definition.source_type);
+        var targetType = safeString(definition.target_type);
+        var verb = safeString(definition.relationship_type);
+        var archimateRelationship = safeString(definition.archimate_relationship);
+
+        ensureRelationship(relationshipConcept, concepts.sabsaTypes[sourceType], "relationship-definition-source:" + relationshipId + ":" + sourceType, "source", {
+            SabsaA1SchemaRelationKind: "RelationshipDefinition",
+            Role: "source",
+            SourceJson: CONST.SourceJsonPath
+        });
+
+        if (targetType !== "Any") {
+            ensureRelationship(relationshipConcept, concepts.sabsaTypes[targetType], "relationship-definition-target:" + relationshipId + ":" + targetType, "target", {
+                SabsaA1SchemaRelationKind: "RelationshipDefinition",
+                Role: "target",
+                SourceJson: CONST.SourceJsonPath
+            });
+        }
+
+        ensureRelationship(relationshipConcept, concepts.relationshipVerbs[verb], "relationship-definition-verb:" + relationshipId + ":" + verb, "uses", {
+            SabsaA1SchemaRelationKind: "RelationshipDefinition",
+            Role: "relationship_type",
+            SourceJson: CONST.SourceJsonPath
+        });
+
+        ensureRelationship(relationshipConcept, concepts.archimateRelationships[archimateRelationship], "relationship-definition-archimate:" + relationshipId + ":" + archimateRelationship, "recommends", {
+            SabsaA1SchemaRelationKind: "RelationshipDefinition",
+            Role: "archimate_relationship",
+            SourceJson: CONST.SourceJsonPath
+        });
+    });
+}
+
+function createTypeMappingView(data, concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.TypeMappingViewName));
+    var sourceVisual;
+    var sourceRefVisuals = {};
+    var sabsaTypeVisuals = {};
+    var archimateTypeVisuals = {};
+    var archimateTypes = unique((data.archimate_type_mapping || []).map(function (mapping) {
+        return mapping.recommended_archimate_type;
+    }));
+
+    view.documentation = "Generated from " + CONST.SourceJsonPath + ". Shows SABSA A1 schema type mappings to recommended ArchiMate element types.";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, concepts.source, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+    tryApplyLabelExpression(sourceVisual, "${name}");
+    tryApplyTextPosition(sourceVisual, 1);
+
+    (data.source_references || []).forEach(function (sourceReference, index) {
+        var position = getGridPosition(index, CONST.Layout.StartX + CONST.Layout.SourceWidth + 40, CONST.Layout.StartY, CONST.Layout.SourceRefWidth, CONST.Layout.SourceRefHeight, CONST.Layout.SourceRefGap, 10, 3);
+        var id = safeString(sourceReference.source_id);
+        var visual = addStyledVisual(view, concepts.sourceRefs[id], position.x, position.y, CONST.Layout.SourceRefWidth, CONST.Layout.SourceRefHeight, CONST.Style.SourceRefFill);
+        sourceRefVisuals[id] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    (data.archimate_type_mapping || []).forEach(function (mapping, index) {
+        var typeName = safeString(mapping.sabsa_type);
+        var position = getGridPosition(index, CONST.Layout.StartX, CONST.Layout.TypeY, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, CONST.Layout.TypeColumns);
+        var visual = addStyledVisual(view, concepts.sabsaTypes[typeName], position.x, position.y, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Style.SabsaTypeFill);
+        sabsaTypeVisuals[typeName] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    archimateTypes.forEach(function (typeName, index) {
+        var position = getGridPosition(index, CONST.Layout.ArchiMateTypeX, CONST.Layout.TypeY, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, CONST.Layout.ArchiMateTypeColumns);
+        var visual = addStyledVisual(view, concepts.archimateTypes[typeName], position.x, position.y, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Style.ArchiMateTypeFill);
+        archimateTypeVisuals[typeName] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    (data.source_references || []).forEach(function (sourceReference) {
+        var id = safeString(sourceReference.source_id);
+        addConnection(view, findRelationshipByKey("source:contains:" + id), sourceVisual, sourceRefVisuals[id]);
+    });
+
+    (data.archimate_type_mapping || []).forEach(function (mapping) {
+        var sabsaType = safeString(mapping.sabsa_type);
+        var archimateType = safeString(mapping.recommended_archimate_type);
+        addConnection(view, findRelationshipByKey("type-map:" + sabsaType + ":" + archimateType), sabsaTypeVisuals[sabsaType], archimateTypeVisuals[archimateType]);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function createRelationshipMappingView(data, concepts) {
+    var view = model.createArchimateView(buildUniqueViewName(CONST.RelationshipViewName));
+    var verbVisuals = {};
+    var archimateRelationshipVisuals = {};
+    var definitionVisuals = {};
+    var sabsaTypeVisuals = {};
+    var involvedTypes = unique(
+        (data.relationship_definitions || []).map(function (definition) {
+            return definition.source_type;
+        }).concat((data.relationship_definitions || []).map(function (definition) {
+            return definition.target_type;
+        }))
+    ).filter(function (typeName) {
+        return typeName !== "Any";
+    });
+    var archimateRelationships = unique((data.relationship_type_mapping || []).map(function (mapping) {
+        return mapping.recommended_archimate_relationship;
+    }).concat((data.relationship_definitions || []).map(function (definition) {
+        return definition.archimate_relationship;
+    })));
+    var typeStartY = CONST.Layout.DefinitionY + 520;
+
+    view.documentation = "Generated from " + CONST.SourceJsonPath + ". Shows SABSA relationship verbs, concrete relationship definitions, source/target types, and recommended ArchiMate relationship types.";
+    moveViewToFolder(view);
+
+    (data.relationship_type_mapping || []).forEach(function (mapping, index) {
+        var verb = safeString(mapping.sabsa_relationship);
+        var position = getGridPosition(index, CONST.Layout.StartX, CONST.Layout.RelationshipVerbY, CONST.Layout.RelationshipVerbWidth, CONST.Layout.RelationshipVerbHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, CONST.Layout.RelationshipVerbColumns);
+        var visual = addStyledVisual(view, concepts.relationshipVerbs[verb], position.x, position.y, CONST.Layout.RelationshipVerbWidth, CONST.Layout.RelationshipVerbHeight, CONST.Style.RelationshipVerbFill);
+        verbVisuals[verb] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    archimateRelationships.forEach(function (relationshipType, index) {
+        var position = getGridPosition(index, CONST.Layout.StartX + 980, CONST.Layout.RelationshipVerbY, CONST.Layout.RelationshipVerbWidth, CONST.Layout.RelationshipVerbHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, 2);
+        var visual = addStyledVisual(view, concepts.archimateRelationships[relationshipType], position.x, position.y, CONST.Layout.RelationshipVerbWidth, CONST.Layout.RelationshipVerbHeight, CONST.Style.ArchiMateTypeFill);
+        archimateRelationshipVisuals[relationshipType] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    (data.relationship_definitions || []).forEach(function (definition, index) {
+        var relationshipId = safeString(definition.relationship_id);
+        var position = getGridPosition(index, CONST.Layout.StartX, CONST.Layout.DefinitionY, CONST.Layout.DefinitionWidth, CONST.Layout.DefinitionHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, CONST.Layout.DefinitionColumns);
+        var fill = definition.required ? CONST.Style.DefinitionRequiredFill : CONST.Style.DefinitionOptionalFill;
+        var visual = addStyledVisual(view, concepts.relationshipDefinitions[relationshipId], position.x, position.y, CONST.Layout.DefinitionWidth, CONST.Layout.DefinitionHeight, fill);
+        definitionVisuals[relationshipId] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    involvedTypes.forEach(function (typeName, index) {
+        var position = getGridPosition(index, CONST.Layout.StartX, typeStartY, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Layout.TypeGapX, CONST.Layout.TypeGapY, CONST.Layout.TypeColumns);
+        var visual = addStyledVisual(view, concepts.sabsaTypes[typeName], position.x, position.y, CONST.Layout.TypeWidth, CONST.Layout.TypeHeight, CONST.Style.SabsaTypeFill);
+        sabsaTypeVisuals[typeName] = visual;
+        tryApplyLabelExpression(visual, "${name}");
+        tryApplyTextPosition(visual, 1);
+    });
+
+    (data.relationship_type_mapping || []).forEach(function (mapping) {
+        var verb = safeString(mapping.sabsa_relationship);
+        var archimateRelationship = safeString(mapping.recommended_archimate_relationship);
+        addConnection(view, findRelationshipByKey("relationship-map:" + verb + ":" + archimateRelationship), verbVisuals[verb], archimateRelationshipVisuals[archimateRelationship]);
+    });
+
+    (data.relationship_definitions || []).forEach(function (definition) {
+        var relationshipId = safeString(definition.relationship_id);
+        var sourceType = safeString(definition.source_type);
+        var targetType = safeString(definition.target_type);
+        var verb = safeString(definition.relationship_type);
+        var archimateRelationship = safeString(definition.archimate_relationship);
+        var definitionVisual = definitionVisuals[relationshipId];
+
+        addConnection(view, findRelationshipByKey("relationship-definition-source:" + relationshipId + ":" + sourceType), definitionVisual, sabsaTypeVisuals[sourceType]);
+
+        if (targetType !== "Any") {
+            addConnection(view, findRelationshipByKey("relationship-definition-target:" + relationshipId + ":" + targetType), definitionVisual, sabsaTypeVisuals[targetType]);
+        }
+
+        addConnection(view, findRelationshipByKey("relationship-definition-verb:" + relationshipId + ":" + verb), definitionVisual, verbVisuals[verb]);
+        addConnection(view, findRelationshipByKey("relationship-definition-archimate:" + relationshipId + ":" + archimateRelationship), definitionVisual, archimateRelationshipVisuals[archimateRelationship]);
+    });
+
+    stats.views++;
+    return view;
+}
+
+function validateData(data) {
+    if (!data || !safeString(data.schema_id)) {
+        throw new Error("Invalid exchange schema: missing schema_id.");
+    }
+
+    if (!data.archimate_type_mapping || !data.archimate_type_mapping.length) {
+        throw new Error("Invalid exchange schema: missing archimate_type_mapping.");
+    }
+
+    if (!data.relationship_type_mapping || !data.relationship_type_mapping.length) {
+        throw new Error("Invalid exchange schema: missing relationship_type_mapping.");
+    }
+
+    if (!data.relationship_definitions || !data.relationship_definitions.length) {
+        throw new Error("Invalid exchange schema: missing relationship_definitions.");
+    }
+}
+
+function confirmExecution(data) {
+    return dialogs.confirmInfo(
+        "This script will generate SABSA A1 exchange schema metamodel views." +
+        "\n\nSource JSON: " + CONST.SourceJsonPath +
+        "\nType mappings: " + (data.archimate_type_mapping || []).length +
+        "\nRelationship type mappings: " + (data.relationship_type_mapping || []).length +
+        "\nRelationship definitions: " + (data.relationship_definitions || []).length +
+        "\n\nThe script will create or reuse folders, concepts, relationships, and two target views in the open Archi model." +
+        "\n\nDo you want to continue?",
+        "Run SABSA A1 Exchange Schema Generator"
+    );
+}
+
+function buildResultMessage() {
+    return "Generated views: " + stats.views +
+        "\nSource references: " + stats.sourceRefs +
+        "\nSABSA types: " + stats.sabsaTypes +
+        "\nArchiMate element types: " + stats.archimateTypes +
+        "\nRelationship verbs: " + stats.relationshipVerbs +
+        "\nRelationship definitions: " + stats.relationshipDefinitions +
+        "\nRelationships: " + stats.relationships +
+        "\nConcepts created: " + stats.conceptsCreated +
+        "\nConcepts reused: " + stats.conceptsReused +
+        "\nRelationships created: " + stats.relationshipsCreated +
+        "\nRelationships reused: " + stats.relationshipsReused;
+}
+
+function main() {
+    var sourceText;
+    var data;
+    var concepts;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    logger.start("SABSA A1 exchange schema metamodel generation started.", {
+        source_json: CONST.SourceJsonPath
+    });
+
+    sourceText = readUtf8Text(CONST.SourceJsonPath);
+    data = JSON.parse(sourceText);
+    validateData(data);
+
+    if (!confirmExecution(data)) {
+        logger.info("SABSA A1 exchange schema metamodel generation cancelled by user.", {
+            source_json: CONST.SourceJsonPath
+        }, "sabsa.a1.schema.generation.cancelled");
+        return;
+    }
+
+    concepts = createConcepts(data);
+    createSourceRelationships(data, concepts);
+    createMappingRelationships(data, concepts);
+    createTypeMappingView(data, concepts);
+    createRelationshipMappingView(data, concepts);
+
+    logger.finish("SABSA A1 exchange schema metamodel generation finished.", {
+        source_json: CONST.SourceJsonPath,
+        views_created: stats.views,
+        source_references_created_or_reused: stats.sourceRefs,
+        sabsa_types_created_or_reused: stats.sabsaTypes,
+        archimate_types_created_or_reused: stats.archimateTypes,
+        relationship_verbs_created_or_reused: stats.relationshipVerbs,
+        relationship_definitions_created_or_reused: stats.relationshipDefinitions,
+        relationships_created_or_reused: stats.relationships,
+        concepts_created: stats.conceptsCreated,
+        concepts_reused: stats.conceptsReused,
+        relationships_created: stats.relationshipsCreated,
+        relationships_reused: stats.relationshipsReused
+    });
+
+    dialogs.showInfo(buildResultMessage(), "SABSA A1 Exchange Schema Metamodel");
+}
+
+main();
