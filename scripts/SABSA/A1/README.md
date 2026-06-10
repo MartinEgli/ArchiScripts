@@ -46,6 +46,20 @@ The script creates stable framework elements under `SABSA/A1/Attribute Profile F
 
 - `SABSA A1 - Attribute Profile Framework`
 
+## Generate_SABSA_A1_Assurance_Framework_View.ajs
+
+Generates a SABSA A1 Assurance Framework view in the style of the A1 training diagram:
+
+- input dimensions for `Attributes`, `Risk`, `Processes`, `Environment`, `People`, and `Time`
+- `Assurance Context` with `Scope`, `Properties`, and `Requirements`
+- central `Assurance Model` and `Deploy Assurance Investigation Activities`
+- `Domains` and `Dependencies`
+- assurance artefacts for levels, activities catalogue, and needs assessment
+
+The script creates stable framework elements under `SABSA/A1/Assurance Framework` and generates:
+
+- `SABSA A1 - Assurance Framework`
+
 ## NIBOCJ Assumption
 
 `NIBOCJ` is currently interpreted as a working cross-reference mnemonic:
