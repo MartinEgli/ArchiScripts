@@ -20,7 +20,7 @@ var CONST = {
     SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md").getCanonicalPath(),
     SourceDocumentName: "SABSA-A1-MFC_generic_metamodel_field_catalogue.md",
     Namespace: "SabsaA1Overlay",
-    LayerViewName: "SABSA A1 - Metamodel Layer Architecture",
+    LayerViewName: "SABSA A1 - SABSA Architecture Layer Alignment",
     TypeViewName: "SABSA A1 - Metamodel Core Type Inventory",
     RelationshipViewName: "SABSA A1 - Metamodel Relationship Catalogue",
     ForeignKeyViewName: "SABSA A1 - Metamodel Field FK Relations",
@@ -97,14 +97,12 @@ var CONST = {
         LineColor: "#111111",
         FontColor: "#111111",
         LayerFillByPrefix: {
-            "L1": "#ccccff",
-            "L2": "#ffcc64",
+            "L1": "#ff9aff",
+            "L2": "#ccccff",
             "L3": "#ccffff",
-            "L4": "#ffff9a",
-            "L5": "#ff9a69",
-            "L6": "#ffff64",
-            "L7": "#ccff9a",
-            "L8": "#ffcc64"
+            "L4": "#ccff9a",
+            "L5": "#ffff9a",
+            "L6": "#ffcc64"
         }
     }
 };
@@ -1143,7 +1141,7 @@ function createCompleteTableCatalogueConcepts(markdown, sourceConcept) {
 }
 
 function createLayerConcepts(markdown, sourceConcept) {
-    var rows = extractTableAfterMarker(markdown, "Table 1-LA01 - Metamodel Layer Architecture");
+    var rows = extractTableAfterMarker(markdown, "Table 1-LA01 - SABSA Architecture Layer Alignment");
     var concepts = [];
 
     rows.forEach(function (row, index) {
@@ -1159,7 +1157,7 @@ function createLayerConcepts(markdown, sourceConcept) {
             VisualFillColor: fillColor,
             VisualColorRole: getColorRole(fillColor),
             SourceSection: "Table 1-LA01"
-        }, buildDocumentation("Metamodel layer extracted from Table 1-LA01.", data));
+        }, buildDocumentation("SABSA architecture layer extracted from Table 1-LA01.", data));
         applyTableProperties(concept, data);
 
         ensureRelationship("association-relationship", sourceConcept, concept, "catalogue:source:layer:" + slugify(layer), "defines", {
@@ -2263,7 +2261,7 @@ function main() {
         fieldDefinitions: parsedTableBlocks.reduce(function (sum, block) {
             return sum + block.rows.filter(isFieldCatalogueRow).length;
         }, 0),
-        layers: extractTableAfterMarker(markdown, "Table 1-LA01 - Metamodel Layer Architecture").length,
+        layers: extractTableAfterMarker(markdown, "Table 1-LA01 - SABSA Architecture Layer Alignment").length,
         coreTypes: extractTableAfterMarker(markdown, "Table 1-03 - Core Type Inventory").length,
         relationships: extractTableAfterMarker(markdown, "Table 1-03B - Relationship Catalogue").length,
         viewpoints: extractTableAfterMarker(markdown, "Table 1-03D - Recommended Architecture Viewpoints").length
