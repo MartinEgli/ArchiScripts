@@ -2863,6 +2863,7 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
     var currentY = CONST.Layout.LibraryGroupY;
     var typeLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
     var relationshipLabel = "«Relationship Type»\n${name}\n${property:BaseType}";
+    var visualsByConcept = {};
 
     view.documentation = "Generated SABSA A1 overlay type model. Meta elements define the available overlay types.";
     moveViewToFolder(view);
@@ -2883,7 +2884,11 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
         var group = addLibraryGroup(view, baseType, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
 
         concepts.forEach(function (concept, index) {
-            addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), typeLabel);
+            rememberVisual(
+                visualsByConcept,
+                concept,
+                addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), typeLabel)
+            );
         });
 
         currentY = nextLibraryGroupY(currentY, groupHeight);
@@ -2894,9 +2899,17 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
         var relationshipGroup = addLibraryGroup(view, "Relationship Types", CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, relationshipGroupHeight, CONST.Style.RelationshipFill);
 
         relationshipConcepts.forEach(function (concept, index) {
-            addLibraryConcept(relationshipGroup, concept, index, getConceptFill(concept, CONST.Style.RelationshipFill), relationshipLabel);
+            rememberVisual(
+                visualsByConcept,
+                concept,
+                addLibraryConcept(relationshipGroup, concept, index, getConceptFill(concept, CONST.Style.RelationshipFill), relationshipLabel)
+            );
         });
     }
+
+    addVisibleRelationshipsByEndpoint(view, visualsByConcept, [
+        "CoreTypeSpecialization"
+    ]);
 
     stats.views++;
     return view;
