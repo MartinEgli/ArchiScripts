@@ -91,6 +91,7 @@ It creates source-traced ArchiMate catalogue elements with properties such as `S
 - `SABSA A1 - Metamodel Complete Table Index`
 - `SABSA A1 - Metamodel Layer Architecture`
 - `SABSA A1 - Metamodel Core Type Inventory`
+- `SABSA A1 - Metamodel Field FK Relations`
 - `SABSA A1 - Metamodel Relationship Catalogue`
 - `SABSA A1 - Metamodel Viewpoint Catalogue`
 - `SABSA A1 - Overlay Sample Relationship Overview`
