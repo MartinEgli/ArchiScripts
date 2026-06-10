@@ -10,7 +10,7 @@ Behavior:
 - shows stereotypes matching the selected element type
 - applies the specialization and stereotype label
 - keeps existing business properties unchanged
-- adds only missing field properties and field metadata
+- adds only missing field values; field metadata stays on the metamodel element
 - creates a trace relationship back to the selected metamodel element
 ===============================================================================
 */
@@ -233,20 +233,11 @@ function applyTemplate(selectedDiagramObject, entry, metaElement) {
     fieldList.forEach(function (fieldName) {
         var prefix = getFieldPropertyPrefix(fieldName);
         var datatype = metaElement.prop(prefix + "_Datatype");
-        var required = metaElement.prop(prefix + "_Required");
-        var keyRole = metaElement.prop(prefix + "_KeyRole");
-        var templateFamily = metaElement.prop(prefix + "_TemplateFamily");
         var description = metaElement.prop(prefix + "_Description");
 
         if (setIfMissing(concept, fieldName, buildSampleValue(fieldName, datatype, description))) {
             added++;
         }
-
-        setIfMissing(concept, prefix + "_Datatype", datatype);
-        setIfMissing(concept, prefix + "_Required", required);
-        setIfMissing(concept, prefix + "_KeyRole", keyRole);
-        setIfMissing(concept, prefix + "_TemplateFamily", templateFamily);
-        setIfMissing(concept, prefix + "_Description", description);
     });
 
     try {

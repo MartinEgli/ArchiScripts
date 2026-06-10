@@ -1079,8 +1079,6 @@ function createCompleteTableCatalogueConcepts(markdown, sourceConcept) {
             HeaderColumns: block.headers.join("; "),
             Caption: block.caption
         }));
-        applyFieldCatalogueProperties(tableConcept, block.rows, block.id);
-
         ensureRelationship("association-relationship", sourceConcept, tableConcept, "catalogue:source:table:" + slugify(block.id), "contains", {
             SabsaA1CatalogueRelationKind: "SourceTableTrace",
             SourceSection: "Table " + block.id
@@ -1551,11 +1549,6 @@ function applySamplePropertiesFromMeta(sampleConcept, metaConcept) {
         var datatype = metaConcept.prop(prefix + "_Datatype");
         var description = metaConcept.prop(prefix + "_Description");
         sampleConcept.prop(fieldName, buildSampleValue(fieldName, datatype, description));
-        sampleConcept.prop(prefix + "_Datatype", datatype);
-        sampleConcept.prop(prefix + "_Required", metaConcept.prop(prefix + "_Required"));
-        sampleConcept.prop(prefix + "_KeyRole", metaConcept.prop(prefix + "_KeyRole"));
-        sampleConcept.prop(prefix + "_TemplateFamily", metaConcept.prop(prefix + "_TemplateFamily"));
-        sampleConcept.prop(prefix + "_Description", description);
     });
 }
 
