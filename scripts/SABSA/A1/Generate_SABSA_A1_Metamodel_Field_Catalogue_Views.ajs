@@ -930,11 +930,22 @@ function addStyledVisual(container, concept, x, y, width, height, fillColor) {
 }
 
 function addConnection(view, relationship, sourceVisual, targetVisual) {
+    var connection;
+
     if (!relationship || !sourceVisual || !targetVisual) {
         return null;
     }
 
-    var connection = view.add(relationship, sourceVisual, targetVisual);
+    try {
+        connection = view.add(relationship, sourceVisual, targetVisual);
+    } catch (error) {
+        logger.debug("Could not add relationship connection to view.", {
+            relationship: safeString(relationship.name),
+            error: String(error)
+        }, "sabsa.a1.catalogue.connection.add.skipped");
+        return null;
+    }
+
     connection.lineColor = CONST.Style.LineColor;
     connection.fontColor = CONST.Style.FontColor;
     try {
@@ -943,6 +954,41 @@ function addConnection(view, relationship, sourceVisual, targetVisual) {
         logger.debug("Could not apply relationship label expression.", { error: String(error) }, "sabsa.a1.catalogue.connection.label.skipped");
     }
     return connection;
+}
+
+function resolveVisualByTypeName(visualsByType, typeName) {
+    var visual = visualsByType[typeName] || visualsByType[normalizeTypeName(typeName)];
+
+    if (visual) {
+        return visual;
+    }
+
+    Object.keys(visualsByType).forEach(function (key) {
+        if (!visual && normalizeTypeName(key) === normalizeTypeName(typeName)) {
+            visual = visualsByType[key];
+        }
+    });
+
+    return visual || null;
+}
+
+function addRelationshipsByCatalogueKind(view, visualsByType, relationKinds) {
+    var wanted = {};
+
+    (relationKinds || []).forEach(function (kind) {
+        wanted[kind] = true;
+    });
+
+    $("relationship").filter(function (relationship) {
+        return !!wanted[safeString(relationship.prop("SabsaA1CatalogueRelationKind"))];
+    }).each(function (relationship) {
+        addConnection(
+            view,
+            relationship,
+            resolveVisualByTypeName(visualsByType, safeString(relationship.prop("SourceType"))),
+            resolveVisualByTypeName(visualsByType, safeString(relationship.prop("TargetType")))
+        );
+    });
 }
 
 function gridPosition(index, columns, startX, startY, width, height) {
@@ -1550,6 +1596,39 @@ function createSampleRelationships(tableData, coreTypeConcepts, samplesByType) {
         stats.sampleRelationships++;
     });
 
+    $("relationship").filter(function (relationship) {
+        return safeString(relationship.prop("SabsaA1CatalogueRelationKind")) === "CoreTypeForeignKeyReference";
+    }).each(function (fkRelationship) {
+        var sourceMeta = getCoreTypeConcept(coreTypeConcepts, fkRelationship.prop("SourceType"));
+        var targetMeta = getCoreTypeConcept(coreTypeConcepts, fkRelationship.prop("TargetType"));
+        var sourceSample = sourceMeta ? samplesByType[sourceMeta.name] : null;
+        var targetSample = targetMeta ? samplesByType[targetMeta.name] : null;
+        var fkKey = safeString(fkRelationship.prop("SabsaA1CatalogueKey"));
+        var fieldName = safeString(fkRelationship.prop("FieldName"));
+        var label = safeString(fkRelationship.prop("RelationshipLabel")) || (fieldName + " -> " + safeString(fkRelationship.prop("TargetType")));
+        var relationship;
+
+        if (!sourceSample || !targetSample || !fkKey) {
+            return;
+        }
+
+        relationship = ensureRelationship("association-relationship", sourceSample, targetSample, "catalogue:sample:fk:" + slugify(fkKey), label, {
+            SabsaA1CatalogueRelationKind: "SampleForeignKeyRelationship",
+            RelationshipKind: CONST.Kind.SampleRelationship,
+            RelationshipTypeName: "SampleForeignKeyReference",
+            RelationshipLabel: label,
+            SourceType: sourceMeta.name,
+            TargetType: targetMeta.name,
+            FieldName: fieldName,
+            Required: fkRelationship.prop("Required"),
+            KeyRole: fkRelationship.prop("KeyRole"),
+            Description: fkRelationship.prop("Description"),
+            SourceSection: fkRelationship.prop("SourceSection")
+        });
+        sampleRelationships.push(relationship);
+        stats.sampleRelationships++;
+    });
+
     return sampleRelationships;
 }
 
@@ -1936,9 +2015,32 @@ function createGridView(baseName, sourceConcept, concepts, fillColor, columns) {
 }
 
 function createTypeView(sourceConcept, typeConcepts) {
-    return createGridView(CONST.TypeViewName, sourceConcept, Object.keys(typeConcepts).map(function (key) {
-        return typeConcepts[key];
-    }), CONST.Style.TypeFill, CONST.Layout.TypeColumns);
+    var view = model.createArchimateView(buildUniqueViewName(CONST.TypeViewName));
+    var sourceVisual;
+    var visualsByType = {};
+
+    view.documentation = "Generated core, promoted support and extension types with semantic and FK relationships from " + CONST.SourceMarkdownPath + ".";
+    moveViewToFolder(view);
+
+    sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
+
+    Object.keys(typeConcepts).forEach(function (key, index) {
+        var concept = typeConcepts[key];
+        var pos = gridPosition(index, CONST.Layout.TypeColumns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        var visual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.TypeFill));
+
+        visualsByType[concept.name] = visual;
+        visualsByType[normalizeTypeName(concept.name)] = visual;
+        addConnection(view, findRelationshipByKey("catalogue:source:type:" + safeString(concept.prop("SabsaType"))), sourceVisual, visual);
+    });
+
+    addRelationshipsByCatalogueKind(view, visualsByType, [
+        "CoreTypeSemanticRelationship",
+        "CoreTypeForeignKeyReference"
+    ]);
+
+    stats.views++;
+    return view;
 }
 
 function createTableIndexView(sourceConcept, tableConcepts) {
@@ -1948,15 +2050,46 @@ function createTableIndexView(sourceConcept, tableConcepts) {
 function createRelationshipView(sourceConcept, relationshipConcepts, coreTypeConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.RelationshipViewName));
     var sourceVisual = addStyledVisual(view, sourceConcept, CONST.Layout.StartX, CONST.Layout.StartY, CONST.Layout.SourceWidth, CONST.Layout.SourceHeight, CONST.Style.SourceFill);
-    var visuals = {};
+    var relationshipVisuals = {};
+    var typeVisuals = {};
+    var typeIndex = 0;
 
     view.documentation = "Generated from the relationship catalogue in " + CONST.SourceMarkdownPath + ".";
     moveViewToFolder(view);
 
+    function ensureTypeVisual(typeName) {
+        var metaConcept = getCoreTypeConcept(coreTypeConcepts, typeName);
+        var pos;
+        var visual;
+
+        if (!metaConcept) {
+            return null;
+        }
+
+        visual = resolveVisualByTypeName(typeVisuals, metaConcept.name);
+        if (visual) {
+            return visual;
+        }
+
+        pos = gridPosition(typeIndex, CONST.Layout.Columns, CONST.Layout.StartX + 980, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
+        visual = addStyledVisual(view, metaConcept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(metaConcept, CONST.Style.TypeFill));
+        typeVisuals[metaConcept.name] = visual;
+        typeVisuals[normalizeTypeName(metaConcept.name)] = visual;
+        typeIndex++;
+        return visual;
+    }
+
     relationshipConcepts.forEach(function (concept, index) {
         var pos = gridPosition(index, CONST.Layout.Columns, CONST.Layout.StartX, CONST.Layout.StartY + 120, CONST.Layout.CardWidth, CONST.Layout.CardHeight);
-        visuals[concept.name] = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.RelationshipFill));
-        addConnection(view, findRelationshipByKey("catalogue:source:relationship:" + slugify(concept.name)), sourceVisual, visuals[concept.name]);
+        var relationshipVisual = addStyledVisual(view, concept, pos.x, pos.y, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(concept, CONST.Style.RelationshipFill));
+        var sourceTypeVisual = ensureTypeVisual(concept.prop("SourceType"));
+        var targetTypeVisual = ensureTypeVisual(concept.prop("TargetType"));
+
+        relationshipVisuals[concept.name] = relationshipVisual;
+        addConnection(view, findRelationshipByKey("catalogue:source:relationship:" + slugify(concept.name)), sourceVisual, relationshipVisual);
+        addConnection(view, findRelationshipByKey("catalogue:relationship:" + slugify(concept.name) + ":source"), relationshipVisual, sourceTypeVisual);
+        addConnection(view, findRelationshipByKey("catalogue:relationship:" + slugify(concept.name) + ":target"), relationshipVisual, targetTypeVisual);
+        addConnection(view, findRelationshipByKey("catalogue:type-relation:" + slugify(concept.prop("Relationship"))), sourceTypeVisual, targetTypeVisual);
     });
 
     stats.views++;
