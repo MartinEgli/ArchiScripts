@@ -67,16 +67,28 @@ It creates ArchiMate elements with source properties such as `SabsaA1MdKey`, `So
 - `SABSA A1 - JSON Extracted Model`
 - JSON-defined use-case, Q3 and Q4 views
 
-## Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs
+## Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs
 
-Parses the generic metamodel field catalogue from:
+Runs the shared field-catalogue generator in table mode. It parses the generic metamodel field catalogue from:
 
 - `../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md`
 
-The script extracts:
+It creates or reuses only source, table and table-row catalogue elements and generates:
 
-- all Markdown tables in the standalone chapter-numbered catalogue as table elements
-- every extracted table row as a row element with `Table_*` properties
+- `SABSA A1 - Metamodel Complete Table Index`
+
+Existing elements are matched by stable `SabsaA1CatalogueKey` values such as `catalogue:table:<table-id>` and `catalogue:table-row:<table-id>:<row-index>`.
+
+## Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs
+
+Runs the shared field-catalogue generator in meta mode. It parses the same source catalogue from:
+
+- `../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md`
+
+It creates or reuses metamodel, overlay, relationship and sample elements. Existing table and table-row elements from `Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs` are reused when present; otherwise the catalogue tables are parsed as data only and no new table catalogue elements are created.
+
+The meta script extracts:
+
 - field definitions as explicit properties on the matching metamodel core-type elements only, using `Field_<field>`, `Field_<field>_Datatype`, `Field_<field>_Required`, `Field_<field>_KeyRole`, `Field_<field>_TemplateFamily`, `Field_<field>_Description`, and `Field_<field>_SourceTable`
 - `Table 3-LA01 - SABSA Architecture Layer Alignment`
 - `Table 6-01 - Core Type Inventory`
@@ -84,11 +96,10 @@ The script extracts:
 - `Table 6-03 - Relationship Catalogue`
 - `Table 6-05 - Recommended Architecture Viewpoints`
 
-It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor`, `VisualColorRole`, and `Table_*` properties for every extracted catalogue row. Meta core-type elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. The generator removes old `Field_*` metadata copies from SABSA A1 non-meta elements when it reuses or scans them. Meta type elements are shown as `«SABSA A1 Overlay Type»` followed by the type name, while sample and applied overlay elements use the concrete overlay stereotype such as `«SABSA A1 Risk»`. It generates seven views:
+It creates source-traced ArchiMate catalogue elements with properties such as `SabsaA1CatalogueKey`, `SourceMarkdown`, `SourceDocumentName`, `ExtractorScript`, `SourceSection`, `SabsaType`, `RecommendedArchiMateType`, cardinality, semantics, validation impact, required back-links, `VisualFillColor` and `VisualColorRole`. Meta core-type elements carry the `Field_*` field metadata; sample and applied overlay elements carry concrete field values only. The generator removes old `Field_*` metadata copies from SABSA A1 non-meta elements when it reuses or scans them. Meta type elements are shown as `«SABSA A1 Overlay Type»` followed by the type name, while sample and applied overlay elements use the concrete overlay stereotype such as `«SABSA A1 Risk»`. It generates the metamodel views:
 
 Visible Archi concept, relationship and stereotype names replace `_` with spaces across the A1 generation and apply scripts, while stable keys and technical properties such as `SabsaType`, field names and catalogue IDs keep their source values.
 
-- `SABSA A1 - Metamodel Complete Table Index`
 - `SABSA A1 - SABSA Architecture Layer Alignment`
 - `SABSA A1 - Metamodel Core Type Inventory`
 - `SABSA A1 - Metamodel Field FK Relations`
@@ -102,9 +113,13 @@ Following `Build_Security_Overlay_Library_With_Overlay_Model_Folder.ajs`, the ge
 - `SABSA A1 Overlay - Type Model`
 - `SABSA A1 Overlay - Template Library`
 
-The complete table model also creates relationships from source to table, table to row, table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type, `CoreTypeHasField` links, named FK-based `CoreTypeForeignKeyReference` links, and direct named core-type semantic relationships from `Table 6-03`. Type-to-field relation labels use the field table `Key Role` value, for example `PK`, `FK` or `Property`. FK targets are resolved from backticked references, field names, free-text notes and catalogue aliases such as `Evidence` -> `Evidence_Item`, `Treatment` -> `Risk_Treatment`, and `Assurance Subject` -> `Assurance_Evaluation_Subject`. Relationship names carry the relationship semantics or field name, for example `risk_id -> Risk` or the relationship-catalogue semantics with cardinality. The type, FK, relationship and sample overview views render semantic and FK relationships through their actual ArchiMate relationship endpoints, and the completion dialog reports created and skipped view connections. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
+When table elements exist, the meta script reuses them to add relationships from table rows to the focused layer/type/relationship/viewpoint concepts, detailed field tables to their core or promoted support type, field rows to their type and `CoreTypeHasField` links. Even without table elements it still creates named FK-based `CoreTypeForeignKeyReference` links and direct named core-type semantic relationships from `Table 6-03`. Type-to-field relation labels use the field table `Key Role` value, for example `PK`, `FK` or `Property`. FK targets are resolved from backticked references, field names, free-text notes and catalogue aliases such as `Evidence` -> `Evidence_Item`, `Treatment` -> `Risk_Treatment`, and `Assurance Subject` -> `Assurance_Evaluation_Subject`. Relationship names carry the relationship semantics or field name, for example `risk_id -> Risk` or the relationship-catalogue semantics with cardinality. The type, FK, relationship and sample overview views render semantic and FK relationships through their actual ArchiMate relationship endpoints, and the completion dialog reports created and skipped view connections. The generator persists `SabsaA1OverlayTemplateIndexJson` and `SabsaA1OverlayRelationshipIndexJson` model properties for downstream application scripts.
 
 The generator adds selected SABSA A1 overlay specializations where the literature or catalogue defines a stable semantic split: `Threat` and `Opportunity` specialize `Event_Attribute`; `Strength` and `Weakness` specialize `State_Attribute`; `Impact` and `Benefit` specialize `Consequence`; `Threat Risk` and `Opportunity Risk` specialize `Risk`; `Control`, `Enabler` and `Combined Treatment` specialize `Risk_Treatment`. These derived types inherit the base type field metadata and set field defaults such as `classification`, `state_effect`, `consequence_type`, `risk_direction` or `treatment_type` for samples and applied elements.
+
+## Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs
+
+Shared backwards-compatible generator core. Running it directly uses combined mode and creates both the table catalogue and the meta/overlay views. Prefer the table and meta entrypoint scripts above when the two views should be maintained separately.
 
 ## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
