@@ -287,8 +287,11 @@ function readUtf8Text(absolutePath) {
 function getTopLevelFolder(rootName) {
     var aliasesByFolderName = {
         "Business": ["Business"],
+        "Application": ["Application"],
+        "Technology": ["Technology"],
         "Motivation": ["Motivation"],
         "Strategy": ["Strategy"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"],
         "Other": ["Other", "Connectors"],
         "Views": ["Views"],
         "Relations": ["Relations", "Relations/Connectors", "Connectors"]
@@ -345,6 +348,61 @@ function getModelFolderSegments(extraSegments) {
     return segments;
 }
 
+function resolveTopLevelFolderNameFromConceptType(conceptType, kindValue) {
+    if (kindValue === "Relationship") {
+        return "Relations";
+    }
+
+    var normalizedConceptType = safeString(conceptType).toLowerCase();
+
+    if (normalizedConceptType.indexOf("business-") === 0) {
+        return "Business";
+    }
+    if (normalizedConceptType.indexOf("application-") === 0 || normalizedConceptType === "data-object") {
+        return "Application";
+    }
+    if (normalizedConceptType.indexOf("technology-") === 0 || normalizedConceptType === "node" ||
+        normalizedConceptType === "artifact" || normalizedConceptType === "device" ||
+        normalizedConceptType === "communication-path" || normalizedConceptType === "path" ||
+        normalizedConceptType === "system-software" || normalizedConceptType === "technology-interface" ||
+        normalizedConceptType === "technology-service" || normalizedConceptType === "technology-function") {
+        return "Technology";
+    }
+    if (normalizedConceptType === "assessment" || normalizedConceptType === "constraint" ||
+        normalizedConceptType === "driver" || normalizedConceptType === "goal" ||
+        normalizedConceptType === "meaning" || normalizedConceptType === "outcome" ||
+        normalizedConceptType === "principle" || normalizedConceptType === "requirement" ||
+        normalizedConceptType === "stakeholder" || normalizedConceptType === "value") {
+        return "Motivation";
+    }
+    if (normalizedConceptType === "capability" || normalizedConceptType === "course-of-action" ||
+        normalizedConceptType === "resource") {
+        return "Strategy";
+    }
+    if (normalizedConceptType === "work-package" || normalizedConceptType === "deliverable" ||
+        normalizedConceptType === "plateau" || normalizedConceptType === "gap" ||
+        normalizedConceptType === "implementation-event") {
+        return "Implementation & Migration";
+    }
+
+    return "Other";
+}
+
+function getAreaFolderSegment(properties, fallbackName) {
+    var kind = safeString(properties && properties.SabsaA1CatalogueKind);
+    var typeName = safeString(properties && (properties.TypeName || properties.SabsaType)) || safeString(fallbackName);
+    var area = getSabsaA1Area(typeName);
+
+    if (kind === "CoreType" || kind === "Template" || kind === "Sample") {
+        return area;
+    }
+    if (kind === "Relationship") {
+        return "Relationships";
+    }
+
+    return "";
+}
+
 function resolveConceptPlacement(conceptType, properties) {
     var kind = safeString(properties && properties.SabsaA1CatalogueKind);
     var folder = kind === "Layer" ? CONST.Folder.Layers :
@@ -354,21 +412,16 @@ function resolveConceptPlacement(conceptType, properties) {
                     kind === "Table" ? CONST.Folder.Tables :
                         kind === "TableRow" ? CONST.Folder.TableRows :
                             kind === "Template" || kind === "Sample" ? CONST.Folder.Templates : CONST.Folder.Source;
+    var pathSegments = getModelFolderSegments([folder]);
+    var areaFolder = getAreaFolderSegment(properties, properties && (properties.TypeName || properties.SabsaType));
+    var rootName;
 
-    if (conceptType === "goal" || conceptType === "requirement" || conceptType === "constraint" ||
-        conceptType === "assessment" || conceptType === "outcome" || conceptType === "driver") {
-        return { rootName: "Motivation", pathSegments: getModelFolderSegments([folder]) };
+    if (areaFolder) {
+        pathSegments.push(areaFolder);
     }
 
-    if (conceptType === "capability" || conceptType === "course-of-action") {
-        return { rootName: "Strategy", pathSegments: getModelFolderSegments([folder]) };
-    }
-
-    if (conceptType === "grouping") {
-        return { rootName: "Other", pathSegments: getModelFolderSegments([folder]) };
-    }
-
-    return { rootName: "Business", pathSegments: getModelFolderSegments([folder]) };
+    rootName = resolveTopLevelFolderNameFromConceptType(conceptType, kind);
+    return { rootName: rootName, pathSegments: pathSegments };
 }
 
 function moveObjectToFolder(rootName, pathSegments, objectToMove) {
@@ -408,7 +461,15 @@ function buildUniqueViewName(baseName) {
 }
 
 function findConceptByKey(conceptType, key) {
-    return $(conceptType).filter(function (concept) {
+    var concept = $(conceptType).filter(function (candidate) {
+        return safeString(candidate.prop("SabsaA1CatalogueKey")) === safeString(key);
+    }).first();
+
+    if (concept) {
+        return concept;
+    }
+
+    return $("element").filter(function (concept) {
         return safeString(concept.prop("SabsaA1CatalogueKey")) === safeString(key);
     }).first();
 }
@@ -434,11 +495,9 @@ function ensureConcept(conceptType, name, key, properties, documentation) {
     if (!canOwnFieldMetadata(properties)) {
         stats.fieldMetadataPropertiesRemoved += removeFieldMetadataProperties(concept);
     }
-    applyOverlayStereotype(concept, conceptType, properties);
+    applyOverlayStereotype(concept, concept.type || conceptType, properties);
 
-    if (conceptCreated) {
-        moveConceptToFolder(concept, conceptType, properties);
-    }
+    moveConceptToFolder(concept, concept.type || conceptType, properties);
 
     return concept;
 }
@@ -475,9 +534,7 @@ function ensureRelationship(relationshipType, sourceConcept, targetConcept, key,
     setProperties(relationship, properties);
     applyRelationshipStereotype(relationship, relationshipType, properties);
 
-    if (relationshipCreated) {
-        moveRelationshipToFolder(relationship);
-    }
+    moveRelationshipToFolder(relationship);
 
     stats.relationshipLinks++;
     return relationship;
@@ -794,10 +851,53 @@ function getOverlaySpecialization(typeName, overlayKind) {
     return typeName;
 }
 
+function archimateBaseTypeName(conceptType) {
+    var aliases = {
+        "access-relationship": "Access Relationship",
+        "aggregation-relationship": "Aggregation Relationship",
+        "application-component": "Application Component",
+        "application-event": "Application Event",
+        "application-service": "Application Service",
+        "artifact": "Artifact",
+        "assessment": "Assessment",
+        "association-relationship": "Association Relationship",
+        "business-actor": "Business Actor",
+        "business-event": "Business Event",
+        "business-object": "Business Object",
+        "business-process": "Business Process",
+        "business-role": "Business Role",
+        "capability": "Capability",
+        "composition-relationship": "Composition Relationship",
+        "constraint": "Constraint",
+        "course-of-action": "Course of Action",
+        "data-object": "Data Object",
+        "driver": "Driver",
+        "flow-relationship": "Flow Relationship",
+        "goal": "Goal",
+        "grouping": "Grouping",
+        "influence-relationship": "Influence Relationship",
+        "meaning": "Meaning",
+        "outcome": "Outcome",
+        "principle": "Principle",
+        "realization-relationship": "Realization Relationship",
+        "requirement": "Requirement",
+        "resource": "Resource",
+        "specialization-relationship": "Specialization Relationship",
+        "stakeholder": "Stakeholder",
+        "technology-event": "Technology Event",
+        "value": "Value",
+        "work-package": "Work Package"
+    };
+    var key = safeString(conceptType).toLowerCase();
+
+    return aliases[key] || displayName(key);
+}
+
 function applyOverlayStereotype(target, conceptType, properties) {
     var typeName = getOverlayTypeName(conceptType, properties);
     var overlayKind = getOverlayKind(properties);
     var specialization = getOverlaySpecialization(typeName, overlayKind);
+    var area = getSabsaA1Area(typeName);
 
     if (!target || !typeName || !specialization) {
         return;
@@ -816,9 +916,11 @@ function applyOverlayStereotype(target, conceptType, properties) {
 
     target.prop(CONST.Property.Namespace, CONST.Namespace);
     target.prop(CONST.Property.Kind, overlayKind);
-    target.prop(CONST.Property.BaseType, conceptType);
+    target.prop(CONST.Property.BaseType, archimateBaseTypeName(conceptType));
     target.prop(CONST.Property.TypeName, typeName);
     target.prop(CONST.Property.ConceptType, conceptType);
+    target.prop("SabsaA1Area", area);
+    target.prop("OverlayArea", area);
     target.prop(CONST.Property.Stereotype, "«SABSA A1 " + specialization + "»");
     target.prop(CONST.Property.DefaultLabelExpression, CONST.LabelExpression.Stereotype);
 }
@@ -856,7 +958,7 @@ function applyRelationshipStereotype(relationship, relationshipType, properties)
 
     relationship.prop(CONST.Property.Namespace, CONST.Namespace);
     relationship.prop(CONST.Property.Kind, safeString(properties && properties.RelationshipKind) || CONST.Kind.MetaRelationship);
-    relationship.prop(CONST.Property.BaseType, relationshipType);
+    relationship.prop(CONST.Property.BaseType, archimateBaseTypeName(relationshipType));
     relationship.prop(CONST.Property.TypeName, typeName);
     relationship.prop(CONST.Property.ConceptType, relationshipType);
     relationship.prop(CONST.Property.Stereotype, "«SABSA A1 " + typeName + "»");
@@ -1047,7 +1149,7 @@ function getCoreTypeFill(typeName, archimateType) {
     if (conceptType === "business-event" || type.indexOf("Event") >= 0) {
         return CONST.Style.ColumnFill;
     }
-    if (conceptType === "goal" || type.indexOf("Attribute") >= 0 || type.indexOf("Objective") >= 0) {
+    if (conceptType === "goal" || conceptType === "principle" || type.indexOf("Attribute") >= 0 || type.indexOf("Objective") >= 0) {
         return CONST.Style.ConceptualFill;
     }
     if (conceptType === "requirement" || conceptType === "constraint") {
@@ -1155,40 +1257,108 @@ function getRowFill(data) {
     return CONST.Style.SupportFill;
 }
 
+function getSabsaA1Area(typeName) {
+    var type = normalizeTypeName(typeName);
+
+    if (/^(Source_Reference|Evidence_Item|Evidence_Confidence|Claim)$/.test(type)) {
+        return "01 Source and Evidence";
+    }
+    if (/^(Domain|Domain_Authority|Attribute|Domain_Attribute|Assessment_Scope|Risk_Context|Business_Objective|Business_Driver|Stakeholder|Stakeholder_Concern|DA_Dependency)$/.test(type)) {
+        return "02 Business Context and Domains";
+    }
+    if (/^(Event|Event_Attribute|Threat|Opportunity|State|State_Attribute|Strength|Weakness|Consequence|Impact|Benefit|Risk|Threat_Risk|Opportunity_Risk|Risk_Period)$/.test(type)) {
+        return "03 Risk Identification";
+    }
+    if (/^(Event_Likelihood|State_Rating|Overall_Likelihood|Consequence_Rating|Risk_Assessment|Evaluation_Criteria|Risk_Evaluation|Risk_Appetite_Criteria|Formula_Variant|Taxonomy_Calibration_Record)$/.test(type)) {
+        return "04 Assessment and Evaluation";
+    }
+    if (/^(Treatment_Strategy|Control_Objective|Enablement_Objective|Risk_Treatment|Control|Enabler|Combined_Treatment|Treatment_Target|Treatment_Capability|Treatment_Library_Item)$/.test(type)) {
+        return "05 Treatment and Control";
+    }
+    if (/^(KRI|KRI_Observation|Feedback_Control_Loop|Risk_Scorecard|Scorecard_Snapshot|Risk_Aggregation|Aggregation_Result|Governance_Communication|Risk_Decision)$/.test(type)) {
+        return "06 Monitoring and Governance";
+    }
+    if (/^Assurance_/.test(type)) {
+        return "07 Assurance";
+    }
+    if (/^(Category_Taxonomy|Classification_Value|Taxonomy_Decision_Record|Source_Precedence_Rule|Taxonomy_Change_Record)$/.test(type)) {
+        return "08 Taxonomy and Calibration";
+    }
+    if (/^(Architecture_View|Traceability_Link)$/.test(type)) {
+        return "09 Views and Traceability";
+    }
+
+    return "99 Support and Extensions";
+}
+
 function inferConceptTypeForSabsaType(typeName) {
     var type = safeString(typeName);
 
-    if (type.indexOf("Authority") >= 0 || type === "Stakeholder") {
+    if (type === "Domain" || type === "Assessment_Scope" || type === "Risk_Context" ||
+        type === "State" || type.indexOf("Period") >= 0 || type.indexOf("Dependency") >= 0) {
+        return "grouping";
+    }
+    if (type === "Event_Attribute" || type === "State_Attribute") {
+        return "assessment";
+    }
+    if (type.indexOf("Rating") >= 0 || type.indexOf("Likelihood") >= 0 ||
+        type.indexOf("Assessment") >= 0 ||
+        type.indexOf("Evaluation") >= 0 || type.indexOf("Scorecard") >= 0 ||
+        type.indexOf("Aggregation") >= 0 || type.indexOf("Finding") >= 0 ||
+        type.indexOf("Opinion") >= 0 || type.indexOf("Evidence_Confidence") >= 0) {
+        return "assessment";
+    }
+    if (type === "Stakeholder") {
+        return "stakeholder";
+    }
+    if (type.indexOf("Authority") >= 0 || type.indexOf("Role") >= 0) {
         return "business-role";
+    }
+    if (type.indexOf("Agent") >= 0) {
+        return "business-actor";
     }
     if (type === "Event" || type === "Implementation_Event") {
         return "business-event";
     }
+    if (type.indexOf("Activity") >= 0 || type.indexOf("Process") >= 0 || type.indexOf("Communication") >= 0) {
+        return "business-process";
+    }
+    if (type === "Source_Reference" || type === "Evidence_Item" || type.indexOf("Record") >= 0 ||
+        type.indexOf("Catalogue") >= 0 || type.indexOf("Catalog") >= 0 || type.indexOf("Taxonomy") >= 0 ||
+        type.indexOf("Classification") >= 0 || type.indexOf("Formula") >= 0 || type.indexOf("Traceability") >= 0) {
+        return "business-object";
+    }
     if (type.indexOf("Consequence") >= 0 || type === "Outcome") {
         return "outcome";
-    }
-    if (type.indexOf("Treatment") >= 0 || type.indexOf("Strategy") >= 0) {
-        return "course-of-action";
-    }
-    if (type.indexOf("Objective") >= 0 || type === "Attribute" || type === "Business_Objective") {
-        return "goal";
-    }
-    if (type.indexOf("Requirement") >= 0 || type.indexOf("Control_Objective") >= 0) {
-        return "requirement";
-    }
-    if (type.indexOf("Criteria") >= 0 || type.indexOf("Rule") >= 0) {
-        return "constraint";
-    }
-    if (type.indexOf("Risk") >= 0 || type.indexOf("Assessment") >= 0 || type.indexOf("Rating") >= 0 ||
-        type.indexOf("Evaluation") >= 0 || type.indexOf("KRI") >= 0 || type.indexOf("Scorecard") >= 0 ||
-        type.indexOf("Aggregation") >= 0 || type.indexOf("Evidence_Confidence") >= 0 ||
-        type.indexOf("Finding") >= 0 || type.indexOf("Opinion") >= 0) {
-        return "assessment";
     }
     if (type.indexOf("Capability") >= 0 || type.indexOf("Shared_Service") >= 0) {
         return "capability";
     }
-
+    if (type.indexOf("Treatment") >= 0 || type.indexOf("Strategy") >= 0) {
+        return "course-of-action";
+    }
+    if (type.indexOf("Objective") >= 0 || type === "Business_Objective") {
+        return "goal";
+    }
+    if (type === "Attribute" || type === "Domain_Attribute" || type.indexOf("_Attribute") >= 0 ||
+        type.indexOf("Criteria") >= 0 || type.indexOf("Appetite") >= 0 || type.indexOf("Concern") >= 0) {
+        return "principle";
+    }
+    if (type.indexOf("Requirement") >= 0 || type.indexOf("Control_Objective") >= 0) {
+        return "requirement";
+    }
+    if (type.indexOf("Rule") >= 0) {
+        return "constraint";
+    }
+    if (type.indexOf("Driver") >= 0) {
+        return "driver";
+    }
+    if (type.indexOf("Decision") >= 0) {
+        return "course-of-action";
+    }
+    if (type.indexOf("Risk") >= 0 || type.indexOf("KRI") >= 0) {
+        return "assessment";
+    }
     return "grouping";
 }
 
@@ -2258,11 +2428,12 @@ function buildTemplateIndex(coreTypeConcepts) {
             Namespace: CONST.Namespace,
             Kind: CONST.Kind.MetaType,
             TypeName: typeName,
-            BaseType: safeString(concept.prop("RecommendedArchiMateType")),
+            BaseType: archimateBaseTypeName(concept.prop("RecommendedArchiMateType")),
             ConceptType: safeString(concept.prop("RecommendedArchiMateType")),
             Stereotype: "«SABSA A1 " + typeName + "»",
             DefaultLabelExpression: CONST.LabelExpression.Stereotype,
             MetaElementKey: safeString(concept.prop("SabsaA1CatalogueKey")),
+            SabsaA1Area: getConceptArea(concept),
             FieldList: safeString(concept.prop("FieldList"))
         });
     });
@@ -2276,7 +2447,7 @@ function buildRelationshipIndex(relationshipConcepts) {
             Namespace: CONST.Namespace,
             Kind: CONST.Kind.MetaRelationship,
             TypeName: safeString(concept.prop(CONST.Property.TypeName)) || specializationName(concept.name),
-            BaseType: "association-relationship",
+            BaseType: archimateBaseTypeName("association-relationship"),
             ConceptType: "association-relationship",
             Stereotype: safeString(concept.prop(CONST.Property.Stereotype)),
             DefaultLabelExpression: CONST.LabelExpression.Stereotype,
@@ -2841,17 +3012,22 @@ function createOverlayLibraryOverviewView() {
     return view;
 }
 
-function groupCoreTypesByBaseType(coreTypeConcepts) {
+function getConceptArea(concept) {
+    return safeString(concept && (concept.prop("SabsaA1Area") || concept.prop("OverlayArea"))) ||
+        getSabsaA1Area(safeString(concept && (concept.prop(CONST.Property.TypeName) || concept.name)));
+}
+
+function groupCoreTypesByArea(coreTypeConcepts) {
     var grouped = {};
 
     Object.keys(coreTypeConcepts || {}).forEach(function (typeName) {
         var concept = coreTypeConcepts[typeName];
-        var baseType = safeString(concept.prop(CONST.Property.BaseType)) || safeString(concept.prop("RecommendedArchiMateType")) || concept.type || "grouping";
+        var area = getConceptArea(concept);
 
-        if (!grouped[baseType]) {
-            grouped[baseType] = [];
+        if (!grouped[area]) {
+            grouped[area] = [];
         }
-        grouped[baseType].push(concept);
+        grouped[area].push(concept);
     });
 
     return grouped;
@@ -2859,7 +3035,7 @@ function groupCoreTypesByBaseType(coreTypeConcepts) {
 
 function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.OverlayTypeModelViewName));
-    var grouped = groupCoreTypesByBaseType(coreTypeConcepts);
+    var grouped = groupCoreTypesByArea(coreTypeConcepts);
     var currentY = CONST.Layout.LibraryGroupY;
     var typeLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
     var relationshipLabel = "«Relationship Type»\n${name}\n${property:BaseType}";
@@ -2878,10 +3054,12 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
         CONST.Style.LibraryHeaderFill
     );
 
-    Object.keys(grouped).sort().forEach(function (baseType) {
-        var concepts = grouped[baseType];
+    Object.keys(grouped).sort().forEach(function (areaName) {
+        var concepts = grouped[areaName].sort(function (left, right) {
+            return safeString(left.name).localeCompare(safeString(right.name));
+        });
         var groupHeight = calculateLibraryGroupHeight(concepts.length);
-        var group = addLibraryGroup(view, baseType, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
+        var group = addLibraryGroup(view, areaName, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
 
         concepts.forEach(function (concept, index) {
             rememberVisual(
@@ -3011,18 +3189,20 @@ function createOverlayTemplateLibraryView(samplesByType) {
     );
 
     samples.forEach(function (sample) {
-        var baseType = safeString(sample.prop(CONST.Property.BaseType)) || sample.type || "grouping";
+        var area = getConceptArea(sample);
 
-        if (!grouped[baseType]) {
-            grouped[baseType] = [];
+        if (!grouped[area]) {
+            grouped[area] = [];
         }
-        grouped[baseType].push(sample);
+        grouped[area].push(sample);
     });
 
-    Object.keys(grouped).sort().forEach(function (baseType) {
-        var concepts = grouped[baseType];
+    Object.keys(grouped).sort().forEach(function (areaName) {
+        var concepts = grouped[areaName].sort(function (left, right) {
+            return safeString(left.name).localeCompare(safeString(right.name));
+        });
         var groupHeight = calculateLibraryGroupHeight(concepts.length);
-        var group = addLibraryGroup(view, baseType, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTemplateGroupFill);
+        var group = addLibraryGroup(view, areaName, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTemplateGroupFill);
 
         concepts.forEach(function (concept, index) {
             addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), templateLabel);
