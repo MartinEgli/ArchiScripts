@@ -1329,7 +1329,7 @@ function getSabsaA1Area(typeName) {
     if (/^(Domain|Domain_Authority|Attribute|Domain_Attribute|Assessment_Scope|Risk_Context|Business_Objective|Business_Driver|Stakeholder|Stakeholder_Concern|DA_Dependency)$/.test(type)) {
         return "02 Business Context and Domains";
     }
-    if (/^(Event|Event_Attribute|Threat|Opportunity|State|State_Attribute|Strength|Weakness|Consequence|Impact|Benefit|Risk|Threat_Risk|Opportunity_Risk|Risk_Period)$/.test(type)) {
+    if (/^(Event|Event_Attribute|Threat|Opportunity|State|State_Attribute|Strength|Weakness|Vulnerability|Consequence|Impact|Benefit|Risk|Threat_Risk|Opportunity_Risk|Risk_Period)$/.test(type)) {
         return "03 Risk Identification";
     }
     if (/^(Event_Likelihood|State_Rating|Overall_Likelihood|Consequence_Rating|Risk_Assessment|Evaluation_Criteria|Risk_Evaluation|Risk_Appetite_Criteria|Formula_Variant|Taxonomy_Calibration_Record)$/.test(type)) {
@@ -1942,6 +1942,16 @@ function getCoreTypeSpecializations() {
                 state_effect: "Weakness"
             },
             MainUse: "State_Attribute specialization for weaknesses that can be exploited by threats."
+        },
+        {
+            TypeName: "Vulnerability",
+            BaseType: "Weakness",
+            Defaults: {
+                state_type: "Weakness",
+                state_effect: "Weakness",
+                classification: "Vulnerability"
+            },
+            MainUse: "Weakness specialization for exploitable vulnerabilities."
         },
         {
             TypeName: "Impact",
