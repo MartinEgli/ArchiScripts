@@ -96,6 +96,9 @@ var CONST = {
     Message: {
         SuccessTitle: "Security Overlay Library",
         ErrorTitle: "Security Overlay Library - Error"
+    },
+    Appearance: {
+        PreserveOriginalConceptColors: true
     }
 };
 
@@ -213,7 +216,19 @@ function setProperties(concept, properties) {
     }
 }
 
-function styleVisual(visual, fillColor) {
+function styleContainerVisual(visual, fillColor) {
+    if (fillColor) {
+        visual.fillColor = fillColor;
+    }
+    visual.lineColor = CONST.Color.Line;
+    visual.fontColor = CONST.Color.Font;
+}
+
+function styleConceptVisual(visual, fillColor) {
+    if (CONST.Appearance.PreserveOriginalConceptColors) {
+        return;
+    }
+
     if (fillColor) {
         visual.fillColor = fillColor;
     }
@@ -238,20 +253,20 @@ function createView(name, documentation) {
 function addNote(container, text, x, y, width, height, fillColor) {
     var note = container.createObject("note", x, y, width, height);
     note.text = text;
-    styleVisual(note, fillColor);
+    styleContainerVisual(note, fillColor);
     return note;
 }
 
 function addGroup(view, name, x, y, width, height, fillColor) {
     var group = view.createObject("group", x, y, width, height);
     group.name = name;
-    styleVisual(group, fillColor);
+    styleContainerVisual(group, fillColor);
     return group;
 }
 
 function addConcept(container, concept, x, y, width, height, fillColor, labelExpression) {
     var visual = container.add(concept, x, y, width, height);
-    styleVisual(visual, fillColor);
+    styleConceptVisual(visual, fillColor);
     if (labelExpression) {
         tryApplyLabelExpression(visual, labelExpression);
     }
@@ -291,16 +306,55 @@ function calculateGroupY(previousY, previousHeight) {
 }
 
 
-function findTopLevelFolderByName(folderName) {
-    var foundFolder = null;
+function getTopLevelFolders() {
+    var folders = [];
 
     $(model).children().each(function (child) {
-        if (!foundFolder && child.type === "folder" && child.name === folderName) {
-            foundFolder = child;
+        if (child.type === "folder") {
+            folders.push(child);
+        }
+    });
+
+    return folders;
+}
+
+function getTopLevelFolderNames() {
+    return getTopLevelFolders().map(function (folder) {
+        return folder.name;
+    });
+}
+
+function normalizeFolderName(folderName) {
+    return String(folderName || "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function findTopLevelFolderByName(folderName) {
+    var foundFolder = null;
+    var wanted = normalizeFolderName(folderName);
+
+    getTopLevelFolders().forEach(function (folder) {
+        if (!foundFolder && normalizeFolderName(folder.name) === wanted) {
+            foundFolder = folder;
         }
     });
 
     return foundFolder;
+}
+
+function findFirstExistingTopLevelFolder(folderNames) {
+    for (var i = 0; i < folderNames.length; i++) {
+        var folder = findTopLevelFolderByName(folderNames[i]);
+        if (folder) {
+            return folder;
+        }
+    }
+
+    return null;
 }
 
 function findChildFolderByName(parentFolder, folderName) {
@@ -332,7 +386,7 @@ function getOrCreateChildFolder(parentFolder, folderName) {
 
 function resolveTopLevelFolderNameFromConceptType(conceptType, kindValue) {
     if (kindValue === CONST.Kind.RelationshipType) {
-        return "Relations";
+        return "Other";
     }
 
     var normalizedConceptType = String(conceptType || "").toLowerCase();
@@ -362,10 +416,34 @@ function resolveTopLevelFolderNameFromConceptType(conceptType, kindValue) {
 
 function getOrCreateOverlayModelFolder(conceptType, kindValue) {
     var topLevelFolderName = resolveTopLevelFolderNameFromConceptType(conceptType, kindValue);
-    var topLevelFolder = findTopLevelFolderByName(topLevelFolderName);
+    var aliasesByFolderName = {
+        "Business": ["Business"],
+        "Application": ["Application"],
+        "Technology": ["Technology & Physical", "Technology", "Physical", "Technology/Physical", "Technology and Physical"],
+        "Motivation": ["Motivation"],
+        "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"],
+        "Other": ["Other", "Connectors"],
+        "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+    };
+
+    var candidateNames = aliasesByFolderName[topLevelFolderName] || [topLevelFolderName];
+    var topLevelFolder = findFirstExistingTopLevelFolder(candidateNames);
+
+    if (!topLevelFolder && topLevelFolderName === "Technology") {
+        logWarn(
+            "Could not find a Technology-like top-level folder. Existing folders: " +
+            getTopLevelFolderNames().join(", ") +
+            ". Falling back to 'Other'."
+        );
+        topLevelFolder = findFirstExistingTopLevelFolder(aliasesByFolderName["Other"] || ["Other"]);
+    }
 
     if (!topLevelFolder) {
-        throw new Error("Top-level folder '" + topLevelFolderName + "' was not found in the model.");
+        throw new Error(
+            "None of the expected top-level folders were found for '" + topLevelFolderName +
+            "'. Tried: " + candidateNames.join(", ") +
+            ". Existing folders: " + getTopLevelFolderNames().join(", ")
+        );
     }
 
     return getOrCreateChildFolder(topLevelFolder, CONST.Folder.OverlayModel);
@@ -420,7 +498,11 @@ function normalizeBaseTypeToConceptType(baseType) {
     return firstBaseType.toLowerCase().replace(/\s+/g, "-");
 }
 
-function resolveTypeCardConceptType(definition) {
+function resolveTypeCardConceptType(definition, kindValue) {
+    if (kindValue === CONST.Kind.RelationshipType) {
+        return "grouping";
+    }
+
     var normalizedBaseType = normalizeBaseTypeToConceptType(definition.baseType);
 
     if (normalizedBaseType) {
@@ -435,7 +517,7 @@ function resolveTypeCardConceptType(definition) {
 }
 
 function createTypeCard(definition, kindValue) {
-    var conceptType = resolveTypeCardConceptType(definition);
+    var conceptType = resolveTypeCardConceptType(definition, kindValue);
     var targetFolder = getOrCreateOverlayModelFolder(conceptType, kindValue);
     var concept = model.createElement(conceptType, definition.name, targetFolder);
     concept.documentation = definition.description;
@@ -447,6 +529,11 @@ function createTypeCard(definition, kindValue) {
         Category: definition.category,
         TypeName: definition.name
     });
+
+    if (kindValue === CONST.Kind.RelationshipType) {
+        concept.prop("RelationshipConceptType", (definition.conceptTypes && definition.conceptTypes.length > 0) ? definition.conceptTypes[0] : "");
+        concept.prop("TypeCardConcept", "Descriptor");
+    }
 
     if (definition.conceptTypes && definition.conceptTypes.length > 1) {
         concept.prop("ConceptTypeOptions", definition.conceptTypes.join(" | "));

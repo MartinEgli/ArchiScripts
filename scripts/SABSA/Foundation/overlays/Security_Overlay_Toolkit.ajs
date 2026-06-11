@@ -58,6 +58,9 @@ var SOG = (function () {
             OverlayTypeModel: "Overlay Type Model",
             OverlayTemplateLibrary: "Overlay Template Library"
         },
+        Folder: {
+            OverlayModel: "Overlay Model"
+        },
         Layout: {
             Margin: 20,
             HeaderX: 20,
@@ -91,6 +94,9 @@ var SOG = (function () {
         Dialog: {
             Title: "Security Overlay Toolkit",
             ErrorTitle: "Security Overlay Toolkit - Error"
+        },
+        Appearance: {
+            PreserveOriginalConceptColors: true
         }
     };
 
@@ -185,7 +191,14 @@ var SOG = (function () {
         }
     }
 
-    function styleVisual(visual, fillColor) {
+    function styleContainerVisual(visual, fillColor) {
+        if (fillColor) { visual.fillColor = fillColor; }
+        visual.lineColor = CONST.Color.Line;
+        visual.fontColor = CONST.Color.Font;
+    }
+
+    function styleConceptVisual(visual, fillColor) {
+        if (CONST.Appearance.PreserveOriginalConceptColors) { return; }
         if (fillColor) { visual.fillColor = fillColor; }
         visual.lineColor = CONST.Color.Line;
         visual.fontColor = CONST.Color.Font;
@@ -205,20 +218,20 @@ var SOG = (function () {
     function addNote(container, text, x, y, width, height, fillColor) {
         var note = container.createObject("note", x, y, width, height);
         note.text = text;
-        styleVisual(note, fillColor);
+        styleContainerVisual(note, fillColor);
         return note;
     }
 
     function addGroup(view, name, x, y, width, height, fillColor) {
         var group = view.createObject("group", x, y, width, height);
         group.name = name;
-        styleVisual(group, fillColor);
+        styleContainerVisual(group, fillColor);
         return group;
     }
 
     function addConcept(container, concept, x, y, width, height, fillColor, labelExpression) {
         var visual = container.add(concept, x, y, width, height);
-        styleVisual(visual, fillColor);
+        styleConceptVisual(visual, fillColor);
         if (labelExpression) { tryApplyLabelExpression(visual, labelExpression); }
         return visual;
     }
@@ -248,6 +261,104 @@ var SOG = (function () {
         return previousY + previousHeight + CONST.Layout.Margin;
     }
 
+    function getTopLevelFolders() {
+        var folders = [];
+        $(model).children().each(function (child) {
+            if (child.type === "folder") {
+                folders.push(child);
+            }
+        });
+        return folders;
+    }
+
+    function getTopLevelFolderNames() {
+        return getTopLevelFolders().map(function (folder) { return folder.name; });
+    }
+
+    function normalizeFolderName(folderName) {
+        return String(folderName || "")
+            .toLowerCase()
+            .replace(/&/g, "and")
+            .replace(/[^a-z0-9]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function findTopLevelFolderByName(folderName) {
+        var foundFolder = null;
+        var wanted = normalizeFolderName(folderName);
+        getTopLevelFolders().forEach(function (folder) {
+            if (!foundFolder && normalizeFolderName(folder.name) === wanted) {
+                foundFolder = folder;
+            }
+        });
+        return foundFolder;
+    }
+
+    function findFirstExistingTopLevelFolder(folderNames) {
+        for (var i = 0; i < folderNames.length; i++) {
+            var folder = findTopLevelFolderByName(folderNames[i]);
+            if (folder) { return folder; }
+        }
+        return null;
+    }
+
+    function findChildFolderByName(parentFolder, folderName) {
+        if (!parentFolder) { return null; }
+        var foundFolder = null;
+        $(parentFolder).children().each(function (child) {
+            if (!foundFolder && child.type === "folder" && child.name === folderName) {
+                foundFolder = child;
+            }
+        });
+        return foundFolder;
+    }
+
+    function getOrCreateChildFolder(parentFolder, folderName) {
+        var existingFolder = findChildFolderByName(parentFolder, folderName);
+        if (existingFolder) { return existingFolder; }
+        logInfo("Creating folder '" + folderName + "' under '" + parentFolder.name + "'.");
+        return parentFolder.createFolder(folderName);
+    }
+
+    function resolveTopLevelFolderNameFromConceptType(conceptType, kindValue) {
+        if (kindValue === CONST.Kind.RelationshipType) { return "Other"; }
+
+        var normalizedConceptType = String(conceptType || "").toLowerCase();
+        if (normalizedConceptType.indexOf("business-") === 0) { return "Business"; }
+        if (normalizedConceptType.indexOf("application-") === 0 || normalizedConceptType === "data-object") { return "Application"; }
+        if (normalizedConceptType.indexOf("technology-") === 0 || normalizedConceptType === "node" || normalizedConceptType === "artifact" || normalizedConceptType === "device" || normalizedConceptType === "communication-path" || normalizedConceptType === "system-software" || normalizedConceptType === "technology-interface" || normalizedConceptType === "technology-service" || normalizedConceptType === "technology-function" || normalizedConceptType === "path") { return "Technology"; }
+        if (normalizedConceptType === "assessment" || normalizedConceptType === "goal" || normalizedConceptType === "requirement" || normalizedConceptType === "principle" || normalizedConceptType === "value" || normalizedConceptType === "meaning" || normalizedConceptType === "outcome" || normalizedConceptType === "constraint" || normalizedConceptType === "driver" || normalizedConceptType === "stakeholder") { return "Motivation"; }
+        if (normalizedConceptType === "work-package" || normalizedConceptType === "deliverable" || normalizedConceptType === "plateau" || normalizedConceptType === "gap" || normalizedConceptType === "implementation-event") { return "Implementation & Migration"; }
+        return "Other";
+    }
+
+    function getOrCreateOverlayModelFolder(conceptType, kindValue) {
+        var topLevelFolderName = resolveTopLevelFolderNameFromConceptType(conceptType, kindValue);
+        var aliasesByFolderName = {
+            "Business": ["Business"],
+            "Application": ["Application"],
+            "Technology": ["Technology & Physical", "Technology", "Physical", "Technology/Physical", "Technology and Physical"],
+            "Motivation": ["Motivation"],
+            "Implementation & Migration": ["Implementation & Migration", "Implementation and Migration"],
+            "Other": ["Other", "Connectors"],
+            "Relations": ["Relations", "Relations/Connectors", "Connectors"]
+        };
+        var candidateNames = aliasesByFolderName[topLevelFolderName] || [topLevelFolderName];
+        var topLevelFolder = findFirstExistingTopLevelFolder(candidateNames);
+
+        if (!topLevelFolder && topLevelFolderName === "Technology") {
+            logWarn("Could not find a Technology-like top-level folder. Existing folders: " + getTopLevelFolderNames().join(", ") + ". Falling back to 'Other'.");
+            topLevelFolder = findFirstExistingTopLevelFolder(aliasesByFolderName["Other"] || ["Other"]);
+        }
+
+        if (!topLevelFolder) {
+            throw new Error("None of the expected top-level folders were found for '" + topLevelFolderName + "'. Tried: " + candidateNames.join(", ") + ". Existing folders: " + getTopLevelFolderNames().join(", "));
+        }
+
+        return getOrCreateChildFolder(topLevelFolder, CONST.Folder.OverlayModel);
+    }
+
     function tryCreateSpecialization(name, conceptType) {
         try {
             model.createSpecialization(name, conceptType);
@@ -266,8 +377,28 @@ var SOG = (function () {
         });
     }
 
+    function normalizeBaseTypeToConceptType(baseType) {
+        if (!baseType) { return null; }
+        var firstBaseType = String(baseType).split("|")[0].trim();
+        var aliases = {
+            "Artefact": "artifact"
+        };
+        if (aliases[firstBaseType]) { return aliases[firstBaseType]; }
+        return firstBaseType.toLowerCase().replace(/\s+/g, "-");
+    }
+
+    function resolveTypeCardConceptType(definition, kindValue) {
+        if (kindValue === CONST.Kind.RelationshipType) { return "grouping"; }
+        var normalizedBaseType = normalizeBaseTypeToConceptType(definition.baseType);
+        if (normalizedBaseType) { return normalizedBaseType; }
+        if (definition.conceptTypes && definition.conceptTypes.length > 0) { return definition.conceptTypes[0]; }
+        return "grouping";
+    }
+
     function createTypeCard(definition, kindValue) {
-        var concept = model.createElement("grouping", definition.name);
+        var conceptType = resolveTypeCardConceptType(definition, kindValue);
+        var targetFolder = getOrCreateOverlayModelFolder(conceptType, kindValue);
+        var concept = model.createElement(conceptType, definition.name, targetFolder);
         concept.documentation = definition.description;
         setProperties(concept, {
             Namespace: CONST.Namespace,
@@ -276,11 +407,19 @@ var SOG = (function () {
             Category: definition.category,
             TypeName: definition.name
         });
+        if (kindValue === CONST.Kind.RelationshipType) {
+            concept.prop("RelationshipConceptType", (definition.conceptTypes && definition.conceptTypes.length > 0) ? definition.conceptTypes[0] : "");
+            concept.prop("TypeCardConcept", "Descriptor");
+        }
+        if (definition.conceptTypes && definition.conceptTypes.length > 1) {
+            concept.prop("ConceptTypeOptions", definition.conceptTypes.join(" | "));
+        }
         return concept;
     }
 
     function createTemplateCard(definition, conceptType) {
-        var concept = model.createElement(conceptType, definition.name);
+        var targetFolder = getOrCreateOverlayModelFolder(conceptType, CONST.Kind.Template);
+        var concept = model.createElement(conceptType, definition.name, targetFolder);
         concept.specialization = definition.name;
         concept.documentation = definition.description;
         var properties = {
