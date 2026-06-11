@@ -3027,30 +3027,214 @@ function createOverlayLibraryOverviewView() {
 
 function getConceptArea(concept) {
     return safeString(concept && (concept.prop("SabsaA1Area") || concept.prop("OverlayArea"))) ||
-        getSabsaA1Area(safeString(concept && (concept.prop(CONST.Property.TypeName) || concept.name)));
+        getSabsaA1Area(getConceptTypeName(concept));
+}
+
+function getConceptTypeName(concept) {
+    return safeString(concept && (concept.prop(CONST.Property.TypeName) || concept.prop("SabsaType") || concept.name));
+}
+
+function getCoreTypeInheritanceIndex(coreTypeConcepts) {
+    var index = {
+        parentByChild: {},
+        childrenByParent: {}
+    };
+
+    getCoreTypeSpecializations().forEach(function (entry) {
+        var parent = coreTypeConcepts[entry.BaseType];
+        var child = coreTypeConcepts[entry.TypeName];
+
+        if (!parent || !child) {
+            return;
+        }
+
+        index.parentByChild[entry.TypeName] = entry.BaseType;
+        if (!index.childrenByParent[entry.BaseType]) {
+            index.childrenByParent[entry.BaseType] = [];
+        }
+        index.childrenByParent[entry.BaseType].push({
+            concept: child,
+            typeName: entry.TypeName,
+            parentType: entry.BaseType
+        });
+    });
+
+    Object.keys(index.childrenByParent).forEach(function (parentType) {
+        index.childrenByParent[parentType].sort(function (left, right) {
+            return safeString(left.typeName).localeCompare(safeString(right.typeName));
+        });
+    });
+
+    return index;
 }
 
 function groupCoreTypesByArea(coreTypeConcepts) {
     var grouped = {};
+    var inheritance = getCoreTypeInheritanceIndex(coreTypeConcepts);
 
     Object.keys(coreTypeConcepts || {}).forEach(function (typeName) {
         var concept = coreTypeConcepts[typeName];
         var area = getConceptArea(concept);
 
+        if (inheritance.parentByChild[typeName]) {
+            return;
+        }
+
         if (!grouped[area]) {
             grouped[area] = [];
         }
-        grouped[area].push(concept);
+        grouped[area].push({
+            concept: concept,
+            typeName: typeName,
+            children: inheritance.childrenByParent[typeName] || []
+        });
+    });
+
+    Object.keys(grouped).forEach(function (areaName) {
+        grouped[areaName].sort(function (left, right) {
+            var leftHasChildren = left.children && left.children.length ? 0 : 1;
+            var rightHasChildren = right.children && right.children.length ? 0 : 1;
+
+            if (leftHasChildren !== rightHasChildren) {
+                return leftHasChildren - rightHasChildren;
+            }
+            return safeString(left.concept.name).localeCompare(safeString(right.concept.name));
+        });
     });
 
     return grouped;
+}
+
+function calculateGridContentHeight(itemCount, columns) {
+    var rows;
+
+    if (!itemCount) {
+        return 0;
+    }
+
+    rows = Math.max(1, Math.ceil(itemCount / columns));
+    return (rows * CONST.Layout.CardHeight) + ((rows - 1) * CONST.Layout.GapY);
+}
+
+function calculateHierarchyRowHeight(childCount, childColumns) {
+    return Math.max(CONST.Layout.CardHeight, calculateGridContentHeight(childCount, childColumns));
+}
+
+function calculateAreaGroupHeight(entries, childColumns) {
+    var hierarchyHeight = 0;
+    var standaloneCount = 0;
+    var standaloneHeight;
+
+    entries.forEach(function (entry) {
+        if (entry.children && entry.children.length) {
+            if (hierarchyHeight > 0) {
+                hierarchyHeight += CONST.Layout.GapY;
+            }
+            hierarchyHeight += calculateHierarchyRowHeight(entry.children.length, childColumns);
+        } else {
+            standaloneCount++;
+        }
+    });
+
+    standaloneHeight = calculateGridContentHeight(standaloneCount, CONST.Layout.LibraryGroupColumns);
+    return CONST.Layout.LibraryGroupInnerY +
+        hierarchyHeight +
+        (hierarchyHeight > 0 && standaloneHeight > 0 ? CONST.Layout.GapY : 0) +
+        standaloneHeight +
+        CONST.Layout.LibraryGroupGapY;
+}
+
+function addOverlayTypeAreaGroup(view, areaName, entries, y, visualsByConcept) {
+    var parentLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
+    var baseLabel = "«Base Overlay Type»\n${name}\n${property:BaseType}";
+    var childLabel = "«Specialized Overlay Type»\n${name}\nparent: ${property:ParentType}";
+    var parentX = CONST.Layout.LibraryGroupInnerX;
+    var childStartX = parentX + CONST.Layout.CardWidth + (CONST.Layout.GapX * 3);
+    var availableChildWidth = CONST.Layout.LibraryGroupWidth - childStartX - CONST.Layout.LibraryGroupInnerX;
+    var childColumns = Math.max(1, Math.min(3, Math.floor((availableChildWidth + CONST.Layout.GapX) / (CONST.Layout.CardWidth + CONST.Layout.GapX))));
+    var groupHeight = calculateAreaGroupHeight(entries, childColumns);
+    var group = addLibraryGroup(view, areaName, CONST.Layout.LibraryGroupX, y, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
+    var currentY = CONST.Layout.LibraryGroupInnerY;
+    var standaloneEntries = [];
+
+    entries.forEach(function (entry) {
+        var children = entry.children || [];
+        var rowHeight;
+        var parentY;
+        var parentVisual;
+
+        if (!children.length) {
+            standaloneEntries.push(entry);
+            return;
+        }
+
+        rowHeight = calculateHierarchyRowHeight(children.length, childColumns);
+        parentY = currentY + Math.max(0, Math.floor((rowHeight - CONST.Layout.CardHeight) / 2));
+        parentVisual = addStyledVisual(group, entry.concept, parentX, parentY, CONST.Layout.CardWidth, CONST.Layout.CardHeight, getConceptFill(entry.concept, CONST.Style.TypeFill));
+        try {
+            parentVisual.labelExpression = baseLabel;
+        } catch (error) {
+            logger.debug("Could not apply area inheritance parent label expression.", { error: String(error) }, "sabsa.a1.overlay.area.inheritance.parent.label.skipped");
+        }
+        rememberVisual(visualsByConcept, entry.concept, parentVisual);
+
+        children.forEach(function (childEntry, index) {
+            var row = Math.floor(index / childColumns);
+            var col = index % childColumns;
+            var child = childEntry.concept;
+            var childVisual = addStyledVisual(
+                group,
+                child,
+                childStartX + (col * (CONST.Layout.CardWidth + CONST.Layout.GapX)),
+                currentY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY)),
+                CONST.Layout.CardWidth,
+                CONST.Layout.CardHeight,
+                getConceptFill(child, CONST.Style.TypeFill)
+            );
+            var relationship = findRelationshipByKey("catalogue:type-specialization:" + childEntry.typeName + ":" + childEntry.parentType);
+
+            try {
+                childVisual.labelExpression = childLabel;
+            } catch (error) {
+                logger.debug("Could not apply area inheritance child label expression.", { error: String(error) }, "sabsa.a1.overlay.area.inheritance.child.label.skipped");
+            }
+            rememberVisual(visualsByConcept, child, childVisual);
+            addConnection(view, relationship, childVisual, parentVisual);
+        });
+
+        currentY += rowHeight + CONST.Layout.GapY;
+    });
+
+    if (standaloneEntries.length) {
+        standaloneEntries.forEach(function (entry, index) {
+            var row = Math.floor(index / CONST.Layout.LibraryGroupColumns);
+            var col = index % CONST.Layout.LibraryGroupColumns;
+            var visual = addStyledVisual(
+                group,
+                entry.concept,
+                CONST.Layout.LibraryGroupInnerX + (col * (CONST.Layout.CardWidth + CONST.Layout.GapX)),
+                currentY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY)),
+                CONST.Layout.CardWidth,
+                CONST.Layout.CardHeight,
+                getConceptFill(entry.concept, CONST.Style.TypeFill)
+            );
+
+            try {
+                visual.labelExpression = parentLabel;
+            } catch (error) {
+                logger.debug("Could not apply area type label expression.", { error: String(error) }, "sabsa.a1.overlay.area.type.label.skipped");
+            }
+            rememberVisual(visualsByConcept, entry.concept, visual);
+        });
+    }
+
+    return groupHeight;
 }
 
 function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
     var view = model.createArchimateView(buildUniqueViewName(CONST.OverlayTypeModelViewName));
     var grouped = groupCoreTypesByArea(coreTypeConcepts);
     var currentY = CONST.Layout.LibraryGroupY;
-    var typeLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
     var relationshipLabel = "«Relationship Type»\n${name}\n${property:BaseType}";
     var visualsByConcept = {};
 
@@ -3068,19 +3252,7 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
     );
 
     Object.keys(grouped).sort().forEach(function (areaName) {
-        var concepts = grouped[areaName].sort(function (left, right) {
-            return safeString(left.name).localeCompare(safeString(right.name));
-        });
-        var groupHeight = calculateLibraryGroupHeight(concepts.length);
-        var group = addLibraryGroup(view, areaName, CONST.Layout.LibraryGroupX, currentY, CONST.Layout.LibraryGroupWidth, groupHeight, CONST.Style.LibraryTypeGroupFill);
-
-        concepts.forEach(function (concept, index) {
-            rememberVisual(
-                visualsByConcept,
-                concept,
-                addLibraryConcept(group, concept, index, getConceptFill(concept, CONST.Style.TypeFill), typeLabel)
-            );
-        });
+        var groupHeight = addOverlayTypeAreaGroup(view, areaName, grouped[areaName], currentY, visualsByConcept);
 
         currentY = nextLibraryGroupY(currentY, groupHeight);
     });
@@ -3100,104 +3272,8 @@ function createOverlayTypeModelView(coreTypeConcepts, relationshipConcepts) {
         currentY = nextLibraryGroupY(currentY, relationshipGroupHeight);
     }
 
-    createOverlayTypeInheritanceSection(view, coreTypeConcepts, currentY);
-
     stats.views++;
     return view;
-}
-
-function createOverlayTypeInheritanceSection(view, coreTypeConcepts, startY) {
-    var inheritanceGroups = {};
-    var parentX = CONST.Layout.LibraryGroupInnerX;
-    var childStartX = parentX + CONST.Layout.CardWidth + (CONST.Layout.GapX * 3);
-    var availableChildWidth = CONST.Layout.LibraryGroupWidth - childStartX - CONST.Layout.LibraryGroupInnerX;
-    var childColumns = Math.max(1, Math.min(3, Math.floor((availableChildWidth + CONST.Layout.GapX) / (CONST.Layout.CardWidth + CONST.Layout.GapX))));
-    var currentY = startY;
-    var parentLabel = "«Base Overlay Type»\n${name}\n${property:BaseType}";
-    var childLabel = "«Specialized Overlay Type»\n${name}\nparent: ${property:ParentType}";
-
-    getCoreTypeSpecializations().forEach(function (entry) {
-        var child = coreTypeConcepts[entry.TypeName];
-        var parent = coreTypeConcepts[entry.BaseType];
-
-        if (!child || !parent) {
-            return;
-        }
-
-        if (!inheritanceGroups[entry.BaseType]) {
-            inheritanceGroups[entry.BaseType] = {
-                parent: parent,
-                children: []
-            };
-        }
-
-        inheritanceGroups[entry.BaseType].children.push({
-            concept: child,
-            typeName: entry.TypeName
-        });
-    });
-
-    Object.keys(inheritanceGroups).sort().forEach(function (parentType) {
-        var groupData = inheritanceGroups[parentType];
-        var children = groupData.children.sort(function (left, right) {
-            return safeString(left.typeName).localeCompare(safeString(right.typeName));
-        });
-        var rowCount = Math.max(1, Math.ceil(children.length / childColumns));
-        var childBlockHeight = (rowCount * CONST.Layout.CardHeight) + ((rowCount - 1) * CONST.Layout.GapY);
-        var contentHeight = Math.max(CONST.Layout.CardHeight, childBlockHeight);
-        var groupHeight = CONST.Layout.LibraryGroupInnerY + contentHeight + CONST.Layout.LibraryGroupGapY;
-        var group = addLibraryGroup(
-            view,
-            "Type Inheritance - " + displayName(parentType),
-            CONST.Layout.LibraryGroupX,
-            currentY,
-            CONST.Layout.LibraryGroupWidth,
-            groupHeight,
-            CONST.Style.LibraryTypeGroupFill
-        );
-        var parentY = CONST.Layout.LibraryGroupInnerY + Math.max(0, Math.floor((contentHeight - CONST.Layout.CardHeight) / 2));
-        var parentVisual = addStyledVisual(
-            group,
-            groupData.parent,
-            parentX,
-            parentY,
-            CONST.Layout.CardWidth,
-            CONST.Layout.CardHeight,
-            getConceptFill(groupData.parent, CONST.Style.TypeFill)
-        );
-
-        try {
-            parentVisual.labelExpression = parentLabel;
-        } catch (error) {
-            logger.debug("Could not apply inheritance parent label expression.", { error: String(error) }, "sabsa.a1.overlay.inheritance.parent.label.skipped");
-        }
-
-        children.forEach(function (childEntry, index) {
-            var child = childEntry.concept;
-            var row = Math.floor(index / childColumns);
-            var col = index % childColumns;
-            var childVisual = addStyledVisual(
-                group,
-                child,
-                childStartX + (col * (CONST.Layout.CardWidth + CONST.Layout.GapX)),
-                CONST.Layout.LibraryGroupInnerY + (row * (CONST.Layout.CardHeight + CONST.Layout.GapY)),
-                CONST.Layout.CardWidth,
-                CONST.Layout.CardHeight,
-                getConceptFill(child, CONST.Style.TypeFill)
-            );
-            var relationship = findRelationshipByKey("catalogue:type-specialization:" + childEntry.typeName + ":" + parentType);
-
-            try {
-                childVisual.labelExpression = childLabel;
-            } catch (error) {
-                logger.debug("Could not apply inheritance child label expression.", { error: String(error) }, "sabsa.a1.overlay.inheritance.child.label.skipped");
-            }
-
-            addConnection(view, relationship, childVisual, parentVisual);
-        });
-
-        currentY = nextLibraryGroupY(currentY, groupHeight);
-    });
 }
 
 function createOverlayTemplateLibraryView(samplesByType) {
