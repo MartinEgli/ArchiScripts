@@ -2,7 +2,16 @@
 
 Deliverable scripts for SABSA Advanced Module A1 oriented modelling.
 
-## Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs
+## Folder Structure
+
+- `frameworks/` contains A1 framework and diagram-style generators.
+- `overlays/` contains overlay type/template generators and overlay maintenance/apply scripts.
+- `catalogues/` contains field-catalogue and metamodel catalogue view generators.
+- `exchange/` contains JSON/exchange-schema import and mapping generators.
+- `core/` contains shared implementation files used by focused entry points.
+- `archive/` contains deprecated compatibility wrappers.
+
+## frameworks/Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs
 
 Generates a generic SABSA A1 risk management model view from the source-of-truth data file:
 
@@ -18,7 +27,7 @@ The script creates or reuses:
 - traceability and mapping relationships
 - folders under `Views/SABSA/A1`, `Business/SABSA/A1/...`, `Other/SABSA/A1/...`, and `Relations/SABSA/A1/...`
 
-## Generate_SABSA_A1_Risk_Strategy_Framework_View.ajs
+## frameworks/Generate_SABSA_A1_Risk_Strategy_Framework_View.ajs
 
 Generates a SABSA A1 Risk Strategy Framework view in the style of the A1 training diagram:
 
@@ -31,7 +40,7 @@ The script creates stable framework elements under `SABSA/A1/Risk Strategy Frame
 
 - `SABSA A1 - Risk Strategy Framework`
 
-## Generate_SABSA_A1_Attribute_Profile_Framework_View.ajs
+## frameworks/Generate_SABSA_A1_Attribute_Profile_Framework_View.ajs
 
 Generates a SABSA A1 Attribute Profile Framework view in the style of the A1 training diagram:
 
@@ -46,7 +55,7 @@ The script creates stable framework elements under `SABSA/A1/Attribute Profile F
 
 - `SABSA A1 - Attribute Profile Framework`
 
-## Generate_SABSA_A1_Assurance_Framework_View.ajs
+## frameworks/Generate_SABSA_A1_Assurance_Framework_View.ajs
 
 Generates a SABSA A1 Assurance Framework view in the style of the A1 training diagram:
 
@@ -60,7 +69,7 @@ The script creates stable framework elements under `SABSA/A1/Assurance Framework
 
 - `SABSA A1 - Assurance Framework`
 
-## Generate_SABSA_A1_Risk_Feedback_Control_System_View.ajs
+## frameworks/Generate_SABSA_A1_Risk_Feedback_Control_System_View.ajs
 
 Generates a SABSA A1 Risk Management Feedback Control System view in the style of the A1 training diagram:
 
@@ -91,11 +100,11 @@ The script creates stable framework elements under `SABSA/A1/Risk Feedback Contr
 
 If the project later defines NIBOCJ differently, update the JSON data file first. The script reads the framework list from that data file instead of hard-coding the framework entries.
 
-## Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs
+## exchange/Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs
 
 Generates exchange-schema mapping views from:
 
-- `../../../../reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json`
+- `reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json`
 
 The script creates or reuses:
 
@@ -110,11 +119,11 @@ The script creates or reuses:
 
 The script deliberately keeps schema concepts as mapping/metamodel objects instead of trying to instantiate a full applied risk model.
 
-## Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs
+## exchange/Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs
 
 Imports the Q003/Q004 model from the JSON extract:
 
-- `../../../../reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json`
+- `reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json`
 
 The script imports:
 
@@ -127,11 +136,11 @@ It creates ArchiMate elements with source properties such as `SabsaA1MdKey`, `So
 - `SABSA A1 - JSON Extracted Model`
 - JSON-defined use-case, Q3 and Q4 views
 
-## Generate_SABSA_A1_Field_Catalogue_Document_Parts_View.ajs
+## catalogues/Generate_SABSA_A1_Field_Catalogue_Document_Parts_View.ajs
 
 Runs the shared field-catalogue generator in document-parts mode. It parses the generic metamodel field catalogue from:
 
-- `../../../../reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md`
+- `reference/Inbox/SABSA-A1-MFC_generic_metamodel_field_catalogue.md`
 
 It creates or reuses the source, table and table-row catalogue elements and generates only:
 
@@ -139,13 +148,13 @@ It creates or reuses the source, table and table-row catalogue elements and gene
 
 Existing elements are matched by stable `SabsaA1CatalogueKey` values such as `catalogue:table:<table-id>` and `catalogue:table-row:<table-id>:<row-index>`.
 
-## Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs
+## catalogues/Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs
 
 Runs the shared field-catalogue generator in table-index mode. It creates or reuses source, table and table-row catalogue elements and generates only:
 
 - `SABSA A1 Field Catalogue - Table Index`
 
-## Generate_SABSA_A1_Metamodel_Architecture_Views.ajs
+## catalogues/Generate_SABSA_A1_Metamodel_Architecture_Views.ajs
 
 Runs the shared field-catalogue generator in metamodel mode. It creates or reuses metamodel catalogue elements and generates only:
 
@@ -155,7 +164,7 @@ Runs the shared field-catalogue generator in metamodel mode. It creates or reuse
 - `SABSA A1 Metamodel - Relationship Catalogue`
 - `SABSA A1 Metamodel - Viewpoint Catalogue`
 
-## Generate_SABSA_A1_Overlay_Type_Model_Views.ajs
+## overlays/Generate_SABSA_A1_Overlay_Type_Model_Views.ajs
 
 Runs the shared field-catalogue generator in overlay model mode. It creates or reuses metamodel catalogue elements and generates only:
 
@@ -166,7 +175,7 @@ The type model view shows derived overlay type inheritance inside the matching S
 
 Overlay type and template elements are organized by SABSA A1 area, for example business context, risk identification, assessment/evaluation, treatment/control, monitoring/governance and assurance. The generated `BaseType` property uses readable ArchiMate base type names while `ConceptType` remains the technical jArchi type used by the apply script.
 
-## Generate_SABSA_A1_Overlay_Template_Library_Views.ajs
+## overlays/Generate_SABSA_A1_Overlay_Template_Library_Views.ajs
 
 Runs the shared field-catalogue generator in template mode. It creates or reuses metamodel and template elements and generates only:
 
@@ -206,17 +215,17 @@ Shared runner used by the focused field-catalogue entry points. The small entry 
 
 Contains deprecated compatibility wrappers that have clearer replacements:
 
-- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs` -> `Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs`
-- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs` -> `Generate_SABSA_A1_Metamodel_Architecture_Views.ajs`
+- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Table_Views.ajs` -> `catalogues/Generate_SABSA_A1_Field_Catalogue_Table_Index_View.ajs`
+- `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Meta_Views.ajs` -> `catalogues/Generate_SABSA_A1_Metamodel_Architecture_Views.ajs`
 - `archive/Generate_SABSA_A1_Metamodel_Field_Catalogue_Views.ajs` -> focused field-catalogue scripts or `core/Generate_SABSA_A1_Field_Catalogue_Core.ajs`
-- `archive/Generate_SABSA_A1_Generic_Risk_Model_View.ajs` -> `Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs`
-- `archive/Generate_SABSA_A1_Exchange_Schema_Metamodel_Views.ajs` -> `Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs`
-- `archive/Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View.ajs` -> `Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs`
+- `archive/Generate_SABSA_A1_Generic_Risk_Model_View.ajs` -> `frameworks/Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs`
+- `archive/Generate_SABSA_A1_Exchange_Schema_Metamodel_Views.ajs` -> `exchange/Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs`
+- `archive/Generate_SABSA_A1_MD_Extracted_Q003_Q004_Model_View.ajs` -> `exchange/Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs`
 
-## Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
+## overlays/Apply_SABSA_A1_Overlay_Stereotype_From_Metamodel.ajs
 
 Applies a SABSA A1 overlay stereotype to exactly one selected diagram element. It reads `SabsaA1OverlayTemplateIndexJson`, offers only stereotypes matching the selected ArchiMate concept type, sets the specialization and label expression, keeps existing business properties unchanged, fills only missing non-ID field values from the metamodel, uses metamodel field defaults such as `classification = Threat`, `state_effect = Strength` or `treatment_type = Enabler`, removes old `Field_*` metadata and ID-style reference field values from the selected explicit element, leaves compact `Field_*` metadata on the meta element, and creates a trace relationship back to the selected meta element.
 
-## Cleanup_SABSA_A1_Field_Metadata_From_Explicit_Elements.ajs
+## overlays/Cleanup_SABSA_A1_Field_Metadata_From_Explicit_Elements.ajs
 
 Removes existing verbose `Field_*` metadata properties from SABSA A1 explicit/generated concepts and relationships, removes redundant `Field_*_Datatype` / `Field_*_Description` style metadata from `CoreType` metamodel elements, and removes ID-style reference field values from explicit/template/applied elements when a linked meta element identifies those fields. Use this once after older generator runs if explicit/template/applied elements still contain verbose metadata or `*_id` / `*_ids` properties.
