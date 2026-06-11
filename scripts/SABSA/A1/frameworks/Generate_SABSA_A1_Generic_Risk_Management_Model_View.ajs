@@ -3,8 +3,8 @@ var Files = Java.type("java.nio.file.Files");
 var Paths = Java.type("java.nio.file.Paths");
 var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
-load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Generic_Risk_Management_Model_View";
 var LOG_LEVEL = "WARN";
@@ -17,7 +17,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../../data/sabsa/sabsa-a1-generic-risk-model-data.json").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../../../data/sabsa/sabsa-a1-generic-risk-model-data.json").getCanonicalPath(),
     ViewName: "SABSA A1 - Generic Risk Management Model",
     Folder: {
         Root: "SABSA",

@@ -3,8 +3,8 @@ var Files = Java.type("java.nio.file.Files");
 var Paths = Java.type("java.nio.file.Paths");
 var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
-load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views";
 var LOG_LEVEL = "WARN";
@@ -17,8 +17,8 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../../../reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json").getCanonicalPath(),
-    SourceMarkdownPath: new File(__DIR__ + "../../../../reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../../../../reference/Inbox/10_q003_q004_usecase_archimate_exchange_model.json").getCanonicalPath(),
+    SourceMarkdownPath: new File(__DIR__ + "../../../../../reference/Inbox/08_q003_q004_end_to_end_gesamtmodell.md").getCanonicalPath(),
     SourceDocumentName: "10_q003_q004_usecase_archimate_exchange_model.json",
     MermaidViewName: "SABSA A1 - JSON Extracted Model",
     RiskViewName: "SABSA A1 - JSON Extracted Risk Governance Map",

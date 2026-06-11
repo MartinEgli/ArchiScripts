@@ -4,10 +4,10 @@ Generate SABSA A1 MD Extracted Q003/Q004 Model View
 ===============================================================================
 
 Archived compatibility entry point. Prefer:
-../Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs
+../exchange/Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs
 ===============================================================================
 */
 
 var File = Java.type("java.io.File");
 
-load(new File(__DIR__ + "../Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs").getCanonicalPath());
+load(new File(__DIR__ + "../exchange/Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs").getCanonicalPath());

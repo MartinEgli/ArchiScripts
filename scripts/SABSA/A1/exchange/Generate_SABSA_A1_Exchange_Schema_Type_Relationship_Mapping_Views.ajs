@@ -3,8 +3,8 @@ var Files = Java.type("java.nio.file.Files");
 var Paths = Java.type("java.nio.file.Paths");
 var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
-load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views";
 var LOG_LEVEL = "WARN";
@@ -17,7 +17,7 @@ var dialogs = ArchiDialogs.createDialogService(logger, {
 });
 
 var CONST = {
-    SourceJsonPath: new File(__DIR__ + "../../../../reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json").getCanonicalPath(),
+    SourceJsonPath: new File(__DIR__ + "../../../../../reference/Inbox/09_generic_sabsa_a1_archimate_exchange_schema.json").getCanonicalPath(),
     TypeMappingViewName: "SABSA A1 - Exchange Schema Type Mapping",
     RelationshipViewName: "SABSA A1 - Exchange Schema Relationship Mapping",
     Folder: {

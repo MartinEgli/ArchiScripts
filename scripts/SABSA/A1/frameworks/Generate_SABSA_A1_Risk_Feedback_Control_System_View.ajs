@@ -1,7 +1,7 @@
 var File = Java.type("java.io.File");
 
-load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
-load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
+load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Risk_Feedback_Control_System_View";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {

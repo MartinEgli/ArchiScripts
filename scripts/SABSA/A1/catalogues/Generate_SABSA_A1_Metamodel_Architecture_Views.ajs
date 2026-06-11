@@ -16,4 +16,4 @@ var SABSA_A1_FIELD_CATALOGUE_MODE = "metamodel";
 var SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME = "Generate_SABSA_A1_Metamodel_Architecture_Views";
 var SABSA_A1_FIELD_CATALOGUE_DIALOG_TITLE = "SABSA A1 Metamodel - Architecture Views";
 
-load(new File(__DIR__ + "core/Run_SABSA_A1_Field_Catalogue_Mode.ajs").getCanonicalPath());
+load(new File(__DIR__ + "../core/Run_SABSA_A1_Field_Catalogue_Mode.ajs").getCanonicalPath());
