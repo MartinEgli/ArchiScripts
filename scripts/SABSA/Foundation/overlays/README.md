@@ -8,3 +8,5 @@ This folder contains the active foundation-level security overlay scripts.
 - `UI Apply_Stereotype_From_Template.ajs` is the UI entry point for applying a template stereotype.
 - `Refresh_Security_Overlay_Template_Cache.ajs` refreshes the overlay template cache summary.
 - `Dump_Security_Overlay_Template_Cache.ajs` dumps the overlay template cache for inspection.
+
+The library build entry points register the generated Security Overlay Library in `SabsaOverviewRegistryJson` after successful generation.

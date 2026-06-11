@@ -26,7 +26,7 @@ Externe Quellen, Community-Packs und Referenzdokumentation liegen bewusst nicht 
 - `scripts/SABSA/`
   SABSA-Skripte nach Ebenen und Skriptfamilien
 - `scripts/SABSA/Foundation/`
-  Foundation-level SABSA- und Security-Overlay-Skripte, inklusive zentralem `overlays/Security_Overlay_Toolkit.ajs`; alte Varianten liegen unter `archive/`
+  Foundation-level SABSA- und Security-Overlay-Skripte, inklusive zentralem `overlays/Security_Overlay_Toolkit.ajs` und registry-basierter `overview/Generate_SABSA_Overview_View.ajs`; alte Varianten liegen unter `archive/`
 - `scripts/SABSA/Matrices/`
   Generatoren fuer die SABSA Architecture Matrix und die SABSA Management Matrix
   Die Generatoren ordnen Views unter `Views/SABSA/Matrices/...` ein und legen Gruppierungen unter `Other/SABSA/Matrices/...` sowie fachliche Elemente unter `Business/SABSA/Matrices/...` ab
