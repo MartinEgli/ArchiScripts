@@ -2,6 +2,7 @@ var File = Java.type("java.io.File");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Assurance_Framework_View";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
@@ -456,6 +457,17 @@ function main() {
 
     concepts = buildConcepts();
     view = createFrameworkView(concepts);
+    SabsaOverview.register({
+        key: "a1:frameworks:assurance",
+        title: "SABSA A1 Assurance Framework",
+        level: "A1",
+        family: "Frameworks",
+        area: "Assurance",
+        description: "A1 assurance context, assurance model, investigation activities and assurance artefacts.",
+        viewNames: [view.name],
+        scriptPath: "scripts/SABSA/A1/frameworks/Generate_SABSA_A1_Assurance_Framework_View.ajs",
+        sortKey: "04-a1:01-frameworks:03-assurance"
+    });
 
     dialogs.showInfo(
         "Generated view: " + view.name +

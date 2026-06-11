@@ -5,6 +5,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = typeof SABSA_A1_FIELD_CATALOGUE_SCRIPT_NAME === "undefined"
     ? "Generate_SABSA_A1_Field_Catalogue_Core"
@@ -231,6 +232,55 @@ function modeLabel(mode) {
         return "Overlay Template Views";
     }
     return "Complete Catalogue";
+}
+
+function getOverviewViewNamesForMode(mode) {
+    var names = [];
+
+    if (shouldGenerateDocumentParts(mode)) {
+        names.push(CONST.DocumentPartsViewName);
+    }
+    if (shouldGenerateTables(mode)) {
+        names.push(CONST.TableIndexViewName);
+    }
+    if (shouldGenerateMetamodelViews(mode)) {
+        names.push(CONST.LayerViewName);
+        names.push(CONST.TypeViewName);
+        names.push(CONST.ForeignKeyViewName);
+        names.push(CONST.RelationshipViewName);
+        names.push(CONST.ViewpointViewName);
+    }
+    if (shouldGenerateOverlayModelViews(mode)) {
+        names.push(CONST.OverlayOverviewViewName);
+        names.push(CONST.OverlayTypeModelViewName);
+    }
+    if (shouldGenerateTemplateViews(mode)) {
+        names.push(CONST.TemplateRelationshipViewName);
+        names.push(CONST.OverlayTemplateLibraryViewName);
+    }
+
+    return names;
+}
+
+function registerSabsaOverview(mode) {
+    var family = mode === "documents" ? "Field Catalogue" :
+        mode === "tables" ? "Field Catalogue" :
+            mode === "metamodel" ? "Catalogues" :
+                mode === "overlay" ? "Overlays" :
+                    mode === "templates" ? "Overlays" : "Catalogues";
+
+    SabsaOverview.register({
+        key: "a1:field-catalogue:" + mode,
+        title: "SABSA A1 " + modeLabel(mode),
+        level: "A1",
+        family: family,
+        area: modeLabel(mode),
+        description: "Generated from the Generic SABSA A1 Metamodel Field Catalogue.",
+        viewNames: getOverviewViewNamesForMode(mode),
+        scriptPath: "scripts/SABSA/A1/core/Generate_SABSA_A1_Field_Catalogue_Core.ajs",
+        sourcePath: CONST.SourceMarkdownPath,
+        sortKey: "04-a1:02-field-catalogue:" + mode
+    });
 }
 
 function trim(value) {
@@ -3451,6 +3501,8 @@ function main() {
             createOverlayTemplateLibraryView(samplesByType);
         }
     }
+
+    registerSabsaOverview(mode);
 
     logger.finish("SABSA A1 field catalogue generation finished.", {
         mode: mode,

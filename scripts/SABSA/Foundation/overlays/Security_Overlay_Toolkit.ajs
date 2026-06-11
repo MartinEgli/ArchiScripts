@@ -21,6 +21,10 @@ Hinweis:
 console.show();
 console.clear();
 
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
+
 var SOG = (function () {
     var CONST = {
         ScriptName: "Security Overlay Toolkit",
@@ -481,6 +485,21 @@ var SOG = (function () {
         buildOverlayTemplateLibrary(viewPrefix);
         persistIndexes();
         resetTemplateCache();
+        SabsaOverview.register({
+            key: "foundation:security-overlay-library",
+            title: "Security Overlay Library",
+            level: "Foundation",
+            family: "Overlays",
+            area: "Security Overlay",
+            description: "General foundation overlay type model and template library.",
+            viewNames: [
+                viewPrefix + CONST.View.Overview,
+                viewPrefix + CONST.View.OverlayTypeModel,
+                viewPrefix + CONST.View.OverlayTemplateLibrary
+            ],
+            scriptPath: "scripts/SABSA/Foundation/overlays/Security_Overlay_Toolkit.ajs",
+            sortKey: "01-foundation:01-overlays:security-overlay-library"
+        });
 
         showMessage(
             CONST.Dialog.Title,

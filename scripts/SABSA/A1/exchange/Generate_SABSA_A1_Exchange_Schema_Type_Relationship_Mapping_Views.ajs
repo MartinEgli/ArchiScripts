@@ -5,6 +5,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views";
 var LOG_LEVEL = "WARN";
@@ -875,6 +876,18 @@ function main() {
     createMappingRelationships(data, concepts);
     createTypeMappingView(data, concepts);
     createRelationshipMappingView(data, concepts);
+    SabsaOverview.register({
+        key: "a1:exchange:schema-type-relationship-mapping",
+        title: "SABSA A1 Exchange Schema Mapping",
+        level: "A1",
+        family: "Exchange",
+        area: "Schema Mapping",
+        description: "Type and relationship mapping views from the generic A1 exchange schema.",
+        viewNames: [CONST.TypeMappingViewName, CONST.RelationshipViewName],
+        scriptPath: "scripts/SABSA/A1/exchange/Generate_SABSA_A1_Exchange_Schema_Type_Relationship_Mapping_Views.ajs",
+        sourcePath: CONST.SourceJsonPath,
+        sortKey: "04-a1:04-exchange:01-schema-mapping"
+    });
 
     logger.finish("SABSA A1 exchange schema metamodel generation finished.", {
         source_json: CONST.SourceJsonPath,

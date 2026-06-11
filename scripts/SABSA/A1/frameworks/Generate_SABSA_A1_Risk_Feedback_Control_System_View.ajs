@@ -2,6 +2,7 @@ var File = Java.type("java.io.File");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Risk_Feedback_Control_System_View";
 var logger = ArchiLogging.createLogger(SCRIPT_NAME, {
@@ -417,6 +418,17 @@ function main() {
 
     concepts = buildConcepts();
     view = createFrameworkView(concepts);
+    SabsaOverview.register({
+        key: "a1:frameworks:risk-feedback-control-system",
+        title: "SABSA A1 Risk Feedback Control System",
+        level: "A1",
+        family: "Frameworks",
+        area: "Risk Feedback Control",
+        description: "A1 decision, control, monitoring and risk assessment feedback loop.",
+        viewNames: [view.name],
+        scriptPath: "scripts/SABSA/A1/frameworks/Generate_SABSA_A1_Risk_Feedback_Control_System_View.ajs",
+        sortKey: "04-a1:01-frameworks:04-risk-feedback-control"
+    });
 
     dialogs.showInfo(
         "Generated view: " + view.name +

@@ -5,6 +5,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Generic_Risk_Management_Model_View";
 var LOG_LEVEL = "WARN";
@@ -785,6 +786,18 @@ function main() {
 
     concepts = createConcepts(data);
     view = createView(data, concepts);
+    SabsaOverview.register({
+        key: "a1:frameworks:generic-risk-management-model",
+        title: "SABSA A1 Generic Risk Management Model",
+        level: "A1",
+        family: "Frameworks",
+        area: "Risk Management",
+        description: "Generic A1 risk management model with NIBOCJ cross-reference overlay.",
+        viewNames: [view.name],
+        scriptPath: "scripts/SABSA/A1/frameworks/Generate_SABSA_A1_Generic_Risk_Management_Model_View.ajs",
+        sourcePath: CONST.SourceJsonPath,
+        sortKey: "04-a1:01-frameworks:00-generic-risk-management"
+    });
 
     logger.finish("SABSA A1 generic model generation finished.", {
         view_name: view.name,

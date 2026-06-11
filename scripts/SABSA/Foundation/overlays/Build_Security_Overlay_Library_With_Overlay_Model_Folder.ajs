@@ -21,6 +21,10 @@ Conceptual split:
 console.show();
 console.clear();
 
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
+
 /* ============================================================================
  * Constants
  * ========================================================================== */
@@ -701,6 +705,24 @@ function persistIndexes() {
     logInfo("Persisted template and relationship indexes to model properties.");
 }
 
+function registerSabsaOverview(viewPrefix) {
+    SabsaOverview.register({
+        key: "foundation:security-overlay-library",
+        title: "Security Overlay Library",
+        level: "Foundation",
+        family: "Overlays",
+        area: "Security Overlay",
+        description: "General foundation overlay type model and template library.",
+        viewNames: [
+            viewPrefix + CONST.View.Overview,
+            viewPrefix + CONST.View.OverlayTypeModel,
+            viewPrefix + CONST.View.OverlayTemplateLibrary
+        ],
+        scriptPath: "scripts/SABSA/Foundation/overlays/Build_Security_Overlay_Library_With_Overlay_Model_Folder.ajs",
+        sortKey: "01-foundation:01-overlays:security-overlay-library"
+    });
+}
+
 /* ============================================================================
  * Main
  * ========================================================================== */
@@ -718,6 +740,7 @@ try {
     buildOverlayTypeModel(viewPrefix);
     buildOverlayTemplateLibrary(viewPrefix);
     persistIndexes();
+    registerSabsaOverview(viewPrefix);
 
     showMessage(
         CONST.Message.SuccessTitle,

@@ -5,6 +5,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_Develop_Conceptual_Security_Architecture_View";
 var LOG_LEVEL = "WARN";
@@ -1612,6 +1613,18 @@ function main() {
     });
 
     view = createView();
+    SabsaOverview.register({
+        key: "processes:develop-conceptual-security-architecture",
+        title: "Develop Conceptual Security Architecture",
+        level: "Processes",
+        family: "Security Architecture",
+        area: "Develop Conceptual Security Architecture",
+        description: "Generated SABSA process view with steps, inputs, outputs and subprocess structure.",
+        viewNames: [view.name],
+        scriptPath: "scripts/SABSA/Processes/Generate_SABSA_Develop_Conceptual_Security_Architecture_View.ajs",
+        sourcePath: CONST.SourceJsonPath,
+        sortKey: "03-processes:01-develop-conceptual-security-architecture"
+    });
 
     logger.finish("SABSA conceptual process generation finished.", {
         source_json: CONST.SourceJsonPath,

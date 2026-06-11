@@ -5,6 +5,7 @@ var StandardCharsets = Java.type("java.nio.charset.StandardCharsets");
 
 load(new File(__DIR__ + "../../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views";
 var LOG_LEVEL = "WARN";
@@ -1150,6 +1151,18 @@ function main() {
     concepts = createJsonConcepts(data, sourceConcept);
     relationships = createJsonRelationships(data, concepts);
     createJsonViews(data, concepts, relationships);
+    SabsaOverview.register({
+        key: "a1:exchange:q003-q004-json-extract",
+        title: "SABSA A1 Q003/Q004 JSON Extracted Model",
+        level: "A1",
+        family: "Exchange",
+        area: "Q003/Q004 Extract",
+        description: "Imported JSON elements, relationships and generated JSON-defined views.",
+        viewNames: ["Generated JSON views: " + stats.views],
+        scriptPath: "scripts/SABSA/A1/exchange/Generate_SABSA_A1_Q003_Q004_JSON_Extracted_Model_Views.ajs",
+        sourcePath: CONST.SourceJsonPath,
+        sortKey: "04-a1:04-exchange:02-q003-q004-json"
+    });
 
     logger.finish("SABSA A1 JSON extract import finished.", {
         json_elements: stats.jsonElements,

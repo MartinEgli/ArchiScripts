@@ -7,6 +7,7 @@ var Font = Java.type("java.awt.Font");
 
 load(new File(__DIR__ + "../../lib/logging/Logger.js").getCanonicalPath());
 load(new File(__DIR__ + "../../lib/ui/DialogHelpers.js").getCanonicalPath());
+load(new File(__DIR__ + "../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
 
 var SCRIPT_NAME = "Generate_SABSA_Architecture_Matrix_View";
 var LOG_LEVEL = "WARN";
@@ -1004,6 +1005,21 @@ function buildResultMessage(view) {
         "\nRelationships reused: " + stats.relationshipsReused;
 }
 
+function registerSabsaOverview(view) {
+    SabsaOverview.register({
+        key: "matrices:architecture-matrix",
+        title: "SABSA Architecture Matrix",
+        level: "Matrices",
+        family: "Architecture Matrix",
+        area: "SABSA Matrix",
+        description: "Generated Architecture Matrix with rows, columns and cell representations.",
+        viewNames: [view.name],
+        scriptPath: "scripts/SABSA/Matrices/Generate_SABSA_Architecture_Matrix_View.ajs",
+        sourcePath: CONST.SourceJsonPath,
+        sortKey: "02-matrices:01-architecture"
+    });
+}
+
 function main() {
     var sourceText;
     var matrixData;
@@ -1029,6 +1045,7 @@ function main() {
     }
 
     view = createMatrixView(matrixData);
+    registerSabsaOverview(view);
 
     logger.finish("SABSA architecture matrix view generation finished.", {
         view_name: view.name,
