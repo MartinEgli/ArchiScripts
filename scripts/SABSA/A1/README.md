@@ -162,7 +162,7 @@ Runs the shared field-catalogue generator in overlay model mode. It creates or r
 - `SABSA A1 Overlay Model - Overview`
 - `SABSA A1 Overlay Model - Type Model`
 
-The type model view shows derived overlay type inheritance with visible `CoreTypeSpecialization` relationships in dedicated `Type Inheritance - ...` sections, for example `Threat` -> `Event Attribute` and `Control` -> `Risk Treatment`.
+The type model view shows derived overlay type inheritance inside the matching SABSA A1 area. Base overlay types are placed left, specialized overlay types are placed to the right, and visible `CoreTypeSpecialization` relationships connect the hierarchy, for example `Threat` -> `Event Attribute` and `Control` -> `Risk Treatment`.
 
 Overlay type and template elements are organized by SABSA A1 area, for example business context, risk identification, assessment/evaluation, treatment/control, monitoring/governance and assurance. The generated `BaseType` property uses readable ArchiMate base type names while `ConceptType` remains the technical jArchi type used by the apply script.
 
