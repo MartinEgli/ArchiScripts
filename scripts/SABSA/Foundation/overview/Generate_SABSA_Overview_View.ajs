@@ -1,0 +1,53 @@
+/*
+===============================================================================
+Generate SABSA Overview View
+===============================================================================
+
+Creates a SABSA overview from the shared SABSA overview registry. The view shows
+only model parts that registered themselves after successful generation.
+===============================================================================
+*/
+
+console.show();
+console.clear();
+
+var File = Java.type("java.io.File");
+
+load(new File(__DIR__ + "../../lib/overview/SABSA_Overview_Registry.js").getCanonicalPath());
+
+function showMessage(title, message, level) {
+    try {
+        var JOptionPane = Java.type("javax.swing.JOptionPane");
+        var iconType = JOptionPane.INFORMATION_MESSAGE;
+
+        if (level === "ERROR") {
+            iconType = JOptionPane.ERROR_MESSAGE;
+        }
+
+        JOptionPane.showMessageDialog(null, message, title, iconType);
+    } catch (error) {
+        console.log("[" + title + "] " + message);
+    }
+}
+
+function main() {
+    var entries;
+    var view;
+
+    if (!model) {
+        throw new Error("No active model is open.");
+    }
+
+    entries = SabsaOverview.getEntries();
+    view = SabsaOverview.renderOverview();
+
+    showMessage(
+        "SABSA Overview",
+        "Generated view: " + view.name +
+            "\nRegistered parts: " + entries.length +
+            "\nRegistry property: " + SabsaOverview.propertyName,
+        "INFO"
+    );
+}
+
+main();
