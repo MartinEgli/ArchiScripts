@@ -3205,9 +3205,9 @@ function calculateAreaGroupHeight(entries, childColumns) {
 }
 
 function addOverlayTypeAreaGroup(view, areaName, entries, y, visualsByConcept) {
-    var parentLabel = "«Overlay Type»\n${name}\n${property:BaseType}";
-    var baseLabel = "«Base Overlay Type»\n${name}\n${property:BaseType}";
-    var childLabel = "«Specialized Overlay Type»\n${name}\nparent: ${property:ParentType}";
+    var parentLabel = "«Overlay Type»\n${name}";
+    var baseLabel = "«Overlay Type»\n${name}";
+    var childLabel = "«Overlay Type»\n${name}";
     var parentX = CONST.Layout.LibraryGroupInnerX;
     var childStartX = parentX + CONST.Layout.CardWidth + (CONST.Layout.GapX * 3);
     var availableChildWidth = CONST.Layout.LibraryGroupWidth - childStartX - CONST.Layout.LibraryGroupInnerX;
