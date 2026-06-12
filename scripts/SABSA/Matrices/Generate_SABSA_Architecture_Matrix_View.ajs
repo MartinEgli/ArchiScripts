@@ -28,12 +28,14 @@ var CONST = {
         MatrixName: "Architecture Matrix",
         Columns: "Columns",
         Rows: "Rows",
+        Scopes: "Scopes",
         WorkPackages: "Work Packages",
         Representations: "Representations",
         Relations: {
             RowToWorkPackages: "Row to Work Packages",
             ColumnToWorkPackages: "Column to Work Packages",
-            CellToRepresentations: "Cell to Representations"
+            CellToRepresentations: "Cell to Representations",
+            ScopeToRows: "Scope to Rows"
         }
     },
     Layout: {
@@ -243,6 +245,13 @@ function resolveConceptFolderPlacement(conceptType, properties) {
             };
         }
 
+        if (kind === "Scope") {
+            return {
+                rootName: "Other",
+                pathSegments: getMatrixFolderSegments([CONST.Folder.Scopes])
+            };
+        }
+
     }
 
     return null;
@@ -287,6 +296,13 @@ function resolveRelationshipFolderPlacement(properties) {
         return {
             rootName: "Relations",
             pathSegments: getRelationFolderSegments([CONST.Folder.Relations.CellToRepresentations])
+        };
+    }
+
+    if (kind === "ScopeToRow") {
+        return {
+            rootName: "Relations",
+            pathSegments: getRelationFolderSegments([CONST.Folder.Relations.ScopeToRows])
         };
     }
 
@@ -620,6 +636,8 @@ function addNoteVisual(container, text, x, y, width, height, fillColor) {
     var note = container.createObject("note", x, y, width, height);
     note.text = text;
     styleVisual(note, fillColor);
+    tryApplyLabelExpression(note, "${content}");
+    tryApplyTextPosition(note, 1);
     return note;
 }
 
@@ -764,10 +782,10 @@ function getRowScopeKey(rowData) {
 
 function getScopeText(scopeKey) {
     if (scopeKey === "strategy") {
-        return "Strategy &\nPlanning\nPhase";
+        return "Strategy & Planning Phase";
     }
     if (scopeKey === "design") {
-        return "Design\nPhase";
+        return "Design Phase";
     }
     return "";
 }
@@ -778,37 +796,61 @@ function getScopeFill(scopeKey) {
         : CONST.Style.ScopeDesignFill;
 }
 
-function addScopeBand(view, firstRow, lastRow, scopeKey) {
+function addScopeBand(view, matrixData, scopeRows, scopeKey) {
+    var firstRow = scopeRows && scopeRows.length ? scopeRows[0] : null;
+    var lastRow = scopeRows && scopeRows.length ? scopeRows[scopeRows.length - 1] : null;
     var scopeText = getScopeText(scopeKey);
-    var note;
+    var scopeKeyValue = [safeString(matrixData.generationNamespace), "scope", scopeKey].join(":");
+    var scopeConcept;
+    var scopeVisual;
 
     if (!firstRow || !lastRow || !scopeText) {
         return;
     }
 
-    note = addNoteVisual(
+    scopeConcept = ensureConcept("grouping", scopeText, scopeKeyValue, {
+        id: scopeKeyValue,
+        SabsaMatrixKind: "Scope",
+        ConceptId: scopeKeyValue,
+        ScopeKey: scopeKey,
+        ScopeTitle: scopeText
+    }, scopeText);
+
+    scopeVisual = addStyledVisual(
         view,
-        scopeText,
+        scopeConcept,
         CONST.Layout.StartX,
         firstRow.y,
         CONST.Layout.ScopeWidth,
         (lastRow.y + lastRow.height) - firstRow.y,
         getScopeFill(scopeKey)
     );
-    tryApplyLabelExpression(note, "${text}");
-    tryApplyTextPosition(note, 1);
+    tryApplyLabelExpression(scopeVisual, "${name}");
+    tryApplyTextPosition(scopeVisual, 1);
+
+    scopeRows.forEach(function (rowBound) {
+        ensureRelationship("aggregation-relationship", scopeConcept, rowBound.concept, [
+            "aggregation",
+            scopeKeyValue,
+            rowBound.key
+        ].join(":"), {
+            SabsaMatrixKind: "ScopeToRow",
+            ScopeKey: scopeKey,
+            ScopeTitle: scopeText,
+            RowId: rowBound.data.id
+        });
+        stats.relationships++;
+    });
 }
 
-function addScopeBands(view, rowBounds) {
+function addScopeBands(view, matrixData, rowBounds) {
     var activeScope = "";
-    var firstRow = null;
-    var lastRow = null;
+    var scopeRows = [];
 
     function flushScope() {
-        addScopeBand(view, firstRow, lastRow, activeScope);
+        addScopeBand(view, matrixData, scopeRows, activeScope);
         activeScope = "";
-        firstRow = null;
-        lastRow = null;
+        scopeRows = [];
     }
 
     (rowBounds || []).forEach(function (rowBound) {
@@ -825,10 +867,9 @@ function addScopeBands(view, rowBounds) {
 
         if (!activeScope) {
             activeScope = scopeKey;
-            firstRow = rowBound;
         }
 
-        lastRow = rowBound;
+        scopeRows.push(rowBound);
     });
 
     flushScope();
@@ -966,6 +1007,8 @@ function createMatrixView(matrixData) {
 
         stats.rows++;
         rowBounds.push({
+            key: rowKey,
+            concept: rowConcept,
             data: rowData,
             y: rowY,
             height: rowHeight
@@ -1050,7 +1093,7 @@ function createMatrixView(matrixData) {
         rowY += rowHeight + CONST.Layout.RowGap;
     });
 
-    addScopeBands(view, rowBounds);
+    addScopeBands(view, matrixData, rowBounds);
 
     return view;
 }
