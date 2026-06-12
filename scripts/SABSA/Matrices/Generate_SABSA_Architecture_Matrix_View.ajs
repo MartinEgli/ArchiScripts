@@ -39,6 +39,8 @@ var CONST = {
     Layout: {
         StartX: 54,
         StartY: 42,
+        ScopeWidth: 132,
+        ScopeGap: 12,
         ColumnY: 42,
         ColumnHeight: 42,
         ColumnWidth: 212,
@@ -68,6 +70,8 @@ var CONST = {
         ColumnFill: "#ff9a69",
         CellFill: "#ffff64",
         RepresentationFill: "#ffffcc",
+        ScopeStrategyFill: "#e8f4ff",
+        ScopeDesignFill: "#edf7ed",
         RowFillById: {
             "contextual-architecture": "#ff9aff",
             "conceptual-architecture": "#ccccff",
@@ -612,6 +616,13 @@ function addStyledVisual(container, concept, x, y, width, height, fillColor) {
     return visual;
 }
 
+function addNoteVisual(container, text, x, y, width, height, fillColor) {
+    var note = container.createObject("note", x, y, width, height);
+    note.text = text;
+    styleVisual(note, fillColor);
+    return note;
+}
+
 function getRowFill(rowId) {
     return CONST.Style.RowFillById[rowId] || "#f0f0f0";
 }
@@ -735,6 +746,94 @@ function getCellKind() {
     return "WorkPackage";
 }
 
+function getMatrixStartX() {
+    return CONST.Layout.StartX + CONST.Layout.ScopeWidth + CONST.Layout.ScopeGap;
+}
+
+function getRowScopeKey(rowData) {
+    var rowId = safeString(rowData && rowData.id);
+
+    if (rowId === "contextual-architecture" || rowId === "conceptual-architecture") {
+        return "strategy";
+    }
+    if (rowId === "logical-architecture" || rowId === "physical-architecture" || rowId === "component-architecture") {
+        return "design";
+    }
+    return "";
+}
+
+function getScopeText(scopeKey) {
+    if (scopeKey === "strategy") {
+        return "Strategy &\nPlanning\nPhase";
+    }
+    if (scopeKey === "design") {
+        return "Design\nPhase";
+    }
+    return "";
+}
+
+function getScopeFill(scopeKey) {
+    return scopeKey === "strategy"
+        ? CONST.Style.ScopeStrategyFill
+        : CONST.Style.ScopeDesignFill;
+}
+
+function addScopeBand(view, firstRow, lastRow, scopeKey) {
+    var scopeText = getScopeText(scopeKey);
+    var note;
+
+    if (!firstRow || !lastRow || !scopeText) {
+        return;
+    }
+
+    note = addNoteVisual(
+        view,
+        scopeText,
+        CONST.Layout.StartX,
+        firstRow.y,
+        CONST.Layout.ScopeWidth,
+        (lastRow.y + lastRow.height) - firstRow.y,
+        getScopeFill(scopeKey)
+    );
+    tryApplyLabelExpression(note, "${text}");
+    tryApplyTextPosition(note, 1);
+}
+
+function addScopeBands(view, rowBounds) {
+    var activeScope = "";
+    var firstRow = null;
+    var lastRow = null;
+
+    function flushScope() {
+        addScopeBand(view, firstRow, lastRow, activeScope);
+        activeScope = "";
+        firstRow = null;
+        lastRow = null;
+    }
+
+    (rowBounds || []).forEach(function (rowBound) {
+        var scopeKey = getRowScopeKey(rowBound.data);
+
+        if (!scopeKey) {
+            flushScope();
+            return;
+        }
+
+        if (activeScope && activeScope !== scopeKey) {
+            flushScope();
+        }
+
+        if (!activeScope) {
+            activeScope = scopeKey;
+            firstRow = rowBound;
+        }
+
+        lastRow = rowBound;
+    });
+
+    flushScope();
+}
+
 function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
     var availableWidth = CONST.Layout.CellWidth - CONST.Layout.CellInnerX - CONST.Layout.CellInnerRight;
     var currentY = startY;
@@ -801,10 +900,12 @@ function createRepresentationVisuals(cellVisual, rowData, cellData, startY) {
 function createMatrixView(matrixData) {
     var totalColumnsWidth = (matrixData.columns.length * CONST.Layout.ColumnWidth) +
         ((matrixData.columns.length - 1) * CONST.Layout.ColumnGap);
-    var cellAreaStartX = CONST.Layout.StartX + CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap;
+    var matrixStartX = getMatrixStartX();
+    var cellAreaStartX = matrixStartX + CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap;
     var viewName = buildUniqueViewName(CONST.ViewName);
     var view = model.createArchimateView(viewName);
     var rowY = CONST.Layout.RowStartY;
+    var rowBounds = [];
 
     view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell work packages contain representation elements for each bullet item.";
     moveViewToSabsaFolder(view);
@@ -854,7 +955,7 @@ function createMatrixView(matrixData) {
         var rowVisual = addStyledVisual(
             view,
             rowConcept,
-            CONST.Layout.StartX,
+            matrixStartX,
             rowY,
             CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + CONST.Layout.RowInsetX + CONST.Layout.RowRightInset,
             rowHeight,
@@ -864,6 +965,11 @@ function createMatrixView(matrixData) {
         tryApplyTextPosition(rowVisual, 0);
 
         stats.rows++;
+        rowBounds.push({
+            data: rowData,
+            y: rowY,
+            height: rowHeight
+        });
         logger.info("Rendering row.", {
             row_id: rowData.id,
             row_title: rowData.title,
@@ -943,6 +1049,8 @@ function createMatrixView(matrixData) {
 
         rowY += rowHeight + CONST.Layout.RowGap;
     });
+
+    addScopeBands(view, rowBounds);
 
     return view;
 }
