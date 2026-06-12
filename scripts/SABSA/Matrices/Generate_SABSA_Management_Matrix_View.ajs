@@ -83,8 +83,9 @@ var CONST = {
         RepresentationFill: "#ffffcc",
         ActivityFill: "#ffffcc",
         NoteFill: "#fff7cc",
-        ScopeStrategyFill: "#e8f4ff",
-        ScopeDesignFill: "#edf7ed",
+        ScopeStrategyFill: "#16464d",
+        ScopeDesignFill: "#006033",
+        ScopeFontColor: "#ffffff",
         RowFillById: {
             "contextual-overlay": "#ff9aff",
             "conceptual-overlay": "#ccccff",
@@ -929,6 +930,7 @@ function addScopeBand(view, matrixData, scopeRows, scopeKey) {
         (lastRow.y + lastRow.height) - firstRow.y,
         getScopeFill(scopeKey)
     );
+    scopeVisual.fontColor = CONST.Style.ScopeFontColor;
     tryApplyLabelExpression(scopeVisual, "${name}");
     tryApplyTextPosition(scopeVisual, 1);
 
