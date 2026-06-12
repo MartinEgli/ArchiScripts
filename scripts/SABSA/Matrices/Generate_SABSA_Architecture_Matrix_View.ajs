@@ -858,6 +858,8 @@ function addScopeBand(view, matrixData, scopeRows, scopeKey, rowVisualWidth) {
         });
         stats.relationships++;
     });
+
+    return scopeVisual;
 }
 
 function addScopeBands(view, matrixData, rowBounds, rowVisualWidth) {
@@ -865,7 +867,14 @@ function addScopeBands(view, matrixData, rowBounds, rowVisualWidth) {
     var scopeRows = [];
 
     function flushScope() {
-        addScopeBand(view, matrixData, scopeRows, activeScope, rowVisualWidth);
+        var scopeVisual = addScopeBand(view, matrixData, scopeRows, activeScope, rowVisualWidth);
+
+        if (scopeVisual) {
+            scopeRows.forEach(function (rowBound) {
+                rowBound.scopeVisual = scopeVisual;
+            });
+        }
+
         activeScope = "";
         scopeRows = [];
     }
@@ -1049,11 +1058,14 @@ function createMatrixView(matrixData) {
         var rowY = rowLayout.y;
         var rowCellHeight = rowLayout.rowCellHeight;
         var rowHeight = rowLayout.height;
+        var rowContainer = rowLayout.scopeVisual || view;
+        var rowX = rowLayout.scopeVisual ? CONST.Layout.ScopeInnerX : matrixStartX;
+        var rowVisualY = rowLayout.scopeVisual ? rowY - rowLayout.scopeY : rowY;
         var rowVisual = addStyledVisual(
-            view,
+            rowContainer,
             rowConcept,
-            matrixStartX,
-            rowY,
+            rowX,
+            rowVisualY,
             rowVisualWidth,
             rowHeight,
             getRowFill(rowData.id)
