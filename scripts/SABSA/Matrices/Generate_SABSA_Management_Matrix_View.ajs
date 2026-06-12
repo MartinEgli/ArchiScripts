@@ -49,7 +49,7 @@ var CONST = {
         StartY: 42,
         ScopeInnerX: 18,
         ScopeInnerRight: 18,
-        ScopeHeaderHeight: 36,
+        ScopeHeaderHeight: 42,
         ScopeInnerBottom: 14,
         ScopeGroupGap: 18,
         ColumnY: 42,
@@ -946,8 +946,20 @@ function addScopeBand(view, matrixData, scopeRows, scopeKey, rowVisualWidth) {
         getScopeFill(scopeKey)
     );
     scopeVisual.fontColor = CONST.Style.ScopeFontColor;
-    tryApplyLabelExpression(scopeVisual, "${name}");
-    tryApplyTextPosition(scopeVisual, 0);
+    tryApplyLabelExpression(scopeVisual, "");
+
+    var headerNote = addNoteVisual(
+        scopeVisual,
+        scopeText,
+        0,
+        0,
+        getScopeVisualWidth(rowVisualWidth),
+        CONST.Layout.ScopeHeaderHeight,
+        getScopeFill(scopeKey)
+    );
+    headerNote.fontColor = CONST.Style.ScopeFontColor;
+    tryApplyLabelExpression(headerNote, "${content}");
+    tryApplyTextPosition(headerNote, 1);
 
     scopeRows.forEach(function (rowBound) {
         ensureRelationship("aggregation-relationship", scopeConcept, rowBound.concept, [
