@@ -41,8 +41,11 @@ var CONST = {
     Layout: {
         StartX: 54,
         StartY: 42,
-        ScopeWidth: 132,
-        ScopeGap: 12,
+        ScopeInnerX: 18,
+        ScopeInnerRight: 18,
+        ScopeHeaderHeight: 36,
+        ScopeInnerBottom: 14,
+        ScopeGroupGap: 18,
         ColumnY: 42,
         ColumnHeight: 42,
         ColumnWidth: 212,
@@ -766,7 +769,19 @@ function getCellKind() {
 }
 
 function getMatrixStartX() {
-    return CONST.Layout.StartX + CONST.Layout.ScopeWidth + CONST.Layout.ScopeGap;
+    return CONST.Layout.StartX + CONST.Layout.ScopeInnerX;
+}
+
+function getRowVisualWidth(totalColumnsWidth) {
+    return CONST.Layout.RowHeaderWidth +
+        CONST.Layout.RowHeaderGap +
+        totalColumnsWidth +
+        CONST.Layout.RowInsetX +
+        CONST.Layout.RowRightInset;
+}
+
+function getScopeVisualWidth(rowVisualWidth) {
+    return CONST.Layout.ScopeInnerX + rowVisualWidth + CONST.Layout.ScopeInnerRight;
 }
 
 function getRowScopeKey(rowData) {
@@ -797,7 +812,7 @@ function getScopeFill(scopeKey) {
         : CONST.Style.ScopeDesignFill;
 }
 
-function addScopeBand(view, matrixData, scopeRows, scopeKey) {
+function addScopeBand(view, matrixData, scopeRows, scopeKey, rowVisualWidth) {
     var firstRow = scopeRows && scopeRows.length ? scopeRows[0] : null;
     var lastRow = scopeRows && scopeRows.length ? scopeRows[scopeRows.length - 1] : null;
     var scopeText = getScopeText(scopeKey);
@@ -821,14 +836,14 @@ function addScopeBand(view, matrixData, scopeRows, scopeKey) {
         view,
         scopeConcept,
         CONST.Layout.StartX,
-        firstRow.y,
-        CONST.Layout.ScopeWidth,
-        (lastRow.y + lastRow.height) - firstRow.y,
+        firstRow.scopeY,
+        getScopeVisualWidth(rowVisualWidth),
+        (lastRow.y + lastRow.height + CONST.Layout.ScopeInnerBottom) - firstRow.scopeY,
         getScopeFill(scopeKey)
     );
     scopeVisual.fontColor = CONST.Style.ScopeFontColor;
     tryApplyLabelExpression(scopeVisual, "${name}");
-    tryApplyTextPosition(scopeVisual, 1);
+    tryApplyTextPosition(scopeVisual, 0);
 
     scopeRows.forEach(function (rowBound) {
         ensureRelationship("aggregation-relationship", scopeConcept, rowBound.concept, [
@@ -845,12 +860,12 @@ function addScopeBand(view, matrixData, scopeRows, scopeKey) {
     });
 }
 
-function addScopeBands(view, matrixData, rowBounds) {
+function addScopeBands(view, matrixData, rowBounds, rowVisualWidth) {
     var activeScope = "";
     var scopeRows = [];
 
     function flushScope() {
-        addScopeBand(view, matrixData, scopeRows, activeScope);
+        addScopeBand(view, matrixData, scopeRows, activeScope, rowVisualWidth);
         activeScope = "";
         scopeRows = [];
     }
@@ -945,10 +960,13 @@ function createMatrixView(matrixData) {
         ((matrixData.columns.length - 1) * CONST.Layout.ColumnGap);
     var matrixStartX = getMatrixStartX();
     var cellAreaStartX = matrixStartX + CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap;
+    var rowVisualWidth = getRowVisualWidth(totalColumnsWidth);
     var viewName = buildUniqueViewName(CONST.ViewName);
     var view = model.createArchimateView(viewName);
     var rowY = CONST.Layout.RowStartY;
-    var rowBounds = [];
+    var rowLayouts = [];
+    var activeScope = "";
+    var activeScopeY = 0;
 
     view.documentation = "Generated from sabsa-architecture-matrix-data.json. English labels only. Cell work packages contain representation elements for each bullet item.";
     moveViewToSabsaFolder(view);
@@ -981,6 +999,7 @@ function createMatrixView(matrixData) {
     });
 
     matrixData.rows.forEach(function (rowData) {
+        var scopeKey = getRowScopeKey(rowData);
         var rowKey = safeString(rowData.conceptKey) || ("row:" + rowData.id);
         var rowConcept = ensureConcept("grouping", rowData.title, rowKey, {
             id: rowData.id,
@@ -995,12 +1014,47 @@ function createMatrixView(matrixData) {
             CONST.Layout.RowInsetY +
             rowCellHeight +
             CONST.Layout.RowBottomPadding;
+
+        if (activeScope && activeScope !== scopeKey) {
+            rowY += CONST.Layout.ScopeInnerBottom + CONST.Layout.ScopeGroupGap;
+            activeScope = "";
+            activeScopeY = 0;
+        }
+
+        if (scopeKey && !activeScope) {
+            activeScope = scopeKey;
+            activeScopeY = rowY;
+            rowY += CONST.Layout.ScopeHeaderHeight;
+        }
+
+        rowLayouts.push({
+            key: rowKey,
+            concept: rowConcept,
+            data: rowData,
+            y: rowY,
+            height: rowHeight,
+            rowCellHeight: rowCellHeight,
+            scopeY: activeScopeY
+        });
+
+        rowY += rowHeight + CONST.Layout.RowGap;
+    });
+
+    addScopeBands(view, matrixData, rowLayouts, rowVisualWidth);
+
+    rowLayouts.forEach(function (rowLayout) {
+        var rowData = rowLayout.data;
+        var rowKey = rowLayout.key;
+        var rowConcept = rowLayout.concept;
+        var rowY = rowLayout.y;
+        var rowCellHeight = rowLayout.rowCellHeight;
+        var rowHeight = rowLayout.height;
         var rowVisual = addStyledVisual(
             view,
             rowConcept,
             matrixStartX,
             rowY,
-            CONST.Layout.RowHeaderWidth + CONST.Layout.RowHeaderGap + totalColumnsWidth + CONST.Layout.RowInsetX + CONST.Layout.RowRightInset,
+            rowVisualWidth,
             rowHeight,
             getRowFill(rowData.id)
         );
@@ -1008,13 +1062,6 @@ function createMatrixView(matrixData) {
         tryApplyTextPosition(rowVisual, 0);
 
         stats.rows++;
-        rowBounds.push({
-            key: rowKey,
-            concept: rowConcept,
-            data: rowData,
-            y: rowY,
-            height: rowHeight
-        });
         logger.info("Rendering row.", {
             row_id: rowData.id,
             row_title: rowData.title,
@@ -1091,11 +1138,7 @@ function createMatrixView(matrixData) {
                 cell_height: rowCellHeight
             }, "sabsa.matrix.cell.render");
         });
-
-        rowY += rowHeight + CONST.Layout.RowGap;
     });
-
-    addScopeBands(view, matrixData, rowBounds);
 
     return view;
 }
